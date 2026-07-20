@@ -1,0 +1,9 @@
+-keep class com.audioboost.noroot.XposedLoader { *; }
+-keep class com.audioboost.noroot.hooks.** { *; }
+-keep class com.audioboost.noroot.utils.** { *; }
+-keep class com.audioboost.noroot.models.** { *; }
+-keep class de.robv.android.xposed.** { *; }
+-dontwarn de.robv.android.xposed.**
+-dontwarn rikka.shizuku.**
+-keepclassmembers class com.audioboost.noroot.models.** { *; }
+-keepattributes *Annotation*,Signature,EnclosingMethod

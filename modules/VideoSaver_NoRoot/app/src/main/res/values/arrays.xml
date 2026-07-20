@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="xposed_scope">
+        <item>com.ss.android.ugc.aweme</item>
+        <item>com.ss.android.ugc.aweme.lite</item>
+        <item>com.smile.gifmaker</item>
+        <item>com.kuaishou.nebula</item>
+        <item>com.xingin.xhs</item>
+        <item>com.xingin.xhscircle</item>
+        <item>tv.danmaku.bili</item>
+        <item>com.tencent.qqlive</item>
+        <item>com.ss.android.article.video</item>
+        <item>com.hihonor.cloudmusic</item>
+    </string-array>
+</resources>

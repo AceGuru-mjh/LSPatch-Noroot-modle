@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="xposed_scope">
+        <item>com.tencent.mm</item>
+        <item>com.tencent.mobileqq</item>
+        <item>com.ss.android.ugc.aweme</item>
+        <item>com.smile.gifmaker</item>
+        <item>com.taobao.taobao</item>
+        <item>com.jingdong.app.mall</item>
+        <item>com.xunmeng.pinduoduo</item>
+        <item>com.eg.android.AlipayGphone</item>
+        <item>com.netease.cloudmusic</item>
+        <item>com.tencent.wmusic</item>
+        <item>com.zhihu.android</item>
+        <item>com.sina.weibo</item>
+        <item>com.netease.mail</item>
+        <item>com.tencent.androidqqmail</item>
+    </string-array>
+</resources>

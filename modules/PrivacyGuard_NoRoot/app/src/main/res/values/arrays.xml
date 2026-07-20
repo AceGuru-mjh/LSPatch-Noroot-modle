@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="xposed_scope">
+        <item>com.tencent.mm</item>
+        <item>com.tencent.mobileqq</item>
+        <item>com.tencent.mobileqqi</item>
+        <item>com.android.settings</item>
+        <item>com.android.chrome</item>
+        <item>com.mi.globalbrowser</item>
+        <item>com.eg.android.AlipayGphone</item>
+        <item>com.taobao.taobao</item>
+        <item>com.xunmeng.pinduoduo</item>
+        <item>com.jingdong.app.mall</item>
+        <item>com.ss.android.ugc.aweme</item>
+        <item>com.smile.gifmaker</item>
+        <item>com.sina.weibo</item>
+    </string-array>
+</resources>

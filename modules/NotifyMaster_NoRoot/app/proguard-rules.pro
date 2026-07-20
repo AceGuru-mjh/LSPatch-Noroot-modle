@@ -1,0 +1,9 @@
+-keep class com.notifymaster.noroot.XposedLoader { *; }
+-keep class com.notifymaster.noroot.hooks.** { *; }
+-keep class com.notifymaster.noroot.utils.** { *; }
+-keep class com.notifymaster.noroot.models.** { *; }
+-keep class de.robv.android.xposed.** { *; }
+-dontwarn de.robv.android.xposed.**
+-dontwarn rikka.shizuku.**
+-keepclassmembers class com.notifymaster.noroot.models.** { *; }
+-keepattributes *Annotation*,Signature,EnclosingMethod

@@ -1,0 +1,9 @@
+-keep class com.microx.enhancer.XposedLoader { *; }
+-keep class com.microx.enhancer.hooks.** { *; }
+-keep class com.microx.enhancer.utils.** { *; }
+-keep class com.microx.enhancer.models.** { *; }
+-keep class de.robv.android.xposed.** { *; }
+-dontwarn de.robv.android.xposed.**
+-dontwarn rikka.shizuku.**
+-keepclassmembers class com.microx.enhancer.models.** { *; }
+-keepattributes *Annotation*,Signature,EnclosingMethod

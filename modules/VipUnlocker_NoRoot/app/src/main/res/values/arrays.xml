@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- VipUnlocker 作用域：音乐 / 视频 / 阅读 / 工具类共 16 个 APP -->
+    <string-array name="xposed_scope">
+        <!-- 音乐类 -->
+        <item>com.netease.cloudmusic</item>
+        <item>com.tencent.wmusic</item>
+        <item>com.kugou.android</item>
+        <item>com.kuwo.player</item>
+        <!-- 视频类 -->
+        <item>com.qiyi.video</item>
+        <item>com.youku.phone</item>
+        <item>com.tencent.qqlive</item>
+        <item>tv.danmaku.bili</item>
+        <!-- 阅读/资讯类 -->
+        <item>com.ximalaya.ting.android</item>
+        <item>com.ss.android.article.news</item>
+        <item>com.zhihu.android</item>
+        <!-- 工具类 -->
+        <item>com.baidu.netdisk</item>
+        <item>com.wps.moffice_eng</item>
+        <item>com.tencent.weread</item>
+        <!-- 出行/支付类 -->
+        <item>com.sdu.didi.psnger</item>
+        <item>com.eg.android.AlipayGphone</item>
+    </string-array>
+</resources>

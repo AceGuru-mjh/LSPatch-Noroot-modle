@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="xposed_scope">
+        <item>com.tencent.tmgp.sgame</item>
+        <item>com.miHoYo.Yuanshen</item>
+        <item>com.miHoYo.GenshinImpact</item>
+        <item>com.tencent.tmgp.pubgmhd</item>
+        <item>com.tencent.ig</item>
+        <item>com.miHoYo.hkrpg</item>
+        <item>com.tencent.tmgp.cod</item>
+        <item>com.activision.callofduty.shooter</item>
+        <item>com.tencent.tmgp.gnyx</item>
+        <item>com.gameblackmyth.mobile</item>
+        <item>com.miHoYo.ZenlessZoneZero</item>
+        <item>com.kurogame.kjq</item>
+    </string-array>
+</resources>

@@ -1,0 +1,9 @@
+-keep class com.stepmod.noroot.XposedLoader { *; }
+-keep class com.stepmod.noroot.hooks.** { *; }
+-keep class com.stepmod.noroot.utils.** { *; }
+-keep class com.stepmod.noroot.models.** { *; }
+-keep class de.robv.android.xposed.** { *; }
+-dontwarn de.robv.android.xposed.**
+-dontwarn rikka.shizuku.**
+-keepclassmembers class com.stepmod.noroot.models.** { *; }
+-keepattributes *Annotation*,Signature,EnclosingMethod

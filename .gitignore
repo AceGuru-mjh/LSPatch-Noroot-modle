@@ -1,0 +1,16 @@
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+*.apk
+*.aab
+local.properties
+*.kotlin_metadata
+.idea/
+*.iml
+.DS_Store
+*.log
+*.jks
+*.keystore
+!modules/keystore/mjh-release.jks
+captures/
+.cxx/

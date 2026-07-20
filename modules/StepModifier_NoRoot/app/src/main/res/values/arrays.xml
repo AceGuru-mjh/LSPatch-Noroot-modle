@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="xposed_scope">
+        <item>com.eg.android.AlipayGphone</item>
+        <item>com.tencent.mm</item>
+        <item>com.tencent.mobileqq</item>
+        <item>com.tencent.tim</item>
+        <item>com.xiaomi.hm.health</item>
+        <item>com.huawei.health</item>
+        <item>com.codoon.gps</item>
+        <item>com.joyrun.gps</item>
+        <item>com.keepfitness</item>
+        <item>com.ss.android.ugc.aweme</item>
+        <item>com.smile.gifmaker</item>
+        <item>com.netease.cloudmusic</item>
+        <item>com.tencent.wmusic</item>
+        <item>com.taobao.taobao</item>
+        <item>com.jingdong.app.mall</item>
+    </string-array>
+</resources>

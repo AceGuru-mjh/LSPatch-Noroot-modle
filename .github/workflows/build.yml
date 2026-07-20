@@ -1,0 +1,79 @@
+name: Build NoRoot Module APKs
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    name: Build ${{ matrix.module }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        module:
+          - ShizukuSceneFix
+          - GameUnlockerPro_NoRoot
+          - MicroXEnhancer
+          - PrivacyGuard_NoRoot
+          - AdBlockerX_NoRoot
+          - BatteryOptimizer_NoRoot
+          - StepModifier_NoRoot
+          - NotifyMaster_NoRoot
+          - AudioBoost_NoRoot
+          - VipUnlocker_NoRoot
+          - VideoSaver_NoRoot
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: 'platform-tools platforms;android-34 build-tools;34.0.0'
+      - uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: '8.2'
+      - name: Generate Gradle Wrapper
+        working-directory: modules/${{ matrix.module }}
+        run: gradle wrapper --gradle-version 8.2 --distribution-type bin
+      - name: Build Release APK
+        working-directory: modules/${{ matrix.module }}
+        env:
+          MJH_STORE_PASSWORD: ${{ secrets.MJH_STORE_PASSWORD }}
+          MJH_KEY_ALIAS: ${{ secrets.MJH_KEY_ALIAS }}
+          MJH_KEY_PASSWORD: ${{ secrets.MJH_KEY_PASSWORD }}
+        run: ./gradlew :app:assembleRelease --no-daemon --stacktrace
+      - name: Rename APK
+        run: |
+          cd modules/${{ matrix.module }}/app/build/outputs/apk/release/
+          mv app-release.apk ${{ matrix.module }}.apk 2>/dev/null || true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.module }}-apk
+          path: modules/${{ matrix.module }}/app/build/outputs/apk/release/${{ matrix.module }}.apk
+  release:
+    name: Publish APKs
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: all-apks
+      - name: Flatten
+        run: |
+          mkdir -p release-assets
+          find all-apks -name "*.apk" | while read f; do cp "$f" "release-assets/$(basename "$f")"; done
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.10
+          name: LSP-Model-NoRoot 模块合集 v1.0.10
+          body: |
+            # LSP-Model-NoRoot v1.0.10
+            11 个 LSPatch 免Root 模块 APK
+            开发者：MJH
+          files: release-assets/*.apk
+          prerelease: false
+          draft: false

@@ -1,0 +1,9 @@
+-keep class com.privacyguard.noroot.XposedLoader { *; }
+-keep class com.privacyguard.noroot.hooks.** { *; }
+-keep class com.privacyguard.noroot.utils.** { *; }
+-keep class com.privacyguard.noroot.models.** { *; }
+-keep class de.robv.android.xposed.** { *; }
+-dontwarn de.robv.android.xposed.**
+-dontwarn rikka.shizuku.**
+-keepclassmembers class com.privacyguard.noroot.models.** { *; }
+-keepattributes *Annotation*,Signature,EnclosingMethod

@@ -1,0 +1,9 @@
+-keep class com.videosaver.noroot.XposedLoader { *; }
+-keep class com.videosaver.noroot.hooks.** { *; }
+-keep class com.videosaver.noroot.utils.** { *; }
+-keep class com.videosaver.noroot.models.** { *; }
+-keep class de.robv.android.xposed.** { *; }
+-dontwarn de.robv.android.xposed.**
+-dontwarn rikka.shizuku.**
+-keepclassmembers class com.videosaver.noroot.models.** { *; }
+-keepattributes *Annotation*,Signature,EnclosingMethod

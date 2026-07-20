@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="xposed_scope">
+        <item>com.netease.cloudmusic</item>
+        <item>com.tencent.wmusic</item>
+        <item>com.kugou.android</item>
+        <item>com.kuwo.player</item>
+        <item>com.netease.cloudmusic.player</item>
+        <item>com.spotify.music</item>
+        <item>com.google.android.apps.youtube.music</item>
+        <item>com.tencent.mm</item>
+        <item>com.ss.android.ugc.aweme</item>
+        <item>com.smile.gifmaker</item>
+        <item>com.miui.player</item>
+        <item>com.hihonor.cloudmusic</item>
+    </string-array>
+</resources>

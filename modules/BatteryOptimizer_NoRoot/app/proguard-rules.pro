@@ -1,0 +1,9 @@
+-keep class com.batteryopt.noroot.XposedLoader { *; }
+-keep class com.batteryopt.noroot.hooks.** { *; }
+-keep class com.batteryopt.noroot.utils.** { *; }
+-keep class com.batteryopt.noroot.models.** { *; }
+-keep class de.robv.android.xposed.** { *; }
+-dontwarn de.robv.android.xposed.**
+-dontwarn rikka.shizuku.**
+-keepclassmembers class com.batteryopt.noroot.models.** { *; }
+-keepattributes *Annotation*,Signature,EnclosingMethod
