@@ -71,7 +71,7 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
     /** 微信进程 Hook 入口 */
     private fun onWeChatLoaded(lpparam: XC_LoadPackage.LoadPackageParam) {
-        LogX.i("===== 微X增强模块开始注入微信 =====")
+        LogX.i("=== MicroXEnhancer v$VERSION starting | pkg=${lpparam.packageName} | process=${lpparam.processName} | mode=${if (EnvDetector.isLocalMode) "local" else "integrated"} ===")
         LogX.i("进程名: ${lpparam.processName}")
         LogX.i("环境: ${if (EnvDetector.isLocalMode) "LSPatch本地" else "LSPosed集成"}模式")
         if (ModuleConflictDetector.checkConflict()) {
@@ -81,6 +81,9 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
         currentPkg = "com.tencent.mm"
 
         initConfig(lpparam)
+        if (!EnvDetector.isLocalMode) {
+            try { Thread.sleep(100) } catch (_: Throwable) { }
+        }
 
         // 1. 安全适配必须最先执行
         if (ConfigManager.isEnabled(ConfigManager.KEY_BYPASS_DETECTION)) {
@@ -144,7 +147,7 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
     /** QQ进程 Hook 入口 */
     private fun onQQLoaded(lpparam: XC_LoadPackage.LoadPackageParam) {
-        LogX.i("===== 微X增强模块开始注入QQ =====")
+        LogX.i("=== MicroXEnhancer v$VERSION starting | pkg=${lpparam.packageName} | process=${lpparam.processName} | mode=${if (EnvDetector.isLocalMode) "local" else "integrated"} ===")
         LogX.i("进程名: ${lpparam.processName}")
         LogX.i("环境: ${if (EnvDetector.isLocalMode) "LSPatch本地" else "LSPosed集成"}模式")
         if (ModuleConflictDetector.checkConflict()) {
@@ -154,6 +157,9 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
         currentPkg = "com.tencent.mobileqq"
 
         initConfig(lpparam)
+        if (!EnvDetector.isLocalMode) {
+            try { Thread.sleep(100) } catch (_: Throwable) { }
+        }
 
         if (ConfigManager.isEnabled(ConfigManager.KEY_BYPASS_DETECTION)) {
             try { SecurityBypassHook.hook(lpparam) } catch (e: Throwable) { LogX.e("SecurityBypass 异常", e) }

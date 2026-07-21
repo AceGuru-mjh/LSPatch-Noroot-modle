@@ -59,10 +59,13 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
             val pkg = lpparam.packageName ?: return
             if (!isTargetApp(pkg)) return
 
-            LogX.i("===== APP启动: $pkg =====")
+            LogX.i("=== BatteryOptimizer v$VERSION starting | pkg=$pkg | process=${lpparam.processName} | mode=${if (EnvDetector.isLocalMode) "local" else "integrated"} ===")
             currentPkg = pkg
 
         initConfig(lpparam)
+        if (!EnvDetector.isLocalMode) {
+            try { Thread.sleep(100) } catch (_: Throwable) { }
+        }
         LogX.i("环境: ${if (EnvDetector.isLocalMode) "LSPatch本地" else "LSPosed集成"}模式")
         if (ModuleConflictDetector.checkConflict()) {
             LogX.w("检测到模块冲突，跳过Hook")
