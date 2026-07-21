@@ -47,14 +47,15 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
     }
 
     override fun handleLoadPackage(lpparam: XC_LoadPackage.LoadPackageParam) {
-        // LSPatch 合规: 跳过系统进程 + 仅主进程加载(避免子进程ClassLoader隔离问题)
-        if (lpparam.packageName == "android") return
-        if (!lpparam.isFirstApplication) return
-        val pkg = lpparam.packageName ?: return
-        if (!isTargetApp(pkg)) return
+        if (lpparam.processName != lpparam.packageName) return
+        try {
+            if (lpparam.packageName == "android") return
+            if (!lpparam.isFirstApplication) return
+            val pkg = lpparam.packageName ?: return
+            if (!isTargetApp(pkg)) return
 
-        LogX.i("===== APP启动: $pkg =====")
-        currentPkg = pkg
+            LogX.i("===== APP启动: $pkg =====")
+            currentPkg = pkg
 
         initConfig(lpparam)
 
@@ -83,6 +84,10 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
         hookAppLifecycle(lpparam)
         LogX.i("===== 全部Hook就绪: $pkg =====")
+        } catch (e: Throwable) {
+            LogX.e("模块崩溃防护: ${lpparam.packageName}", e)
+            try { LogStore.add("error", "模块异常: ${e.message}") } catch (_: Exception) { }
+        }
     }
 
     /** 目标APP包名白名单（音乐/语音/短视频类） */

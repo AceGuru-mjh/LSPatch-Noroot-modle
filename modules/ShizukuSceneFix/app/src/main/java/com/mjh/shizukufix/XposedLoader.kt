@@ -62,6 +62,7 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
     }
 
     override fun handleLoadPackage(lpparam: XC_LoadPackage.LoadPackageParam) {
+        if (lpparam.processName != lpparam.packageName) return
         val pkg = lpparam.packageName ?: return
         val proc = lpparam.processName ?: pkg
         LogX.i(">>> Module loaded in process: $proc (package: $pkg)")
@@ -107,8 +108,9 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
             // ===== 晚期检测：在 Application.onCreate 后再次确认是否为 Shizuku 变体 =====
             tryLateDetection(lpparam, cfg)
 
-        } catch (t: Throwable) {
-            LogX.e("Fatal error in handleLoadPackage", t)
+        } catch (e: Throwable) {
+            LogX.e("模块崩溃防护: ${lpparam.packageName}", e)
+            try { LogStore.add("error", "模块异常: ${e.message}") } catch (_: Exception) { }
         }
     }
 

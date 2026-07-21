@@ -44,19 +44,24 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
     }
 
     override fun handleLoadPackage(lpparam: XC_LoadPackage.LoadPackageParam) {
-        // LSPatch 合规: 跳过系统进程 + 仅主进程加载(避免子进程ClassLoader隔离问题)
-        if (lpparam.packageName == "android") return
-        if (!lpparam.isFirstApplication) return
-        val pkg = lpparam.packageName ?: return
-        val processName = lpparam.processName ?: return
+        if (lpparam.processName != lpparam.packageName) return
+        try {
+            if (lpparam.packageName == "android") return
+            if (!lpparam.isFirstApplication) return
+            val pkg = lpparam.packageName ?: return
+            val processName = lpparam.processName ?: return
 
-        when (pkg) {
-            "com.tencent.mm" -> {
-                if (HookHelper.isWeChatMainProcess(processName)) onWeChatLoaded(lpparam)
+            when (pkg) {
+                "com.tencent.mm" -> {
+                    if (HookHelper.isWeChatMainProcess(processName)) onWeChatLoaded(lpparam)
+                }
+                "com.tencent.mobileqq" -> {
+                    if (HookHelper.isQQMainProcess(processName)) onQQLoaded(lpparam)
+                }
             }
-            "com.tencent.mobileqq" -> {
-                if (HookHelper.isQQMainProcess(processName)) onQQLoaded(lpparam)
-            }
+        } catch (e: Throwable) {
+            LogX.e("模块崩溃防护: ${lpparam.packageName}", e)
+            try { LogStore.add("error", "模块异常: ${e.message}") } catch (_: Exception) { }
         }
     }
 
