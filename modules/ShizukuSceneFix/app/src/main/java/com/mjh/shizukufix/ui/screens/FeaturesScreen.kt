@@ -32,7 +32,7 @@ fun FeaturesScreen(cfg: ShizukuFixConfig, onConfigChange: (ShizukuFixConfig) -> 
 
         FeatureCard(
             "Scene 权限申请修复",
-            "Hook Scene 启动流程，主动向 Shizuku 发送 REQUEST_PERMISSION（Path A）",
+            "Hook Scene 启动流程，主动向 Shizuku 发�?REQUEST_PERMISSION（Path A�?,
             cfg.sceneFixEnabled,
             { val nc = cfg.copy(sceneFixEnabled = it); ConfigManager.saveGlobalConfig(nc); onConfigChange(nc) }
         )
@@ -40,32 +40,32 @@ fun FeaturesScreen(cfg: ShizukuFixConfig, onConfigChange: (ShizukuFixConfig) -> 
 
         FeatureCard(
             "授权列表注入",
-            "向 Shizuku getInstalledApplications/getInstalledPackages 等返回值注入 Scene（Path B）",
+            "�?Shizuku getInstalledApplications/getInstalledPackages 等返回值注�?Scene（Path B�?,
             cfg.listInjectorEnabled,
             { val nc = cfg.copy(listInjectorEnabled = it); ConfigManager.saveGlobalConfig(nc); onConfigChange(nc) }
         )
         Spacer(Modifier.height(8.dp))
 
         FeatureCard(
-            "Shizuku 变体检测",
-            "扫描已安装应用，识别 Shizuku 变体包名（含第三方 fork），辅助排错",
+            "Shizuku 变体检�?,
+            "扫描已安装应用，识别 Shizuku 变体包名（含第三�?fork），辅助排错",
             cfg.variantDetectEnabled,
             { val nc = cfg.copy(variantDetectEnabled = it); ConfigManager.saveGlobalConfig(nc); onConfigChange(nc) }
         )
 
         Spacer(Modifier.height(20.dp))
-        Text("Shizuku 系统级授权（adb级，需 Shizuku 运行）", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+        Text("Shizuku 系统级授权（adb级，需 Shizuku 运行�?, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
         Spacer(Modifier.height(8.dp))
 
         FeatureCard(
-            "pm grant 真正授予权限", "通过 Shizuku 执行 pm grant + am broadcast，真正授予 Scene Shizuku API 权限（非模拟UI点击）",
+            "pm grant 真正授予权限", "通过 Shizuku 执行 pm grant + am broadcast，真正授�?Scene Shizuku API 权限（非模拟UI点击�?,
             cfg.pmGrantEnabled,
             { val nc = cfg.copy(pmGrantEnabled = it); ConfigManager.saveGlobalConfig(nc); onConfigChange(nc) },
             experimental = true
         )
 
         Spacer(Modifier.height(20.dp))
-        Text("实验性功能", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.secondary)
+        Text("实验性功�?, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.secondary)
         Spacer(Modifier.height(8.dp))
 
         FeatureCard(
@@ -88,7 +88,7 @@ fun FeaturesScreen(cfg: ShizukuFixConfig, onConfigChange: (ShizukuFixConfig) -> 
 
         FeatureCard(
             "隐藏模块自身",
-            "Hook Scene PackageManager 查询，过滤掉本模块和 LSPosed/Magisk 等敏感包名",
+            "Hook Scene PackageManager 查询，过滤掉本模块和 LSPosed/Magisk 等敏感包�?,
             cfg.hideFromSceneEnabled,
             { val nc = cfg.copy(hideFromSceneEnabled = it); ConfigManager.saveGlobalConfig(nc); onConfigChange(nc) },
             experimental = true

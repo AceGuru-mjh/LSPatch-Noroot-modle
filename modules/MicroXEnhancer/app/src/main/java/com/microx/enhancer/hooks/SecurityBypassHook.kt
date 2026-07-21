@@ -8,21 +8,21 @@ import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.callbacks.XC_LoadPackage
 
 /**
- * 安全检测绕过Hook类
+ * 安全检测绕过Hook�?
  *
- * 核心目标：绕过微信/QQ对Xposed、LSPatch、LSPatch进程的检测
+ * 核心目标：绕过微�?QQ对Xposed、LSPatch、LSPatch进程的检�?
  *
- * 微信/QQ安全检测的常见手段：
- * 1. 检查XposedBridge类是否存在
- * 2. 检查/system/framework/XposedBridge.jar（Xposed框架文件）
- * 3. 检查已加载的ClassLoader中是否有Xposed相关类
- * 4. 检查进程的maps文件中是否有Xposed so库
+ * 微信/QQ安全检测的常见手段�?
+ * 1. 检查XposedBridge类是否存�?
+ * 2. 检�?system/framework/XposedBridge.jar（Xposed框架文件�?
+ * 3. 检查已加载的ClassLoader中是否有Xposed相关�?
+ * 4. 检查进程的maps文件中是否有Xposed so�?
  * 5. 扫描/sdcard/Android/data/下的LSPatch目录
- * 6. 检查/system/lib/libxposed_art.so等文件
- * 7. 反射调用XposedHelpers.findClass来检测是否能找到特殊类
+ * 6. 检�?system/lib/libxposed_art.so等文�?
+ * 7. 反射调用XposedHelpers.findClass来检测是否能找到特殊�?
  * 8. 调用ClassLoader.loadClass("de.robv.android.xposed.XposedBridge")看是否抛异常
  *
- * 绕过策略（仅在应用进程内存内，不涉及系统层）：
+ * 绕过策略（仅在应用进程内存内，不涉及系统层）�?
  * 1. Hook安全检测方法，修改返回值为"安全/未检测到"
  * 2. Hook文件检测方法，对检查Xposed框架文件路径返回false
  * 3. Hook反射检测，对findClass等调用返回ClassNotFoundException
@@ -30,20 +30,20 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage
  */
 object SecurityBypassHook {
 
-    // ===== 安全检测绕过（微信+QQ通用） =====
+    // ===== 安全检测绕过（微信+QQ通用�?=====
     fun hook(lpparam: XC_LoadPackage.LoadPackageParam) {
         HookHelper.log("加载安全检测绕过Hook")
 
-        // 1. 绕过Xposed类检测
+        // 1. 绕过Xposed类检�?
         bypassXposedClassCheck(lpparam)
 
-        // 2. 绕过文件系统检测
+        // 2. 绕过文件系统检�?
         bypassFileCheck(lpparam)
 
-        // 3. 绕过堆栈检测
+        // 3. 绕过堆栈检�?
         bypassStackTraceCheck(lpparam)
 
-        // 4. 绕过LSPatch特征检测
+        // 4. 绕过LSPatch特征检�?
         bypassLSPatchCheck(lpparam)
 
         // 5. 隐藏Xposed框架特征
@@ -51,7 +51,7 @@ object SecurityBypassHook {
     }
 
     // ================================================================
-    //  1. 绕过Xposed类检测
+    //  1. 绕过Xposed类检�?
     //  微信/QQ通常通过以下方式检测：
     //  - Class.forName("de.robv.android.xposed.XposedBridge")
     //  - ClassLoader.loadClass("de.robv.android.xposed.XposedBridge")
@@ -67,7 +67,7 @@ object SecurityBypassHook {
                     
                                 // 检测到Xposed相关类名时，模拟ClassNotFoundException
                                 if (isXposedClassName(className)) {
-                                    HookHelper.log("[安全绕过] 拦截Class.forName检测: $className")
+                                    HookHelper.log("[安全绕过] 拦截Class.forName检�? $className")
                                     throw ClassNotFoundException(className)
                                 }
                 }
@@ -83,19 +83,19 @@ object SecurityBypassHook {
                     val className = param.args.getOrNull(0) as? String ?: ""
                     
                                 if (isXposedClassName(className)) {
-                                    HookHelper.log("[安全绕过] 拦截ClassLoader.loadClass检测: $className")
+                                    HookHelper.log("[安全绕过] 拦截ClassLoader.loadClass检�? $className")
                                     throw ClassNotFoundException(className)
                                 }
                 }
             })
 
-        // Hook反射获取方法列表：过滤掉Xposed注入的方法
+        // Hook反射获取方法列表：过滤掉Xposed注入的方�?
         hookReflectionChecks(lpparam)
     }
 
-    /** Hook反射相关检测 */
+    /** Hook反射相关检�?*/
     private fun hookReflectionChecks(lpparam: XC_LoadPackage.LoadPackageParam) {
-        // Hook getDeclaredMethods — 微信可能通过此方法检查是否有Xposed注入的额外方法
+        // Hook getDeclaredMethods �?微信可能通过此方法检查是否有Xposed注入的额外方�?
         val classClass2 = XposedHelpers.findClass("java.lang.Class", lpparam.classLoader)
 
         HookHelper.hookAllMethodsSafe(classClass2, "getDeclaredMethods", object : XC_MethodHook() {
@@ -103,14 +103,14 @@ object SecurityBypassHook {
                     val result = param.result as? Array<*>
                     
                                 if (result != null && result.isNotEmpty()) {
-                                    // 检查被查询的类是否是微信自身的关键类
+                                    // 检查被查询的类是否是微信自身的关键�?
                                     val callerClassName = getCallerClassName()
                     
                                     if (callerClassName != null &&
                                         (callerClassName.contains("com.tencent.mm") ||
                                                 callerClassName.contains("com.tencent.mobileqq"))
                                     ) {
-                                        // 过滤掉由Xposed注入的额外方法
+                                        // 过滤掉由Xposed注入的额外方�?
                                         val filtered = result.filter { method ->
                                             try {
                                                 val mn = (method as? java.lang.reflect.Method)?.name ?: return@filter true
@@ -127,7 +127,7 @@ object SecurityBypassHook {
                 }
             })
 
-        // Hook getDeclaredField — 防止检测Xposed注入的字段
+        // Hook getDeclaredField �?防止检测Xposed注入的字�?
         HookHelper.hookAllMethodsSafe(classClass2, "getDeclaredField", object : XC_MethodHook() {
                 override fun beforeHookedMethod(param: XC_MethodHook.MethodHookParam) {
                     val fieldName = param.args.getOrNull(0) as? String ?: ""
@@ -140,8 +140,8 @@ object SecurityBypassHook {
     }
 
     // ================================================================
-    //  2. 绕过文件系统检测
-    //  微信/QQ检测以下路径来判断是否有Xposed/LSPatch：
+    //  2. 绕过文件系统检�?
+    //  微信/QQ检测以下路径来判断是否有Xposed/LSPatch�?
     //  - /system/framework/XposedBridge.jar
     //  - /system/lib/libxposed_art.so
     //  - /system/lib64/libxposed_art.so
@@ -171,8 +171,8 @@ object SecurityBypassHook {
                     val filePath = param.thisObject.toString().lowercase()
                     
                                 if (blockedPaths.any { filePath.contains(it) }) {
-                                    HookHelper.log("[安全绕过] 拦截文件检测: $filePath")
-                                    param.result = false // 文件不存在
+                                    HookHelper.log("[安全绕过] 拦截文件检�? $filePath")
+                                    param.result = false // 文件不存�?
                                 }
                 }
             })
@@ -187,7 +187,7 @@ object SecurityBypassHook {
                 }
             })
 
-        // Hook File.canRead() — 某些检测会尝试读取框架文件
+        // Hook File.canRead() �?某些检测会尝试读取框架文件
         HookHelper.hookAllMethodsSafe(fileClass, "canRead", object : XC_MethodHook() {
                 override fun beforeHookedMethod(param: XC_MethodHook.MethodHookParam) {
                     val filePath = param.thisObject.toString().lowercase()
@@ -197,7 +197,7 @@ object SecurityBypassHook {
                 }
             })
 
-        // Hook File.length() — 检验文件是否非空
+        // Hook File.length() �?检验文件是否非�?
         HookHelper.hookAllMethodsSafe(fileClass, "length", object : XC_MethodHook() {
                 override fun beforeHookedMethod(param: XC_MethodHook.MethodHookParam) {
                     val filePath = param.thisObject.toString().lowercase()
@@ -207,11 +207,11 @@ object SecurityBypassHook {
                 }
             })
 
-        // Hook Runtime.exec — 防止通过shell命令检测
+        // Hook Runtime.exec �?防止通过shell命令检�?
         hookRuntimeExec(lpparam, blockedPaths)
     }
 
-    /** Hook Runtime.exec / ProcessBuilder 防止通过shell命令检测 */
+    /** Hook Runtime.exec / ProcessBuilder 防止通过shell命令检�?*/
     private fun hookRuntimeExec(
         lpparam: XC_LoadPackage.LoadPackageParam,
         blockedPaths: List<String>
@@ -231,7 +231,7 @@ object SecurityBypassHook {
                     
                                 if (suspiciousCommands.any { command.contains(it) }) {
                                     HookHelper.log("[安全绕过] 拦截可疑shell命令: ${command.take(100)}")
-                                    // 返回一个假的Process：执行结果为空
+                                    // 返回一个假的Process：执行结果为�?
                                     // 此处简化处理，直接抛出异常阻止执行
                                     throw SecurityException("Permission denied")
                                 }
@@ -264,10 +264,10 @@ object SecurityBypassHook {
     }
 
     // ================================================================
-    //  3. 绕过堆栈检测
-    //  微信/QQ可能通过以下方式检测Xposed：
+    //  3. 绕过堆栈检�?
+    //  微信/QQ可能通过以下方式检测Xposed�?
     //  - StackTraceElement中查找de.robv.android.xposed包名
-    //  - 检测调用栈中是否有Xposed的方法
+    //  - 检测调用栈中是否有Xposed的方�?
     //  策略：Hook获取调用栈的方法，过滤Xposed相关元素
     // ================================================================
     private fun bypassStackTraceCheck(lpparam: XC_LoadPackage.LoadPackageParam) {
@@ -281,7 +281,7 @@ object SecurityBypassHook {
                                 if (original != null) {
                                     val filtered = original.filter { element ->
                                         val className = element.className
-                                        // 过滤掉Xposed/LSPatch相关的堆栈信息
+                                        // 过滤掉Xposed/LSPatch相关的堆栈信�?
                                         !className.contains("de.robv.android.xposed") &&
                                                 !className.contains("org.lsposed") &&
                                                 !className.contains("lspatch") &&
@@ -312,7 +312,7 @@ object SecurityBypassHook {
                 }
             })
 
-        // Hook Security.getStackTrace() — 某些安全框架使用
+        // Hook Security.getStackTrace() �?某些安全框架使用
         try {
             val securityClass = HookHelper.findClassSafe(lpparam,
                 "java.lang.SecurityManager"
@@ -339,14 +339,14 @@ object SecurityBypassHook {
     }
 
     // ================================================================
-    //  4. 绕过LSPatch特征检测
+    //  4. 绕过LSPatch特征检�?
     //  LSPatch的特征：
     //  - /data/local/tmp/lspatch/
-    //  - org.lsposed.lspatch 包名的残留
+    //  - org.lsposed.lspatch 包名的残�?
     //  - AndroidManifest中的meta-data
     // ================================================================
     private fun bypassLSPatchCheck(lpparam: XC_LoadPackage.LoadPackageParam) {
-        // Hook ApplicationInfo获取 — 防止检测到LSPatch的meta-data
+        // Hook ApplicationInfo获取 �?防止检测到LSPatch的meta-data
         val pmClass = HookHelper.findClassSafe(lpparam,
             "android.content.pm.PackageManager"
         )
@@ -354,7 +354,7 @@ object SecurityBypassHook {
             HookHelper.hookAllMethodsSafe(pmClass, "getApplicationInfo", object : XC_MethodHook() {
                 override fun beforeHookedMethod(param: XC_MethodHook.MethodHookParam) {
                     // 不拦截正常获取，但过滤meta-data中的Xposed标记
-                                    // 这在大部分情况下不需要（LSPatch本身已经处理）
+                                    // 这在大部分情况下不需要（LSPatch本身已经处理�?
                 }
             })
 
@@ -380,7 +380,7 @@ object SecurityBypassHook {
                                             }
                                         }
                                         if (filtered.size < result.size) {
-                                            HookHelper.log("[安全绕过] 过滤包列表: ${result.size} -> ${filtered.size}")
+                                            HookHelper.log("[安全绕过] 过滤包列�? ${result.size} -> ${filtered.size}")
                                             param.result = filtered
                                         }
                                     }
@@ -417,7 +417,7 @@ object SecurityBypassHook {
     //  补充一些零散的特征隐藏
     // ================================================================
     private fun hideXposedFeatures(lpparam: XC_LoadPackage.LoadPackageParam) {
-        // Hook System.getProperty — 防止通过系统属性检测
+        // Hook System.getProperty �?防止通过系统属性检�?
         val systemClass = XposedHelpers.findClass("java.lang.System", lpparam.classLoader)
 
         HookHelper.hookAllMethodsSafe(systemClass, "getProperty", object : XC_MethodHook() {
@@ -428,22 +428,22 @@ object SecurityBypassHook {
                                     "vxp", "edxposed", "ro.product.cpu.abi",
                                 )
                     
-                                // 移除可能暴露框架存在的结果
+                                // 移除可能暴露框架存在的结�?
                                 if (blockedKeys.any { key.lowercase().contains(it) }) {
                                     val originalResult = param.result as? String ?: ""
                                     if (originalResult.isNotEmpty() &&
                                         (originalResult.contains("xposed") ||
                                                 originalResult.contains("lsposed"))
                                     ) {
-                                        HookHelper.log("[安全绕过] 隐藏系统属性: $key")
+                                        HookHelper.log("[安全绕过] 隐藏系统属�? $key")
                                         param.result = ""
                                     }
                                 }
                 }
             })
 
-        // Hook /proc/self/maps读取（微信常检查maps文件）
-        // 通过Hook FileInputStream/BufferedReader的read方法来过滤
+        // Hook /proc/self/maps读取（微信常检查maps文件�?
+        // 通过Hook FileInputStream/BufferedReader的read方法来过�?
         hookProcMapsRead(lpparam)
     }
 
@@ -454,13 +454,13 @@ object SecurityBypassHook {
 
         HookHelper.hookAllMethodsSafe(fisClass, "read", object : XC_MethodHook() {
                 override fun beforeHookedMethod(param: XC_MethodHook.MethodHookParam) {
-                    // FileInputStream.read()的读取过滤比较复杂
-                                // 这里采用更简洁的方案：在前面已经Hook了File.exists等，阻止了文件层面的检测
+                    // FileInputStream.read()的读取过滤比较复�?
+                                // 这里采用更简洁的方案：在前面已经Hook了File.exists等，阻止了文件层面的检�?
                                 // /proc文件读取的过滤可在此扩展
                 }
             })
 
-        // Hook BufferedReader.readLine — 过滤maps文件中的Xposed行
+        // Hook BufferedReader.readLine �?过滤maps文件中的Xposed�?
         val brClass = HookHelper.findClassSafe(lpparam, "java.io.BufferedReader")
         if (brClass != null) {
             HookHelper.hookAllMethodsSafe(brClass, "readLine", object : XC_MethodHook() {
@@ -472,7 +472,7 @@ object SecurityBypassHook {
                                             lowerLine.contains("lspatch") ||
                                             lowerLine.contains("lsposed")
                                         ) {
-                                            HookHelper.log("[安全绕过] 过滤maps行: ${line.take(80)}")
+                                            HookHelper.log("[安全绕过] 过滤maps�? ${line.take(80)}")
                                             param.result = "" // 返回空行
                                         }
                                     }

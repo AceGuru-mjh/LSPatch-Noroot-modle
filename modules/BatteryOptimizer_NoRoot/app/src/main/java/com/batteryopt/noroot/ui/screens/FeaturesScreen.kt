@@ -34,70 +34,70 @@ fun FeaturesScreen(cfg: BatteryConfig, onConfigChange: (BatteryConfig) -> Unit) 
         Spacer(Modifier.height(8.dp))
 
         FeatureCard(
-            "WakeLock 优化", "超长持有自动释放 + 拦截冗余 SDK 统计类",
+            "WakeLock 优化", "超长持有自动释放 + 拦截冗余 SDK 统计�?,
             cfg.wakeLockEnabled,
             { val nc = cfg.copy(wakeLockEnabled = it); ConfigManager.saveGlobalConfig(nc); onConfigChange(nc) }
         )
         Spacer(Modifier.height(8.dp))
 
         FeatureCard(
-            "Alarm 闹钟优化", "高频精确闹钟降级为 setWindow，最小间隔放大",
+            "Alarm 闹钟优化", "高频精确闹钟降级�?setWindow，最小间隔放�?,
             cfg.alarmEnabled,
             { val nc = cfg.copy(alarmEnabled = it); ConfigManager.saveGlobalConfig(nc); onConfigChange(nc) }
         )
         Spacer(Modifier.height(8.dp))
 
         FeatureCard(
-            "Sync 同步降频", "requestSync 节流，周期同步最小 30 分钟",
+            "Sync 同步降频", "requestSync 节流，周期同步最�?30 分钟",
             cfg.syncEnabled,
             { val nc = cfg.copy(syncEnabled = it); ConfigManager.saveGlobalConfig(nc); onConfigChange(nc) }
         )
         Spacer(Modifier.height(8.dp))
 
         FeatureCard(
-            "JobScheduler 限频", "Job 最小周期 15 分钟，追加 requireDeviceIdle 约束",
+            "JobScheduler 限频", "Job 最小周�?15 分钟，追�?requireDeviceIdle 约束",
             cfg.jobEnabled,
             { val nc = cfg.copy(jobEnabled = it); ConfigManager.saveGlobalConfig(nc); onConfigChange(nc) }
         )
         Spacer(Modifier.height(8.dp))
 
         FeatureCard(
-            "Location 定位降频", "最小间隔 30s，后台高频 GPS 降级为 NETWORK",
+            "Location 定位降频", "最小间�?30s，后台高�?GPS 降级�?NETWORK",
             cfg.locationEnabled,
             { val nc = cfg.copy(locationEnabled = it); ConfigManager.saveGlobalConfig(nc); onConfigChange(nc) }
         )
         Spacer(Modifier.height(8.dp))
 
         FeatureCard(
-            "Animation 动画优化", "scale=0 关闭动画省 GPU（默认关闭，可能影响体验）",
+            "Animation 动画优化", "scale=0 关闭动画�?GPU（默认关闭，可能影响体验�?,
             cfg.animationEnabled,
             { val nc = cfg.copy(animationEnabled = it); ConfigManager.saveGlobalConfig(nc); onConfigChange(nc) }
         )
         Spacer(Modifier.height(8.dp))
 
         FeatureCard(
-            "Sensor 传感器降频", ">50Hz 高频传感器降频至 5Hz",
+            "Sensor 传感器降�?, ">50Hz 高频传感器降频至 5Hz",
             cfg.sensorEnabled,
             { val nc = cfg.copy(sensorEnabled = it); ConfigManager.saveGlobalConfig(nc); onConfigChange(nc) }
         )
 
         Spacer(Modifier.height(20.dp))
-        Text("Shizuku 系统级（adb级，需 Shizuku 运行）", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+        Text("Shizuku 系统级（adb级，需 Shizuku 运行�?, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
         Spacer(Modifier.height(8.dp))
 
         FeatureCard(
-            "cmd appops 系统级后台限制", "通过 Shizuku 执行 cmd appops set，在系统级限制 WAKE_LOCK/RUN_IN_BACKGROUND/BOOT_COMPLETED（远比 Java 层 Hook 更强）",
+            "cmd appops 系统级后台限�?, "通过 Shizuku 执行 cmd appops set，在系统级限�?WAKE_LOCK/RUN_IN_BACKGROUND/BOOT_COMPLETED（远�?Java �?Hook 更强�?,
             cfg.appOpsRestrictEnabled,
             { val nc = cfg.copy(appOpsRestrictEnabled = it); ConfigManager.saveGlobalConfig(nc); onConfigChange(nc) },
             experimental = true
         )
 
         Spacer(Modifier.height(20.dp))
-        Text("实验性功能", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.secondary)
+        Text("实验性功�?, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.secondary)
         Spacer(Modifier.height(8.dp))
 
         FeatureCard(
-            "蓝牙扫描降频", "Hook BluetoothLeScanner.startScan，最小间隔 60s",
+            "蓝牙扫描降频", "Hook BluetoothLeScanner.startScan，最小间�?60s",
             cfg.bluetoothScanThrottleEnabled,
             { val nc = cfg.copy(bluetoothScanThrottleEnabled = it); ConfigManager.saveGlobalConfig(nc); onConfigChange(nc) },
             experimental = true
@@ -113,7 +113,7 @@ fun FeaturesScreen(cfg: BatteryConfig, onConfigChange: (BatteryConfig) -> Unit) 
         Spacer(Modifier.height(8.dp))
 
         FeatureCard(
-            "振动器限频", "Hook Vibrator.vibrate，最小触发间隔 1s",
+            "振动器限�?, "Hook Vibrator.vibrate，最小触发间�?1s",
             cfg.vibratorThrottleEnabled,
             { val nc = cfg.copy(vibratorThrottleEnabled = it); ConfigManager.saveGlobalConfig(nc); onConfigChange(nc) },
             experimental = true
@@ -123,7 +123,7 @@ fun FeaturesScreen(cfg: BatteryConfig, onConfigChange: (BatteryConfig) -> Unit) 
         Text("参数调整", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
         Spacer(Modifier.height(8.dp))
 
-        Text("WakeLock 最大持有: ${cfg.wakeLockMaxHoldSec}s", style = MaterialTheme.typography.bodySmall)
+        Text("WakeLock 最大持�? ${cfg.wakeLockMaxHoldSec}s", style = MaterialTheme.typography.bodySmall)
         val wakeLockMaxHoldSecState = remember(cfg) { mutableFloatStateOf(cfg.wakeLockMaxHoldSec.toFloat()) }
             Slider(
                 value = wakeLockMaxHoldSecState.floatValue,
@@ -136,7 +136,7 @@ fun FeaturesScreen(cfg: BatteryConfig, onConfigChange: (BatteryConfig) -> Unit) 
                 valueRange = 10f..300f
             )
 
-        Text("Alarm 最小间隔: ${cfg.alarmMinIntervalMin} 分钟", style = MaterialTheme.typography.bodySmall)
+        Text("Alarm 最小间�? ${cfg.alarmMinIntervalMin} 分钟", style = MaterialTheme.typography.bodySmall)
         val alarmMinIntervalMinState = remember(cfg) { mutableFloatStateOf(cfg.alarmMinIntervalMin.toFloat()) }
             Slider(
                 value = alarmMinIntervalMinState.floatValue,

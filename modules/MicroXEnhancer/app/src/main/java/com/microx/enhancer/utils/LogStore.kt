@@ -6,7 +6,7 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
 /**
- * 跨进程日志存储（UI 进程 ↔ Hook 进程共享）
+ * 跨进程日志存储（UI 进程 �?Hook 进程共享�?
  */
 data class LogEntry(
     val timestamp: Long = System.currentTimeMillis(),

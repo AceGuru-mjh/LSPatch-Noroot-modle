@@ -73,7 +73,7 @@ fun MainScreen() {
         val onCfgChange: (NotifyConfig) -> Unit = { cfg = it }
 
         val screens = listOf(
-            Triple("home", "总开关", Icons.Default.PowerSettingsNew),
+            Triple("home", "总开�?, Icons.Default.PowerSettingsNew),
             Triple("features", "功能", Icons.Default.Build),
             Triple("diagnostics", "诊断", Icons.Default.BugReport),
             Triple("update", "更新", Icons.Default.CloudDownload),

@@ -62,7 +62,7 @@ class MainActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen() {
-    // 暗色模式开关
+    // 暗色模式开�?
     var darkMode by rememberSaveable { mutableStateOf(false) }
 
     AudioBoostTheme(darkTheme = darkMode) {
@@ -74,7 +74,7 @@ fun MainScreen() {
         val onCfgChange: (AudioConfig) -> Unit = { cfg = it }
 
         val screens = listOf(
-            Triple("home", "总开关", Icons.Default.PowerSettingsNew),
+            Triple("home", "总开�?, Icons.Default.PowerSettingsNew),
             Triple("features", "功能", Icons.Default.Build),
             Triple("diagnostics", "诊断", Icons.Default.BugReport),
             Triple("update", "更新", Icons.Default.CloudDownload),

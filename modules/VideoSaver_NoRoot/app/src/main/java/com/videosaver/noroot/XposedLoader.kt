@@ -13,7 +13,7 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage
 class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
     companion object {
-        const val VERSION = "1.0.11"
+        const val VERSION = "1.0.12"
         const val TAG = "LSP-VideoSaver"
         const val MODULE_PKG = "com.videosaver.noroot"
         var currentPkg: String? = null

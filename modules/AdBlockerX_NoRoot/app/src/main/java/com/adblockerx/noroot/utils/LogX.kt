@@ -4,7 +4,7 @@ import android.util.Log
 
 /**
  * 统一日志工具
- * TAG: AdBlockerX-NoRoot，可用 adb logcat -s AdBlockerX:V 查看
+ * TAG: AdBlockerX-NoRoot，可�?adb logcat -s AdBlockerX:V 查看
  */
 object LogX {
     private const val TAG = "AdBlockerX-NoRoot"

@@ -64,7 +64,7 @@ fun AboutScreen() {
 
         Card(modifier = Modifier.fillMaxWidth()) {
             Column(modifier = Modifier.padding(16.dp)) {
-                Row2(Icons.Default.Person, "开发者", "MJH")
+                Row2(Icons.Default.Person, "开发�?, "MJH")
                 Spacer(Modifier.height(12.dp))
                 Row2(Icons.Default.Code, "项目地址", "github.com/AceGuru-mjh/LSPatch-Noroot-modle")
                 Spacer(Modifier.height(12.dp))
@@ -85,17 +85,17 @@ fun AboutScreen() {
 
         Card(modifier = Modifier.fillMaxWidth()) {
             Column(modifier = Modifier.padding(16.dp)) {
-                Text("功能简介", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Text("功能简�?, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                 Spacer(Modifier.height(8.dp))
-                Text("• 机型伪装（Build/SystemProperties）", style = MaterialTheme.typography.bodySmall)
-                Text("• 帧率解锁（Display/Surface/Unity/Unreal）", style = MaterialTheme.typography.bodySmall)
-                Text("• 环境隐藏（Xposed/Shizuku/LSPatch/Magisk）", style = MaterialTheme.typography.bodySmall)
-                Text("• 进程优化（线程优先级 + 热状态）", style = MaterialTheme.typography.bodySmall)
-                Text("• 分辨率伪装（Display/DisplayMetrics）", style = MaterialTheme.typography.bodySmall)
-                Text("• [实验] 触摸采样率提升", style = MaterialTheme.typography.bodySmall)
-                Text("• [实验] 网络延迟优化（TCP_NODELAY）", style = MaterialTheme.typography.bodySmall)
-                Text("• [实验] 音频优先级提升", style = MaterialTheme.typography.bodySmall)
-                Text("• [实验] 内存整理（MemoryInfo/TrimMemory）", style = MaterialTheme.typography.bodySmall)
+                Text("�?机型伪装（Build/SystemProperties�?, style = MaterialTheme.typography.bodySmall)
+                Text("�?帧率解锁（Display/Surface/Unity/Unreal�?, style = MaterialTheme.typography.bodySmall)
+                Text("�?环境隐藏（Xposed/Shizuku/LSPatch/Magisk�?, style = MaterialTheme.typography.bodySmall)
+                Text("�?进程优化（线程优先级 + 热状态）", style = MaterialTheme.typography.bodySmall)
+                Text("�?分辨率伪装（Display/DisplayMetrics�?, style = MaterialTheme.typography.bodySmall)
+                Text("�?[实验] 触摸采样率提�?, style = MaterialTheme.typography.bodySmall)
+                Text("�?[实验] 网络延迟优化（TCP_NODELAY�?, style = MaterialTheme.typography.bodySmall)
+                Text("�?[实验] 音频优先级提�?, style = MaterialTheme.typography.bodySmall)
+                Text("�?[实验] 内存整理（MemoryInfo/TrimMemory�?, style = MaterialTheme.typography.bodySmall)
             }
         }
 
@@ -103,11 +103,11 @@ fun AboutScreen() {
 
         Card(modifier = Modifier.fillMaxWidth()) {
             Column(modifier = Modifier.padding(16.dp)) {
-                Text("硬性限制", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.secondary)
+                Text("硬性限�?, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.secondary)
                 Spacer(Modifier.height(4.dp))
                 Text(
                     "NoRoot 版不含：温控屏蔽、GPU 调频、系统属性修改（这些仅在 Root 版提供）。\n" +
-                    "本模块仅缓解轻度发热场景的降频，长时间高负载仍会触发 SOC 硬件级保护。",
+                    "本模块仅缓解轻度发热场景的降频，长时间高负载仍会触发 SOC 硬件级保护�?,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -121,7 +121,7 @@ fun AboutScreen() {
                 Text("免责声明", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.error)
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    "仅供学习研究使用。使用本模块产生的任何后果（包括但不限于账号封禁、设备损坏）由使用者自行承担。",
+                    "仅供学习研究使用。使用本模块产生的任何后果（包括但不限于账号封禁、设备损坏）由使用者自行承担�?,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

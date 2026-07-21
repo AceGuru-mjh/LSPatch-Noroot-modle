@@ -7,20 +7,20 @@ import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.callbacks.XC_LoadPackage
 
 /**
- * 防通知撤回 Hook（NoRoot 版 - 仅应用进程内）
+ * 防通知撤回 Hook（NoRoot �?- 仅应用进程内�?
  *
- * 功能：阻止应用主动 cancel 自己发出的通知（防撤回提示被清掉）。
+ * 功能：阻止应用主�?cancel 自己发出的通知（防撤回提示被清掉）�?
  *
- * 拦截路径：
+ * 拦截路径�?
  *  1. NotificationManager.cancel(int id)
  *  2. NotificationManager.cancel(String tag, int id)
  *  3. NotificationManager.cancelAll()
  *  4. NotificationManager.cancelAsUser(...)
  *
  * 硬性限制：
- *  - 仅 Hook 应用进程内的 cancel 调用（应用想撤回自己的通知时拦截）
- *  - 不 Hook 系统 NotificationListenerService（NoRoot 版无系统权限）
- *  - 用户手动划掉通知不在此 Hook 范围（那是系统侧调用）
+ *  - �?Hook 应用进程内的 cancel 调用（应用想撤回自己的通知时拦截）
+ *  - �?Hook 系统 NotificationListenerService（NoRoot 版无系统权限�?
+ *  - 用户手动划掉通知不在�?Hook 范围（那是系统侧调用�?
  */
 object AntiRecallNotifyHook {
 
@@ -32,7 +32,7 @@ object AntiRecallNotifyHook {
         if (isApplied) return
         isApplied = true
 
-        LogX.i("防通知撤回启动（应用自身 cancel 全部拦截）")
+        LogX.i("防通知撤回启动（应用自�?cancel 全部拦截�?)
 
         hookCancel(lpparam)
     }
@@ -100,7 +100,7 @@ object AntiRecallNotifyHook {
         } catch (e: Exception) { LogX.w("cancelAsUser 不存在或 Hook 失败: ${e.message}") }
     }
 
-    /** 释放（重启 Hook 链路时调用） */
+    /** 释放（重�?Hook 链路时调用） */
     fun release() {
         isApplied = false
     }

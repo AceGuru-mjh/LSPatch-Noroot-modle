@@ -12,12 +12,12 @@ android {
         minSdk = 26
         targetSdk = 34
         versionCode = 1
-        versionName = "1.0.11"
+        versionName = "1.0.12"
     }
 
     signingConfigs {
         create("release") {
-            // 优先从环境变量读取(GitHub Actions Secrets), 其次默认 keystore
+            // 优先从环境变量读�?GitHub Actions Secrets), 其次默认 keystore
             val storeFilePath = System.getenv("MJH_STORE_FILE") ?: rootProject.file("../keystore/mjh-release.jks").path
             storeFile = file(storeFilePath)
             storePassword = System.getenv("MJH_STORE_PASSWORD")?.takeIf { it.isNotEmpty() } ?: "meng411722"
@@ -64,10 +64,10 @@ android {
 }
 
 dependencies {
-    // Xposed API (compileOnly: 由 LSPosed/LSPatch 框架运行时提供，避免类冲突)
+    // Xposed API (compileOnly: �?LSPosed/LSPatch 框架运行时提供，避免类冲�?
     compileOnly("de.robv.android.xposed:api:82")
 
-    // Shizuku API (compileOnly, 免Root通过adb级Shizuku调用，反射兼容)
+    // Shizuku API (compileOnly, 免Root通过adb级Shizuku调用，反射兼�?
     compileOnly("dev.rikka.shizuku:api:13.1.5")
     compileOnly("dev.rikka.shizuku:provider:13.1.5")
 

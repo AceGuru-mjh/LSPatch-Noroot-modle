@@ -7,9 +7,9 @@ import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.callbacks.XC_LoadPackage
 
 /**
- * 爱奇艺 VIP 解锁 Hook（黄金/白金/星钻会员）
+ * 爱奇�?VIP 解锁 Hook（黄�?白金/星钻会员�?
  *
- * 候选 Hook 类：
+ * 候�?Hook 类：
  *  1. com.iqiyi.video.PlayerUtil
  *  2. com.iqiyi.video.QYVipManager
  *  3. com.iqiyi.video.UserCenter
@@ -17,8 +17,8 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage
  *  5. org.qiyi.android.video.vip.VipController
  *
  * 硬性限制：
- *  - 仅 Hook 应用进程内 Java 层 VIP 状态查询方法
- *  - 服务端播放鉴权不绕过，部分 4K/杜比片源仍需真实VIP
+ *  - �?Hook 应用进程�?Java �?VIP 状态查询方�?
+ *  - 服务端播放鉴权不绕过，部�?4K/杜比片源仍需真实VIP
  */
 object IqiyiVipHook {
 
@@ -46,7 +46,7 @@ object IqiyiVipHook {
             for (m in VIP_METHODS) {
                 if (tryHookBoolean(cls, clsName, m)) hookedAny = true
             }
-            // getVipType / getVipLevel 返回高级别
+            // getVipType / getVipLevel 返回高级�?
             tryHookIntReturning(cls, clsName, "getVipType", 3)
             tryHookIntReturning(cls, clsName, "getVipLevel", 3)
             tryHookIntReturning(cls, clsName, "getUserVipType", 3)

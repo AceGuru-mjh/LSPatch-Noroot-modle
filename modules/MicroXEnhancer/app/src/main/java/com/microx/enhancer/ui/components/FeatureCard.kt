@@ -44,7 +44,7 @@ fun FeatureCard(
                     )
                     if (experimental) {
                         Text(
-                            text = "  实验性",
+                            text = "  实验�?,
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.secondary
                         )

@@ -86,10 +86,10 @@ fun UpdateScreen() {
             .verticalScroll(scroll)
             .padding(16.dp)
     ) {
-        Text("热更新", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+        Text("热更�?, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
         Spacer(Modifier.height(4.dp))
         Text(
-            "检查 GitHub Release 新版本，支持应用内下载安装",
+            "检�?GitHub Release 新版本，支持应用内下载安�?,
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -108,12 +108,12 @@ fun UpdateScreen() {
         }
         Spacer(Modifier.height(12.dp))
 
-        // 自动检查开关
+        // 自动检查开�?
         Card(modifier = Modifier.fillMaxWidth()) {
             Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
                 Column(modifier = Modifier.weight(1f)) {
-                    Text("自动检查更新", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                    Text("进入页面自动检查（5分钟内不重复）", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text("自动检查更�?, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                    Text("进入页面自动检查（5分钟内不重复�?, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
                 Switch(checked = autoCheck, onCheckedChange = {
                     autoCheck = it
@@ -123,7 +123,7 @@ fun UpdateScreen() {
         }
         Spacer(Modifier.height(12.dp))
 
-        // 检查更新按钮
+        // 检查更新按�?
         Button(
             onClick = {
                 checking = true
@@ -137,7 +137,7 @@ fun UpdateScreen() {
                     if (result != null) {
                         info = result
                     } else {
-                        error = "检查失败，请检查网络"
+                        error = "检查失败，请检查网�?
                     }
                 }
             },
@@ -149,7 +149,7 @@ fun UpdateScreen() {
                 Text("  检查中...")
             } else {
                 Icon(Icons.Default.Refresh, contentDescription = null)
-                Text("  检查更新")
+                Text("  检查更�?)
             }
         }
 
@@ -168,7 +168,7 @@ fun UpdateScreen() {
         info?.let { ui ->
             Spacer(Modifier.height(16.dp))
 
-            // 更新状态卡片
+            // 更新状态卡�?
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(
@@ -185,7 +185,7 @@ fun UpdateScreen() {
                     )
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            if (ui.hasUpdate) "发现新版本 v${ui.latestVersion}" else "已是最新版本",
+                            if (ui.hasUpdate) "发现新版�?v${ui.latestVersion}" else "已是最新版�?,
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold
                         )
@@ -198,7 +198,7 @@ fun UpdateScreen() {
                 }
             }
 
-            // 更新说明（可展开）
+            // 更新说明（可展开�?
             if (ui.releaseNotes.isNotBlank()) {
                 Spacer(Modifier.height(8.dp))
                 Card(modifier = Modifier.fillMaxWidth()) {
@@ -237,7 +237,7 @@ fun UpdateScreen() {
                             onClick = {
                                 downloading = true
                                 progress = 0f
-                                statusMsg = "开始下载..."
+                                statusMsg = "开始下�?.."
                                 scope.launch {
                                     val result = withContext(Dispatchers.IO) {
                                         ApkDownloader.download(
@@ -258,7 +258,7 @@ fun UpdateScreen() {
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Icon(Icons.Default.CloudDownload, contentDescription = null)
-                            Text("  下载并安装")
+                            Text("  下载并安�?)
                         }
                     }
                 }
@@ -267,7 +267,7 @@ fun UpdateScreen() {
                     OutlinedButton(
                         onClick = { UpdateChecker.ignoreVersion(ui.latestVersion) },
                         modifier = Modifier.weight(1f)
-                    ) { Text("忽略此版本") }
+                    ) { Text("忽略此版�?) }
                     OutlinedButton(
                         onClick = {
                             val i = Intent(Intent.ACTION_VIEW, Uri.parse(ui.releaseUrl))
@@ -285,7 +285,7 @@ fun UpdateScreen() {
                 OutlinedButton(
                     onClick = {
                         UpdateChecker.clearIgnored()
-                        // 重新检查
+                        // 重新检�?
                         checking = true
                         scope.launch {
                             val r = withContext(Dispatchers.IO) {
@@ -296,7 +296,7 @@ fun UpdateScreen() {
                         }
                     },
                     modifier = Modifier.fillMaxWidth()
-                ) { Text("取消忽略并重新检查") }
+                ) { Text("取消忽略并重新检�?) }
             }
         }
 
@@ -311,7 +311,7 @@ fun UpdateScreen() {
                 IconButton(onClick = {
                     UpdateChecker.clearDownloadCache(ctx)
                     cacheSize = 0L
-                    statusMsg = "缓存已清理"
+                    statusMsg = "缓存已清�?
                 }) {
                     Icon(Icons.Default.Delete, contentDescription = "清理缓存", tint = MaterialTheme.colorScheme.error)
                 }
@@ -324,10 +324,10 @@ fun UpdateScreen() {
             Column(modifier = Modifier.padding(12.dp)) {
                 Text("说明", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
                 Spacer(Modifier.height(4.dp))
-                Text("• 更新源: github.com/AceGuru-mjh/LSPatch-Noroot-modle/releases", style = MaterialTheme.typography.bodySmall)
-                Text("• 下载完成自动弹出安装界面（需允许\"安装未知应用\"）", style = MaterialTheme.typography.bodySmall)
-                Text("• 模块更新后需在 LSPosed/LSPatch 重新启用并重启目标 APP", style = MaterialTheme.typography.bodySmall)
-                Text("• 自动检查间隔最少5分钟，避免频繁请求 GitHub API", style = MaterialTheme.typography.bodySmall)
+                Text("�?更新�? github.com/AceGuru-mjh/LSPatch-Noroot-modle/releases", style = MaterialTheme.typography.bodySmall)
+                Text("�?下载完成自动弹出安装界面（需允许\"安装未知应用\"�?, style = MaterialTheme.typography.bodySmall)
+                Text("�?模块更新后需�?LSPosed/LSPatch 重新启用并重启目�?APP", style = MaterialTheme.typography.bodySmall)
+                Text("�?自动检查间隔最�?分钟，避免频繁请�?GitHub API", style = MaterialTheme.typography.bodySmall)
             }
         }
         Spacer(Modifier.height(32.dp))

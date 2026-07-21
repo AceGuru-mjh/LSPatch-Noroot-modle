@@ -64,7 +64,7 @@ fun AboutScreen() {
 
         Card(modifier = Modifier.fillMaxWidth()) {
             Column(modifier = Modifier.padding(16.dp)) {
-                Row2(Icons.Default.Person, "开发者", "MJH")
+                Row2(Icons.Default.Person, "开发�?, "MJH")
                 Spacer(Modifier.height(12.dp))
                 Row2(Icons.Default.Code, "项目地址", "github.com/AceGuru-mjh/LSPatch-Noroot-modle")
                 Spacer(Modifier.height(12.dp))
@@ -85,16 +85,16 @@ fun AboutScreen() {
 
         Card(modifier = Modifier.fillMaxWidth()) {
             Column(modifier = Modifier.padding(16.dp)) {
-                Text("功能简介", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Text("功能简�?, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                 Spacer(Modifier.height(8.dp))
-                Text("• WakeLock 超时自动释放 + 冗余 SDK 拦截", style = MaterialTheme.typography.bodySmall)
-                Text("• Alarm 高频精确闹钟降级 setWindow", style = MaterialTheme.typography.bodySmall)
-                Text("• Sync 同步降频（最小 30 分钟）", style = MaterialTheme.typography.bodySmall)
-                Text("• JobScheduler 限频 + idle 约束", style = MaterialTheme.typography.bodySmall)
-                Text("• Location 后台高频 GPS 降级", style = MaterialTheme.typography.bodySmall)
-                Text("• Animation scale=0 关闭动画", style = MaterialTheme.typography.bodySmall)
-                Text("• Sensor >50Hz 降频至 5Hz", style = MaterialTheme.typography.bodySmall)
-                Text("• [实验] 蓝牙扫描/相机阻断/振动器限频", style = MaterialTheme.typography.bodySmall)
+                Text("�?WakeLock 超时自动释放 + 冗余 SDK 拦截", style = MaterialTheme.typography.bodySmall)
+                Text("�?Alarm 高频精确闹钟降级 setWindow", style = MaterialTheme.typography.bodySmall)
+                Text("�?Sync 同步降频（最�?30 分钟�?, style = MaterialTheme.typography.bodySmall)
+                Text("�?JobScheduler 限频 + idle 约束", style = MaterialTheme.typography.bodySmall)
+                Text("�?Location 后台高频 GPS 降级", style = MaterialTheme.typography.bodySmall)
+                Text("�?Animation scale=0 关闭动画", style = MaterialTheme.typography.bodySmall)
+                Text("�?Sensor >50Hz 降频�?5Hz", style = MaterialTheme.typography.bodySmall)
+                Text("�?[实验] 蓝牙扫描/相机阻断/振动器限�?, style = MaterialTheme.typography.bodySmall)
             }
         }
 
@@ -105,7 +105,7 @@ fun AboutScreen() {
                 Text("免责声明", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.error)
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    "仅供学习研究使用。使用本模块产生的任何后果由使用者自行承担。",
+                    "仅供学习研究使用。使用本模块产生的任何后果由使用者自行承担�?,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

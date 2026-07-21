@@ -2,7 +2,7 @@ package com.videosaver.noroot.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// VideoSaver 粉色系主题
+// VideoSaver 粉色系主�?
 val PinkLight = Color(0xFFD81B60)        // Material Pink 500
 val PinkPrimary = Color(0xFFD81B60)      // primary 主色 (#FFD81B60)
 val PinkContainer = Color(0xFFFFD9E2)    // primaryContainer 浅粉

@@ -86,15 +86,15 @@ fun GlassmorphismPanel(onClose: () -> Unit) {
             Column(modifier = Modifier.padding(20.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text("PrivacyGuard NoRoot 控制面板", style = MaterialTheme.typography.titleLarge, modifier = Modifier.weight(1f))
-                    Text("已处理: ${counter.longValue}", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary)
+                    Text("已处�? ${counter.longValue}", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary)
                 }
                 Spacer(Modifier.height(16.dp))
 
                 cfgState.value?.let { realCfg ->
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Column(modifier = Modifier.weight(1f)) {
-                            Text("总开关", style = MaterialTheme.typography.titleMedium)
-                            Text(if (realCfg.masterEnabled) "已启用" else "已停用", style = MaterialTheme.typography.bodySmall)
+                            Text("总开�?, style = MaterialTheme.typography.titleMedium)
+                            Text(if (realCfg.masterEnabled) "已启�? else "已停�?, style = MaterialTheme.typography.bodySmall)
                         }
                         Switch(
                             checked = realCfg.masterEnabled,
@@ -111,7 +111,7 @@ fun GlassmorphismPanel(onClose: () -> Unit) {
                 }
                 Spacer(Modifier.height(16.dp))
 
-                Text("最近日志 (${logsState.value.size} 条)", style = MaterialTheme.typography.titleMedium)
+                Text("最近日�?(${logsState.value.size} �?", style = MaterialTheme.typography.titleMedium)
                 Spacer(Modifier.height(8.dp))
                 Card(colors = CardDefaults.cardColors(containerColor = ComposeColor.Black.copy(alpha = 0.05f))) {
                     Column(modifier = Modifier.heightIn(max = 300.dp).padding(8.dp).verticalScroll(rememberScrollState())) {

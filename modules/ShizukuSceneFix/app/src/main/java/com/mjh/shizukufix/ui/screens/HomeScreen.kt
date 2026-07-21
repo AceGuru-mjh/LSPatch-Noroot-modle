@@ -82,7 +82,7 @@ fun HomeScreen(
                 Text("v${XposedLoader.VERSION}", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onPrimaryContainer)
                 Spacer(Modifier.height(8.dp))
                 Text(
-                    "已修复: ${counter.longValue} 次",
+                    "已修�? ${counter.longValue} �?,
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.primary
                 )
@@ -92,9 +92,9 @@ fun HomeScreen(
         Card(modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)) {
             Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
                 Column(modifier = Modifier.weight(1f)) {
-                    Text("模块总开关", style = MaterialTheme.typography.titleMedium, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
+                    Text("模块总开�?, style = MaterialTheme.typography.titleMedium, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
                     Text(
-                        "开启后所有功能将在目标应用生效",
+                        "开启后所有功能将在目标应用生�?,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -113,9 +113,9 @@ fun HomeScreen(
         Card(modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)) {
             Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
                 Column(modifier = Modifier.weight(1f)) {
-                    Text("悬浮控制球", style = MaterialTheme.typography.titleMedium, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
+                    Text("悬浮控制�?, style = MaterialTheme.typography.titleMedium, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
                     Text(
-                        if (ballRunning.value) "运行中 - 点击右侧关闭" else "未运行 - 点击右侧启动",
+                        if (ballRunning.value) "运行�?- 点击右侧关闭" else "未运�?- 点击右侧启动",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -149,7 +149,7 @@ fun HomeScreen(
                 Text("实时统计", style = MaterialTheme.typography.titleMedium, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
                 Spacer(Modifier.height(8.dp))
                 Row {
-                    StatBox("已修复", counter.longValue.toString(), modifier = Modifier.weight(1f))
+                    StatBox("已修�?, counter.longValue.toString(), modifier = Modifier.weight(1f))
                     StatBox("日志", "${recentLogs.value.size}", modifier = Modifier.weight(1f))
                 }
             }
@@ -157,7 +157,7 @@ fun HomeScreen(
 
         Card(modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)) {
             Column(modifier = Modifier.padding(16.dp)) {
-                Text("最近日志", style = MaterialTheme.typography.titleMedium, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
+                Text("最近日�?, style = MaterialTheme.typography.titleMedium, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
                 Spacer(Modifier.height(8.dp))
                 Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)) {
                     Column(modifier = Modifier.heightIn(max = 240.dp).padding(8.dp).verticalScroll(rememberScrollState())) {

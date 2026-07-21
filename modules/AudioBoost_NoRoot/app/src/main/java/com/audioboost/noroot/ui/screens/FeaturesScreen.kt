@@ -37,42 +37,42 @@ fun FeaturesScreen(cfg: AudioConfig, onConfigChange: (AudioConfig) -> Unit) {
         Spacer(Modifier.height(8.dp))
 
         FeatureCard(
-            "音量增强", "Hook AudioTrack/MediaPlayer.setVolume 放大播放音量（100%~300%）",
+            "音量增强", "Hook AudioTrack/MediaPlayer.setVolume 放大播放音量�?00%~300%�?,
             cfg.volumeBoostEnabled,
             { val nc = cfg.copy(volumeBoostEnabled = it); ConfigManager.saveGlobalConfig(nc); onConfigChange(nc) }
         )
         Spacer(Modifier.height(8.dp))
 
         FeatureCard(
-            "低音增强", "Hook AudioEffect.BassBoost.setStrength 提升低音强度（0%~100%）",
+            "低音增强", "Hook AudioEffect.BassBoost.setStrength 提升低音强度�?%~100%�?,
             cfg.bassBoostEnabled,
             { val nc = cfg.copy(bassBoostEnabled = it); ConfigManager.saveGlobalConfig(nc); onConfigChange(nc) }
         )
         Spacer(Modifier.height(8.dp))
 
         FeatureCard(
-            "均衡器", "Hook AudioEffect.Equalizer.setBandLevel 调整 5 段均衡器频段增益",
+            "均衡�?, "Hook AudioEffect.Equalizer.setBandLevel 调整 5 段均衡器频段增益",
             cfg.equalizerEnabled,
             { val nc = cfg.copy(equalizerEnabled = it); ConfigManager.saveGlobalConfig(nc); onConfigChange(nc) }
         )
 
         Spacer(Modifier.height(20.dp))
-        Text("Shizuku 硬件增强（adb级，需 Shizuku 运行）", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+        Text("Shizuku 硬件增强（adb级，需 Shizuku 运行�?, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
         Spacer(Modifier.height(8.dp))
 
         FeatureCard(
-            "tinymix 硬件音频桥接", "通过 Shizuku 执行 tinymix 直接设置 ALSA 混音器（扬声器/耳机/麦克风/低音强化）",
+            "tinymix 硬件音频桥接", "通过 Shizuku 执行 tinymix 直接设置 ALSA 混音器（扬声�?耳机/麦克�?低音强化�?,
             cfg.tinymixEnabled,
             { val nc = cfg.copy(tinymixEnabled = it); ConfigManager.saveGlobalConfig(nc); onConfigChange(nc) },
             experimental = true
         )
 
         Spacer(Modifier.height(20.dp))
-        Text("实验性功能", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.secondary)
+        Text("实验性功�?, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.secondary)
         Spacer(Modifier.height(8.dp))
 
         FeatureCard(
-            "扬声器增强", "Hook AudioManager.getStreamMaxVolume 突破应用层音量上限显示",
+            "扬声器增�?, "Hook AudioManager.getStreamMaxVolume 突破应用层音量上限显�?,
             cfg.speakerBoostEnabled,
             { val nc = cfg.copy(speakerBoostEnabled = it); ConfigManager.saveGlobalConfig(nc); onConfigChange(nc) },
             experimental = true
@@ -80,7 +80,7 @@ fun FeaturesScreen(cfg: AudioConfig, onConfigChange: (AudioConfig) -> Unit) {
         Spacer(Modifier.height(8.dp))
 
         FeatureCard(
-            "麦克风增益增强", "Hook AudioRecord.read 放大 PCM 样本，提升录音音量",
+            "麦克风增益增�?, "Hook AudioRecord.read 放大 PCM 样本，提升录音音�?,
             cfg.micBoostEnabled,
             { val nc = cfg.copy(micBoostEnabled = it); ConfigManager.saveGlobalConfig(nc); onConfigChange(nc) },
             experimental = true
@@ -88,7 +88,7 @@ fun FeaturesScreen(cfg: AudioConfig, onConfigChange: (AudioConfig) -> Unit) {
         Spacer(Modifier.height(8.dp))
 
         FeatureCard(
-            "音质增强", "Hook MediaFormat/AudioRecord.Builder 提升采样率/位深到高保真",
+            "音质增强", "Hook MediaFormat/AudioRecord.Builder 提升采样�?位深到高保真",
             cfg.audioQualityEnhanceEnabled,
             { val nc = cfg.copy(audioQualityEnhanceEnabled = it); ConfigManager.saveGlobalConfig(nc); onConfigChange(nc) },
             experimental = true
@@ -132,7 +132,7 @@ fun FeaturesScreen(cfg: AudioConfig, onConfigChange: (AudioConfig) -> Unit) {
 
         if (cfg.equalizerEnabled) {
             Spacer(Modifier.height(16.dp))
-            Text("均衡器频段（5段，单位 mb，范围 -1500~+1500）", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            Text("均衡器频段（5段，单位 mb，范�?-1500~+1500�?, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
             Spacer(Modifier.height(8.dp))
             val bandLabels = listOf("60Hz", "230Hz", "910Hz", "3.6kHz", "14kHz")
             bandLabels.forEachIndexed { i, label ->
@@ -157,7 +157,7 @@ fun FeaturesScreen(cfg: AudioConfig, onConfigChange: (AudioConfig) -> Unit) {
 
         if (cfg.speakerBoostEnabled) {
             Spacer(Modifier.height(16.dp))
-            Text("扬声器突破上限", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            Text("扬声器突破上�?, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
             Spacer(Modifier.height(8.dp))
             Text("额外刻度: ${cfg.speakerBoostMax} (范围 0~30)", style = MaterialTheme.typography.bodySmall)
             val sbState = remember(cfg) { mutableFloatStateOf(cfg.speakerBoostMax.toFloat()) }
@@ -175,7 +175,7 @@ fun FeaturesScreen(cfg: AudioConfig, onConfigChange: (AudioConfig) -> Unit) {
 
         if (cfg.micBoostEnabled) {
             Spacer(Modifier.height(16.dp))
-            Text("麦克风增益级别", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            Text("麦克风增益级�?, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
             Spacer(Modifier.height(8.dp))
             Text("当前: ${cfg.micBoostLevel}% (范围 100~300)", style = MaterialTheme.typography.bodySmall)
             val mbState = remember(cfg) { mutableFloatStateOf(cfg.micBoostLevel.toFloat()) }
@@ -195,7 +195,7 @@ fun FeaturesScreen(cfg: AudioConfig, onConfigChange: (AudioConfig) -> Unit) {
             Spacer(Modifier.height(16.dp))
             Text("音质参数", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
             Spacer(Modifier.height(8.dp))
-            Text("目标采样率: ${cfg.targetSampleRate} Hz", style = MaterialTheme.typography.bodySmall)
+            Text("目标采样�? ${cfg.targetSampleRate} Hz", style = MaterialTheme.typography.bodySmall)
             val srState = remember(cfg) { mutableFloatStateOf(cfg.targetSampleRate.toFloat()) }
             Slider(
                 value = srState.floatValue,
