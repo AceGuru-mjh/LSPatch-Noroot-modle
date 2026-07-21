@@ -1,6 +1,7 @@
 package com.adblockerx.noroot.hooks
 
 import com.adblockerx.noroot.models.AdBlockConfig
+import com.adblockerx.noroot.utils.LogStore
 import com.adblockerx.noroot.utils.LogX
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XposedHelpers
@@ -63,6 +64,8 @@ object WebViewAdHook {
                             val url = p.args.getOrNull(1) as? String ?: return
                             if (HostsFilterHook.isUrlBlocked(url)) {
                                 LogX.i("[WebView] 拦截跳转: $url")
+                                try { LogStore.add("blocked", "拦截广告: $url") } catch (_: Exception) { }
+                                try { LogStore.incrementCounter(1) } catch (_: Exception) { }
                                 p.result = true
                             }
                         }
@@ -82,6 +85,8 @@ object WebViewAdHook {
                             } catch (_: Throwable) { null } ?: return
                             if (HostsFilterHook.isUrlBlocked(url)) {
                                 LogX.i("[WebView] 拦截跳转: $url")
+                                try { LogStore.add("blocked", "拦截广告: $url") } catch (_: Exception) { }
+                                try { LogStore.incrementCounter(1) } catch (_: Exception) { }
                                 p.result = true
                             }
                         }

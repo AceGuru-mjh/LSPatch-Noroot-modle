@@ -1,6 +1,7 @@
 package com.mjh.shizukufix.hooks
 
 import com.mjh.shizukufix.models.ShizukuFixConfig
+import com.mjh.shizukufix.utils.LogStore
 import com.mjh.shizukufix.utils.LogX
 import com.mjh.shizukufix.utils.ShizukuHelper
 import de.robv.android.xposed.XC_MethodHook
@@ -31,6 +32,8 @@ object ShizukuGrantHook {
     fun apply(lpparam: XC_LoadPackage.LoadPackageParam, cfg: ShizukuFixConfig) {
         if (!cfg.pmGrantEnabled) return
         LogX.i("pm grant权限授予启动（Shizuku adb级） pkgs=${cfg.pmGrantPackages}")
+        try { LogStore.add("granted", "pm grant 授权") } catch (_: Exception) { }
+        try { LogStore.incrementCounter(1) } catch (_: Exception) { }
 
         hookApplicationOnCreate(lpparam, cfg)
     }

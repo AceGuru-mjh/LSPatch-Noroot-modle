@@ -39,12 +39,15 @@ jobs:
       - name: Generate Gradle Wrapper
         working-directory: modules/${{ matrix.module }}
         run: gradle wrapper --gradle-version 8.2 --distribution-type bin
+      - name: Generate Debug Keystore
+        run: |
+          keytool -genkey -v -keystore modules/keystore/debug.jks -keyalg RSA -keysize 2048 -validity 10000 -alias debug -storepass debug123 -keypass debug123 -dname "CN=Debug, OU=Dev, O=LSP, L=City, S=State, C=CN" -noprompt
       - name: Build Release APK
         working-directory: modules/${{ matrix.module }}
         env:
-          MJH_STORE_PASSWORD: ${{ secrets.MJH_STORE_PASSWORD }}
-          MJH_KEY_ALIAS: ${{ secrets.MJH_KEY_ALIAS }}
-          MJH_KEY_PASSWORD: ${{ secrets.MJH_KEY_PASSWORD }}
+          MJH_STORE_PASSWORD: ${{ secrets.MJH_STORE_PASSWORD || 'debug123' }}
+          MJH_KEY_ALIAS: ${{ secrets.MJH_KEY_ALIAS || 'debug' }}
+          MJH_KEY_PASSWORD: ${{ secrets.MJH_KEY_PASSWORD || 'debug123' }}
         run: ./gradlew :app:assembleRelease --no-daemon --stacktrace
       - name: Rename APK
         run: |
@@ -72,7 +75,7 @@ jobs:
           name: LSPatch-Noroot-modle 模块合集 v1.0.11
           body: |
             # LSPatch-Noroot-modle v1.0.11
-            11 个 LSPatch 免Root 模块 APK
+            10 个 LSPosed Root 模块 APK
             开发者：MJH
           files: release-assets/*.apk
           prerelease: false

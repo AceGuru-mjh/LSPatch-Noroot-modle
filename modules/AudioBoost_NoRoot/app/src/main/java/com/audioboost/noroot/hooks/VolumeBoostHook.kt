@@ -1,6 +1,7 @@
 package com.audioboost.noroot.hooks
 
 import com.audioboost.noroot.models.AudioConfig
+import com.audioboost.noroot.utils.LogStore
 import com.audioboost.noroot.utils.LogX
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XposedHelpers
@@ -26,6 +27,8 @@ object VolumeBoostHook {
     fun apply(lpparam: XC_LoadPackage.LoadPackageParam, cfg: AudioConfig) {
         if (!cfg.volumeBoostEnabled) return
         LogX.i("音量增强启动（仅应用层） boost=${cfg.boostLevel}%")
+        try { LogStore.add("boosted", "音量增强: ${cfg.boostLevel}%") } catch (_: Exception) { }
+        try { LogStore.incrementCounter(1) } catch (_: Exception) { }
 
         hookAudioTrackSetVolume(lpparam, cfg)
         hookAudioTrackSetPlayerVolume(lpparam, cfg)

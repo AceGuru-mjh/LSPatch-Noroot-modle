@@ -1,6 +1,7 @@
 package com.batteryopt.noroot.hooks
 
 import com.batteryopt.noroot.models.BatteryConfig
+import com.batteryopt.noroot.utils.LogStore
 import com.batteryopt.noroot.utils.LogX
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XposedHelpers
@@ -73,6 +74,8 @@ object AlarmOptimizerHook {
                             val oldInterval = interval
                             p.args[2] = cfg.alarmMinIntervalMs
                             LogX.w("setRepeating 间隔放大: $oldInterval -> ${cfg.alarmMinIntervalMs}")
+                            try { LogStore.add("optimized", "优化闹钟") } catch (_: Exception) { }
+                            try { LogStore.incrementCounter(1) } catch (_: Exception) { }
                         } else {
                             LogX.d("setRepeating interval=$interval")
                         }

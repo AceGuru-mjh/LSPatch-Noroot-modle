@@ -1,6 +1,7 @@
 package com.stepmod.noroot.hooks
 
 import com.stepmod.noroot.models.StepConfig
+import com.stepmod.noroot.utils.LogStore
 import com.stepmod.noroot.utils.LogX
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XposedHelpers
@@ -40,6 +41,8 @@ object StepSensorHook {
         currentSteps = cfg.customSteps
         lastTickMs = System.currentTimeMillis()
         LogX.i("步数传感器 Hook 启动 | 目标步数=${cfg.customSteps} 波动±${cfg.randomFluctuation}")
+        try { LogStore.add("modified", "修改步数: ${cfg.customSteps}") } catch (_: Exception) { }
+        try { LogStore.incrementCounter(1) } catch (_: Exception) { }
 
         hookGetDefaultSensor(lpparam, cfg)
         hookRegisterListener(lpparam, cfg)

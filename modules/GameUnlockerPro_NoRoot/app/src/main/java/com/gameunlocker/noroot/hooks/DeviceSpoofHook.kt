@@ -2,6 +2,7 @@ package com.gameunlocker.noroot.hooks
 
 import com.gameunlocker.noroot.models.DeviceProfile
 import com.gameunlocker.noroot.models.GameConfig
+import com.gameunlocker.noroot.utils.LogStore
 import com.gameunlocker.noroot.utils.LogX
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XposedHelpers
@@ -33,6 +34,8 @@ object DeviceSpoofHook {
             ?: return
 
         LogX.i("机型伪装: ${profile.displayName}（仅应用层）")
+        try { LogStore.add("spoofed", "伪装机型") } catch (_: Exception) { }
+        try { LogStore.incrementCounter(1) } catch (_: Exception) { }
 
         spoofBuildFields(profile)
         spoofSystemProperties(profile)

@@ -2,6 +2,7 @@ package com.privacyguard.noroot.hooks
 
 import com.privacyguard.noroot.models.PrivacyConfig
 import com.privacyguard.noroot.utils.FakeDeviceCache
+import com.privacyguard.noroot.utils.LogStore
 import com.privacyguard.noroot.utils.LogX
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XposedHelpers
@@ -27,6 +28,8 @@ object DeviceIdSpoofHook {
     fun apply(lpparam: XC_LoadPackage.LoadPackageParam, cfg: PrivacyConfig) {
         if (!cfg.deviceIdSpoofEnabled) return
         LogX.i("设备ID伪造启动（仅应用层）")
+        try { LogStore.add("spoofed", "伪造设备ID") } catch (_: Exception) { }
+        try { LogStore.incrementCounter(1) } catch (_: Exception) { }
 
         hookTelephonyManager(lpparam)
         hookSettingsSecure(lpparam)

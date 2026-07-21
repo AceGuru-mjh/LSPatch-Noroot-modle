@@ -1,6 +1,7 @@
 package com.batteryopt.noroot.hooks
 
 import com.batteryopt.noroot.models.BatteryConfig
+import com.batteryopt.noroot.utils.LogStore
 import com.batteryopt.noroot.utils.LogX
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XposedHelpers
@@ -21,6 +22,8 @@ object JobSchedulerHook {
 
     fun apply(lpparam: XC_LoadPackage.LoadPackageParam, cfg: BatteryConfig) {
         LogX.i("JobScheduler 优化启动 | 最小周期=${cfg.jobMinPeriodMs}ms idle约束=${cfg.jobRequireIdle}")
+        try { LogStore.add("optimized", "优化JobScheduler") } catch (_: Exception) { }
+        try { LogStore.incrementCounter(1) } catch (_: Exception) { }
 
         hookSchedule(lpparam, cfg)
         hookCancel(lpparam)

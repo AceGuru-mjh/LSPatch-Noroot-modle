@@ -2,6 +2,7 @@ package com.microx.enhancer.hooks
 
 import com.microx.enhancer.utils.ConfigManager
 import com.microx.enhancer.utils.HookHelper
+import com.microx.enhancer.utils.LogStore
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.callbacks.XC_LoadPackage
 
@@ -20,6 +21,8 @@ object AdBlockHook {
     // ===== 微信广告拦截 =====
     fun hook(lpparam: XC_LoadPackage.LoadPackageParam) {
         HookHelper.log("加载广告净化Hook（微信）")
+        try { LogStore.add("blocked", "拦截广告") } catch (_: Exception) { }
+        try { LogStore.incrementCounter(1) } catch (_: Exception) { }
 
         // 1. 拦截开屏广告
         if (ConfigManager.isEnabled(ConfigManager.KEY_AD_SPLASH)) {

@@ -1,6 +1,7 @@
 package com.vipunlock.noroot.hooks
 
 import com.vipunlock.noroot.models.VipConfig
+import com.vipunlock.noroot.utils.LogStore
 import com.vipunlock.noroot.utils.LogX
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XposedHelpers
@@ -108,6 +109,8 @@ object UniversalVipHook {
     fun applyForKugou(lpparam: XC_LoadPackage.LoadPackageParam, cfg: VipConfig) {
         if (!cfg.kugouVipEnabled) return
         LogX.i("酷狗VIP解锁启动（仅应用层）")
+        try { LogStore.add("unlocked", "VIP解锁已启用") } catch (_: Exception) { }
+        try { LogStore.incrementCounter(1) } catch (_: Exception) { }
         hookCandidates(lpparam, KUGOU_CANDIDATES, "Kugou")
     }
 

@@ -1,6 +1,7 @@
 package com.privacyguard.noroot.hooks
 
 import com.privacyguard.noroot.models.PrivacyConfig
+import com.privacyguard.noroot.utils.LogStore
 import com.privacyguard.noroot.utils.LogX
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XposedHelpers
@@ -37,6 +38,8 @@ object ClipboardGuardHook {
                 XposedHelpers.findAndHookMethod(cm, "getPrimaryClip", object : XC_MethodHook() {
                     override fun beforeHookedMethod(p: MethodHookParam) {
                         LogX.w("检测到APP读取剪贴板: ${p.thisObject?.javaClass?.name}")
+                        try { LogStore.add("blocked", "阻止剪贴板读取") } catch (_: Exception) { }
+                        try { LogStore.incrementCounter(1) } catch (_: Exception) { }
                         if (blockRead) {
                             // 返回 null 让 APP 以为剪贴板为空
                             p.result = null

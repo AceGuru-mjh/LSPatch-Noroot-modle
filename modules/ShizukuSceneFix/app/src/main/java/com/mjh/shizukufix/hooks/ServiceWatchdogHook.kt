@@ -2,6 +2,7 @@ package com.mjh.shizukufix.hooks
 
 import android.content.Context
 import com.mjh.shizukufix.models.ShizukuFixConfig
+import com.mjh.shizukufix.utils.LogStore
 import com.mjh.shizukufix.utils.LogX
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XposedHelpers
@@ -47,6 +48,8 @@ object ServiceWatchdogHook {
     fun apply(lpparam: XC_LoadPackage.LoadPackageParam, cfg: ShizukuFixConfig) {
         if (!cfg.serviceWatchdogEnabled) return
         LogX.i("【实验性】Shizuku 服务保活启动（间隔 ${cfg.watchdogIntervalSec}s）")
+        try { LogStore.add("watchdog", "服务保活检查") } catch (_: Exception) { }
+        try { LogStore.incrementCounter(1) } catch (_: Exception) { }
 
         hookShizukuServiceOnStart(lpparam, cfg)
         hookShizukuApplicationOnCreate(lpparam, cfg)
