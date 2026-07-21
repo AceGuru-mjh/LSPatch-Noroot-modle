@@ -2,20 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- LSPatch 鍚堣锛欶OREGROUND_SERVICE 鏉冮檺锛圓ndroid 9+ 鍚姩鍓嶅彴鏈嶅姟蹇呴』锛?-->
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-
-    <!-- Shizuku 鎺堟潈 -->
-    <uses-permission android:name="moe.shizuku.manager.permission.API_V23" />
-
-    <!-- 鐑洿鏂颁笌涓嬭浇 -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
-
-    <!-- 淇濆瓨瑙嗛鍒板閮ㄥ瓨鍌紙Android 10+ 閫氳繃 MediaStore锛屾棫鐗堢敤 WRITE_EXTERNAL_STORAGE锛?-->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="28" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
@@ -26,53 +15,12 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/Theme.VideoSaver"
-        tools:targetApi="34"
-        android:extractNativeLibs="false"
-        android:largeHeap="true"
-        android:requestLegacyExternalStorage="true">
+        tools:targetApi="34">
 
-        <activity
-            android:name=".ui.MainActivity"
-            android:exported="true"
-            android:label="@string/app_name"
-            android:launchMode="singleTop"
-            android:theme="@style/Theme.VideoSaver">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-
-        <!-- Xposed 妯″潡鍥涗欢濂?-->
         <meta-data android:name="xposedmodule" android:value="true" />
-        <meta-data android:name="xposedminversion" android:value="93" />
-        <meta-data android:name="xposeddescription" android:value="VideoSaver NoRoot - 鐭棰戝幓姘村嵃涓嬭浇锛氭姈闊?蹇墜/灏忕孩涔?B绔?瑗跨摐瑙嗛鏃犳按鍗颁笅杞?+ 鑷畾涔変繚瀛樿矾寰?+ 瀹為獙鎬ц嚜鍔ㄤ笅杞?鍘诲箍鍛?鍘熺敾璐? />
+        <meta-data android:name="xposedminversion" android:value="82" />
+        <meta-data android:name="xposeddescription" android:value="VideoSaver NoRoot - 视频下载(纯Hook/无UI冲突)" />
         <meta-data android:name="xposedscope" android:resource="@array/xposed_scope" />
-
-        <!-- FileProvider: APK 鐑洿鏂板畨瑁?+ 瑙嗛瀵煎嚭 -->
-        <provider
-            android:name="androidx.core.content.FileProvider"
-            android:authorities="${applicationId}.fileprovider"
-            android:exported="false"
-            android:grantUriPermissions="true">
-            <meta-data
-                android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_paths" />
-        </provider>
-        <service
-            android:name=".services.FloatingBallService"
-            android:exported="false"
-            android:foregroundServiceType="specialUse">
-            <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
-                android:value="floating_ball_for_module_control"/>
-        </service>
-
-        <activity android:name=".activities.PanelActivity"
-            android:exported="false"
-            android:theme="@style/Theme.Translucent"/>
 
     </application>
 </manifest>
-
-

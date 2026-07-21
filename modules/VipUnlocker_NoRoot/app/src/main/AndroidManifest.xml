@@ -2,64 +2,21 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- LSPatch 鍚堣: FOREGROUND_SERVICE 閬垮厤 Android 9+ 鍚姩宕╂簝 -->
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="moe.shizuku.manager.permission.API_V23" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
 
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/Theme.VipUnlocker"
-        tools:targetApi="34" android:extractNativeLibs="false" android:largeHeap="true">
-
-        <activity
-            android:name=".ui.MainActivity"
-            android:exported="true"
-            android:label="@string/app_name"
-            android:launchMode="singleTop"
-            android:theme="@style/Theme.VipUnlocker">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+        tools:targetApi="34">
 
         <meta-data android:name="xposedmodule" android:value="true" />
-        <!-- LSPatch 鍚堣: xposedminversion=93 (LSPatch v0.6.1+ API) -->
-        <meta-data android:name="xposedminversion" android:value="93" />
-        <meta-data android:name="xposeddescription" android:value="VipUnlocker NoRoot - VIP鍔熻兘瑙ｉ攣锛堝厤Root锛夛細缃戞槗浜?QQ闊充箰/閰风嫍/閰锋垜/鐖卞鑹?浼橀叿/鑵捐瑙嗛/B绔?鍠滈┈鎷夐泤/浠婃棩澶存潯/鐭ヤ箮/鐧惧害缃戠洏/WPS/寰俊璇讳功 + 瀹為獙鎬ч€氱敤VIP/鍘诲箍鍛?缁曡繃鏍￠獙" />
+        <meta-data android:name="xposedminversion" android:value="82" />
+        <meta-data android:name="xposeddescription" android:value="VipUnlocker NoRoot - VIP解锁(纯Hook/无UI冲突)" />
         <meta-data android:name="xposedscope" android:resource="@array/xposed_scope" />
-
-        <!-- FileProvider: APK 鐑洿鏂板畨瑁?-->
-        <provider
-            android:name="androidx.core.content.FileProvider"
-            android:authorities="${applicationId}.fileprovider"
-            android:exported="false"
-            android:grantUriPermissions="true">
-            <meta-data
-                android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_paths" />
-        </provider>
-        <service
-            android:name=".services.FloatingBallService"
-            android:exported="false"
-            android:foregroundServiceType="specialUse">
-            <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
-                android:value="floating_ball_for_module_control"/>
-        </service>
-
-        <activity android:name=".activities.PanelActivity"
-            android:exported="false"
-            android:theme="@style/Theme.Translucent"/>
 
     </application>
 </manifest>
-
-

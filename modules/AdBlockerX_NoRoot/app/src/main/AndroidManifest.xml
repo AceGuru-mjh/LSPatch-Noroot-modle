@@ -2,68 +2,21 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-            <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-
-        
-
-        <uses-permission android:name="moe.shizuku.manager.permission.API_V23" />
     <uses-permission android:name="android.permission.INTERNET" />
-
-        <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
 
     <application
-
-    
-
-    
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/Theme.AdBlockerX"
-        tools:targetApi="34" android:extractNativeLibs="false" android:largeHeap="true">
-
-        <activity
-            android:name=".ui.MainActivity"
-            android:exported="true"
-            android:label="@string/app_name"
-            android:launchMode="singleTop"
-            android:theme="@style/Theme.AdBlockerX">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+        tools:targetApi="34">
 
         <meta-data android:name="xposedmodule" android:value="true" />
-        <meta-data android:name="xposedminversion" android:value="93" />
-        <meta-data android:name="xposeddescription" android:value="AdBlockerX NoRoot - 搴旂敤灞傚箍鍛婃嫤鎴細WebView/OkHttp/URLConnection/骞垮憡SDK View闅愯棌/鍐呭瓨hosts榛戝悕鍗?+ 瀹為獙鎬ц拷韪?cookie/閲嶅畾鍚?Intent鎷︽埅" />
+        <meta-data android:name="xposedminversion" android:value="82" />
+        <meta-data android:name="xposeddescription" android:value="AdBlockerX NoRoot - 广告拦截(纯Hook/无UI冲突)" />
         <meta-data android:name="xposedscope" android:resource="@array/xposed_scope" />
-
-        <!-- FileProvider: APK 鐑洿鏂板畨瑁?-->
-        <provider
-            android:name="androidx.core.content.FileProvider"
-            android:authorities="${applicationId}.fileprovider"
-            android:exported="false"
-            android:grantUriPermissions="true">
-            <meta-data
-                android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_paths" />
-        </provider>
-        <service
-            android:name=".services.FloatingBallService"
-            android:exported="false"
-            android:foregroundServiceType="specialUse">
-            <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
-                android:value="floating_ball_for_module_control"/>
-        </service>
-
-        <activity android:name=".activities.PanelActivity"
-            android:exported="false"
-            android:theme="@style/Theme.Translucent"/>
 
     </application>
 </manifest>
