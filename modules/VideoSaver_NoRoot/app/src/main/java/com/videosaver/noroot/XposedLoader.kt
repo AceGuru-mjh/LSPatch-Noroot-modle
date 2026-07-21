@@ -66,6 +66,7 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
         val cfg = loadConfig()
         LogX.i("配置: 总开关=${cfg.masterEnabled} 抖音=${cfg.douyinNoWatermark} " +
                 "快手=${cfg.kuaishouNoWatermark} 小红书=${cfg.xhsNoWatermark} B站=${cfg.biliDownload} " +
+                "capture=${cfg.shizukuCaptureEnabled} " +
                 "[实验]自动下载=${cfg.autoDownloadEnabled} 去广告=${cfg.removeAdsEnabled} " +
                 "原画质=${cfg.saveOriginalQualityEnabled} 批量下载=${cfg.batchDownloadEnabled}")
 
@@ -79,6 +80,9 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
         if (cfg.kuaishouNoWatermark) KuaishouNoWatermarkHook.apply(lpparam, cfg)
         if (cfg.xhsNoWatermark) XhsNoWatermarkHook.apply(lpparam, cfg)
         if (cfg.biliDownload) BiliDownloadHook.apply(lpparam, cfg)
+
+        // ===== Shizuku 系统级（adb级 screencap/input tap） =====
+        if (cfg.shizukuCaptureEnabled) ShizukuCaptureHook.apply(lpparam, cfg)
 
         // ===== 实验性功能 =====
         if (cfg.autoDownloadEnabled) AutoDownloadHook.apply(lpparam, cfg)

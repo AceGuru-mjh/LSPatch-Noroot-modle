@@ -56,6 +56,12 @@ data class AdBlockConfig(
     /** 是否启用日志输出 */
     var logEnabled: Boolean = true,
 
+    // ===== Shizuku 系统级（adb级，通过 ShizukuHelper） =====
+    /** 系统级 Private DNS 广告拦截（通过 settings put global） */
+    var dnsAdBlockEnabled: Boolean = false,
+    /** 自定义 DNS 服务器地址，默认 dns.adguard.com */
+    var dnsServer: String = "dns.adguard.com",
+
     /** 拦截命中计数（仅用于显示） */
     var blockedCount: Long = 0L,
 

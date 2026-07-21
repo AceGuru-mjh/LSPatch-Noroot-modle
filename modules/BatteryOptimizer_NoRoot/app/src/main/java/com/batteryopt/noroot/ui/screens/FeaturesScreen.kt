@@ -82,6 +82,17 @@ fun FeaturesScreen(cfg: BatteryConfig, onConfigChange: (BatteryConfig) -> Unit) 
         )
 
         Spacer(Modifier.height(20.dp))
+        Text("Shizuku 系统级（adb级，需 Shizuku 运行）", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+        Spacer(Modifier.height(8.dp))
+
+        FeatureCard(
+            "cmd appops 系统级后台限制", "通过 Shizuku 执行 cmd appops set，在系统级限制 WAKE_LOCK/RUN_IN_BACKGROUND/BOOT_COMPLETED（远比 Java 层 Hook 更强）",
+            cfg.appOpsRestrictEnabled,
+            { val nc = cfg.copy(appOpsRestrictEnabled = it); ConfigManager.saveGlobalConfig(nc); onConfigChange(nc) },
+            experimental = true
+        )
+
+        Spacer(Modifier.height(20.dp))
         Text("实验性功能", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.secondary)
         Spacer(Modifier.height(8.dp))
 

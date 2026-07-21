@@ -57,6 +57,17 @@ fun FeaturesScreen(cfg: AudioConfig, onConfigChange: (AudioConfig) -> Unit) {
         )
 
         Spacer(Modifier.height(20.dp))
+        Text("Shizuku 硬件增强（adb级，需 Shizuku 运行）", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+        Spacer(Modifier.height(8.dp))
+
+        FeatureCard(
+            "tinymix 硬件音频桥接", "通过 Shizuku 执行 tinymix 直接设置 ALSA 混音器（扬声器/耳机/麦克风/低音强化）",
+            cfg.tinymixEnabled,
+            { val nc = cfg.copy(tinymixEnabled = it); ConfigManager.saveGlobalConfig(nc); onConfigChange(nc) },
+            experimental = true
+        )
+
+        Spacer(Modifier.height(20.dp))
         Text("实验性功能", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.secondary)
         Spacer(Modifier.height(8.dp))
 

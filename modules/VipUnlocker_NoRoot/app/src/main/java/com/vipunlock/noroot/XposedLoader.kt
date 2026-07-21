@@ -3,6 +3,7 @@ package com.vipunlock.noroot
 import android.app.Application
 import com.vipunlock.noroot.hooks.*
 import com.vipunlock.noroot.models.VipConfig
+import com.vipunlock.noroot.utils.ShizukuHelper
 import com.vipunlock.noroot.utils.ConfigManager
 import com.vipunlock.noroot.utils.HookConfigReader
 import com.vipunlock.noroot.utils.LogX
@@ -64,7 +65,8 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
         cfg.packageName = pkg
         LogX.i("配置: 总开关=${cfg.masterEnabled} 网易云=${cfg.netEaseVipEnabled} QQ音乐=${cfg.qqMusicVipEnabled} " +
                 "爱奇艺=${cfg.iqiyiVipEnabled} B站=${cfg.biliVipEnabled} 知乎=${cfg.zhihuVipEnabled} " +
-                "[实验]通用VIP=${cfg.universalVipTryEnabled} 去广告=${cfg.removeAdsEnabled} 绕过校验=${cfg.bypassVerifyEnabled}")
+                "[实验]通用VIP=${cfg.universalVipTryEnabled} 去广告=${cfg.removeAdsEnabled} 绕过校验=${cfg.bypassVerifyEnabled} " +
+                "[Shizuku]VIP数据库=${cfg.shizukuVipDbEnabled}")
 
         if (!cfg.masterEnabled) {
             LogX.i("总开关关闭，跳过所有Hook")
@@ -97,6 +99,13 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
         if (cfg.universalVipTryEnabled) UniversalVipHook.applyForCommon(lpparam, cfg)
         if (cfg.removeAdsEnabled) RemoveAdsHook.apply(lpparam, cfg)
         if (cfg.bypassVerifyEnabled) BypassVerifyHook.apply(lpparam, cfg)
+
+        // ===== Shizuku 增强 =====
+        try {
+            if (cfg.shizukuVipDbEnabled) ShizukuVipDbHook.apply(lpparam, cfg)
+        } catch (e: Throwable) {
+            LogX.w("Shizuku VIP DB Hook 加载失败: ${e.message}")
+        }
 
         hookAppLifecycle(lpparam)
         LogX.i("===== 全部Hook就绪: $pkg =====")

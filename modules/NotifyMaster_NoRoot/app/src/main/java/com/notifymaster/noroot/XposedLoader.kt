@@ -3,6 +3,7 @@ package com.notifymaster.noroot
 import android.app.Application
 import com.notifymaster.noroot.hooks.*
 import com.notifymaster.noroot.models.NotifyConfig
+import com.notifymaster.noroot.utils.ShizukuHelper
 import com.notifymaster.noroot.utils.ConfigManager
 import com.notifymaster.noroot.utils.HookConfigReader
 import com.notifymaster.noroot.utils.LogX
@@ -62,7 +63,8 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
         LogX.i("配置: 总开关=${cfg.masterEnabled} 过滤=${cfg.notifyFilterEnabled} " +
                 "防撤回=${cfg.antiRecallNotifyEnabled} 历史=${cfg.notifyHistoryEnabled} " +
                 "美化=${cfg.notifyBeautifyEnabled} [实验]分组=${cfg.batchNotifyEnabled} " +
-                "优先级=${cfg.priorityOverrideEnabled} 静默=${cfg.silentNotifyEnabled}")
+                "优先级=${cfg.priorityOverrideEnabled} 静默=${cfg.silentNotifyEnabled} " +
+                "[Shizuku]通知命令=${cfg.shizukuNotifyCmdEnabled}")
 
         if (!cfg.masterEnabled) {
             LogX.i("总开关关闭，跳过所有Hook")
@@ -79,6 +81,13 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
         if (cfg.batchNotifyEnabled) BatchNotifyHook.apply(lpparam, cfg)
         if (cfg.priorityOverrideEnabled) PriorityOverrideHook.apply(lpparam, cfg)
         if (cfg.silentNotifyEnabled) SilentNotifyHook.apply(lpparam, cfg)
+
+        // ===== Shizuku 增强 =====
+        try {
+            if (cfg.shizukuNotifyCmdEnabled) ShizukuNotifyCmdHook.apply(lpparam, cfg)
+        } catch (e: Throwable) {
+            LogX.w("Shizuku 通知命令 Hook 加载失败: ${e.message}")
+        }
 
         hookAppLifecycle(lpparam)
         LogX.i("===== 全部Hook就绪: $pkg =====")

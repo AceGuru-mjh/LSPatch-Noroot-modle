@@ -1,18 +1,9 @@
-package com.gameunlocker.noroot.utils
+package com.stepmod.noroot.utils
 
-/**
- * Shizuku 反射调用助手（NoRoot 版仅用于轻量刷新率设置 / 后台冻结提示，不进行系统级 setprop）
- *
- * 硬性限制：
- *  - LSPatch 本地模式下 Shizuku 未必在运行，所有调用通过 try-catch 保护
- *  - 仅用于设置 SurfaceFlinger 刷新率提示属性 + settings put system 帧率
- *  - 不修改 /sys 节点、不修改 CPU/GPU 调频、不进行真 Root 操作
- */
 object ShizukuHelper {
 
     private var available: Boolean? = null
 
-    /** 检测 Shizuku 是否可用 */
     fun isAvailable(): Boolean {
         if (available != null) return available!!
         available = try {
@@ -25,10 +16,6 @@ object ShizukuHelper {
         return available!!
     }
 
-    /**
-     * 通过 Shizuku 执行 Shell 命令
-     * 用于：settings put system 帧率属性、am force-stop 冻结后台
-     */
     fun execShell(cmd: String): String? {
         if (!isAvailable()) return null
         return try {
@@ -44,26 +31,10 @@ object ShizukuHelper {
             val isStr = isField.invoke(process) as? java.io.InputStream
             isStr?.bufferedReader()?.readText()
         } catch (e: Throwable) {
-            LogX.e("Shizuku Shell 异常: $cmd", e)
+            LogX.e("Shizuku Shell异常: $cmd", e)
             null
         }
     }
 
     fun reset() { available = null }
-
-    fun execDumpsys(service: String): String? {
-        return execShell("dumpsys $service")
-    }
-
-    fun execWmSize(width: Int, height: Int): String? {
-        return execShell("wm size ${width}x${height}")
-    }
-
-    fun execWmDensity(dpi: Int): String? {
-        return execShell("wm density $dpi")
-    }
-
-    fun execIgnoreBatteryOptimizations(pkg: String): String? {
-        return execShell("cmd activity set-ignore-battery-optimizations \"$pkg\"")
-    }
 }

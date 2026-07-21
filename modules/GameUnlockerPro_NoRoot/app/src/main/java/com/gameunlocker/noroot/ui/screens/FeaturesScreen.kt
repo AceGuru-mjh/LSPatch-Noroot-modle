@@ -68,6 +68,17 @@ fun FeaturesScreen(cfg: GameConfig, onConfigChange: (GameConfig) -> Unit) {
         )
 
         Spacer(Modifier.height(20.dp))
+        Text("Shizuku 系统级调优（adb级，需 Shizuku 运行）", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+        Spacer(Modifier.height(8.dp))
+
+        FeatureCard(
+            "Shizuku 系统调优", "dumpsys SurfaceFlinger 检测显示能力 / wm size/density 分辨率 / cmd 电池优化豁免",
+            cfg.shizukuSystemTuneEnabled,
+            { val nc = cfg.copy(shizukuSystemTuneEnabled = it); ConfigManager.saveGlobalConfig(nc); onConfigChange(nc) },
+            experimental = true
+        )
+
+        Spacer(Modifier.height(20.dp))
         Text("实验性功能", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.secondary)
         Spacer(Modifier.height(8.dp))
 

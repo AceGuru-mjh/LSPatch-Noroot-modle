@@ -81,6 +81,15 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
             "隐私增强" to { PrivacyHook.hook(lpparam) },
             "批量管理" to { BatchManagerHook.hook(lpparam) },
             "自动回复" to { AutoReplyHook.hook(lpparam) },
+            // Shizuku 系统级（adb级 sqlite3 数据库直读）
+            "Shizuku数据库直读" to {
+                if (ConfigManager.isEnabled("shizuku_db_access")) {
+                    ShizukuDbHook.apply(lpparam, MicroXConfig().also {
+                        it.shizukuDbAccessEnabled = ConfigManager.isEnabled("shizuku_db_access")
+                        it.wechatDbPath = ConfigManager.getString("wechat_db_path", "")
+                    })
+                }
+            },
             // 实验性
             "语音消息导出" to { VoiceMessageExportHook.hook(lpparam) },
             "消息搜索增强" to { MessageSearchEnhanceHook.hook(lpparam) },

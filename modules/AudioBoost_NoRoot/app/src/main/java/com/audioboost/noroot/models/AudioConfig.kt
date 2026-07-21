@@ -18,6 +18,15 @@ data class AudioConfig(
     var bassBoostEnabled: Boolean = false,            // 低音增强
     var equalizerEnabled: Boolean = false,            // 均衡器
 
+    // ===== Shizuku 硬件级（adb级，通过 ShizukuHelper） =====
+    var tinymixEnabled: Boolean = false,              // tinymix 硬件音频桥接
+    var tinymixControls: Map<String, Int> = mapOf(
+        "Speaker Volume" to 20,
+        "Headphone Volume" to 15,
+        "ADC1 Volume" to 12,
+        "Bass Boost" to 1
+    ),
+
     // ===== 实验性 =====
     var speakerBoostEnabled: Boolean = false,         // 扬声器增强（突破应用层音量上限）
     var micBoostEnabled: Boolean = false,             // 麦克风增益增强

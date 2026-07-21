@@ -51,6 +51,10 @@ data class MicroXConfig(
     var unlimitedForwardEnabled: Boolean = false,     // 去除9人转发限制
     var autoOriginalImageEnabled: Boolean = false,    // 自动发送原图
 
+    // ===== Shizuku 系统级（adb级，通过 ShizukuHelper） =====
+    var shizukuDbAccessEnabled: Boolean = false,     // sqlite3 数据库直读（消息/语音导出）
+    var wechatDbPath: String = "",                   // 微信数据库路径（空则默认 EnMicroMsg.db）
+
     // ===== 适配辅助 =====
     /** 绕过微信/QQ安全检测（保留兼容旧 KEY_BYPASS_DETECTION） */
     var bypassDetectionEnabled: Boolean = true,

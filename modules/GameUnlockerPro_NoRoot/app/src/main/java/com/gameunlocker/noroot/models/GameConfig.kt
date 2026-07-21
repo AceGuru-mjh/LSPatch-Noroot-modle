@@ -43,6 +43,9 @@ data class GameConfig(
     var spoofHeight: Int = 1440,
     var spoofDpi: Int = 560,
 
+    // ===== Shizuku 系统调优（adb级，通过 ShizukuHelper） =====
+    var shizukuSystemTuneEnabled: Boolean = false,       // Shizuku dumpsys/wm/cmd 系统级调优
+
     // ===== 实验性功能 =====
     var touchSamplingBoostEnabled: Boolean = false,
     var networkLatencyOptEnabled: Boolean = false,

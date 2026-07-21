@@ -25,6 +25,9 @@ data class NotifyConfig(
     var priorityOverrideEnabled: Boolean = false,    // 通知优先级覆盖（强制 IMPORTANT）
     var silentNotifyEnabled: Boolean = false,        // 指定 APP 通知静默（不响铃不震动）
 
+    // ===== Shizuku 增强 =====
+    var shizukuNotifyCmdEnabled: Boolean = false,  // Shizuku 通知命令增强（cmd/dumpsys/settings）
+
     // ===== 参数 =====
     var filterKeywords: MutableList<String> = mutableListOf(
         "广告", "推广", "推广链接", "营销", "限时抢购"

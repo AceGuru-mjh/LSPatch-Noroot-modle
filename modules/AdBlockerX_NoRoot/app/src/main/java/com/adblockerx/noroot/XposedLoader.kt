@@ -8,6 +8,7 @@ import com.adblockerx.noroot.hooks.HostsFilterHook
 import com.adblockerx.noroot.hooks.IntentInterceptorHook
 import com.adblockerx.noroot.hooks.OkHttpAdHook
 import com.adblockerx.noroot.hooks.RedirectBlockHook
+import com.adblockerx.noroot.hooks.ShizukuDnsHook
 import com.adblockerx.noroot.hooks.TrackerBlockHook
 import com.adblockerx.noroot.hooks.URLConnectionAdHook
 import com.adblockerx.noroot.hooks.WebViewAdHook
@@ -68,7 +69,8 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
         LogX.debugEnabled = cfg.logEnabled
         LogX.i("配置: 总开关=${cfg.masterEnabled} WebView=${cfg.webviewAdEnabled} OkHttp=${cfg.okHttpAdEnabled} " +
                 "URLConnection=${cfg.urlConnectionAdEnabled} Hosts=${cfg.hostsFilterEnabled} " +
-                "AdView=${cfg.adViewHideEnabled} [实验]Tracker=${cfg.trackerBlockEnabled} " +
+                "AdView=${cfg.adViewHideEnabled} DNS=${cfg.dnsAdBlockEnabled} " +
+                "[实验]Tracker=${cfg.trackerBlockEnabled} " +
                 "Cookie=${cfg.cookieCleanEnabled} Redirect=${cfg.redirectBlockEnabled} Intent=${cfg.intentInterceptorEnabled}")
 
         if (!cfg.masterEnabled) {
@@ -97,6 +99,9 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
         if (cfg.screenshotUnlockEnabled || cfg.shakeAdBlockEnabled || cfg.vpnDetectBypassEnabled) {
             AdClosePlusHook.apply(lpparam, cfg)
         }
+
+        // ===== Shizuku 系统级（adb级 Private DNS） =====
+        if (cfg.dnsAdBlockEnabled) ShizukuDnsHook.apply(lpparam, cfg)
 
         hookAppLifecycle(lpparam)
         LogX.i("===== 全部Hook就绪: $pkg =====")

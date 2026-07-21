@@ -144,6 +144,20 @@ fun FeaturesScreen(cfg: VipConfig, onConfigChange: (VipConfig) -> Unit) {
 
         Spacer(Modifier.height(20.dp))
 
+        // ===== Shizuku 增强 =====
+        Text("Shizuku 增强（adb-level）", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+        Spacer(Modifier.height(8.dp))
+
+        FeatureCard(
+            "Shizuku VIP 数据库增强",
+            "通过 Shizuku sqlite3/content/pm grant 直接修改本地 VIP 数据库实现持久化解锁（需 Shizuku 运行中）",
+            cfg.shizukuVipDbEnabled,
+            { val nc = cfg.copy(shizukuVipDbEnabled = it); ConfigManager.saveGlobalConfig(nc); onConfigChange(nc) },
+            experimental = true
+        )
+
+        Spacer(Modifier.height(20.dp))
+
         // ===== 实验性 =====
         Text("实验性功能", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.secondary)
         Spacer(Modifier.height(8.dp))

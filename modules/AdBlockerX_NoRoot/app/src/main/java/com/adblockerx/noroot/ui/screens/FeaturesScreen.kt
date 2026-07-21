@@ -108,6 +108,18 @@ fun FeaturesScreen(cfg: AdBlockConfig, onConfigChange: (AdBlockConfig) -> Unit) 
         )
 
         Spacer(Modifier.height(16.dp))
+        Text("Shizuku 系统级 DNS 拦截（adb级，需 Shizuku 运行）", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+        Spacer(Modifier.height(8.dp))
+
+        FeatureCard(
+            "系统级 Private DNS 广告拦截",
+            "通过 Shizuku 设置全局 Private DNS（如 dns.adguard.com），全系统 DNS 级广告拦截（影响所有应用）",
+            cfg.dnsAdBlockEnabled,
+            { val nc = cfg.copy(dnsAdBlockEnabled = it); ConfigManager.saveGlobalConfig(nc); onConfigChange(nc) },
+            experimental = true
+        )
+
+        Spacer(Modifier.height(16.dp))
         Text("v1.0.6 新增（对标 AdClose）", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.secondary)
         Spacer(Modifier.height(8.dp))
 

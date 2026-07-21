@@ -64,6 +64,7 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
         val cfg = loadConfig()
         LogX.i("配置: 总开关=${cfg.masterEnabled} 伪装=${cfg.deviceSpoofEnabled} " +
                 "帧率=${cfg.targetFps}fps 隐藏=${cfg.detectionHideEnabled} 优化=${cfg.processOptimizeEnabled} " +
+                "Shizuku调优=${cfg.shizukuSystemTuneEnabled} " +
                 "[实验]触摸=${cfg.touchSamplingBoostEnabled} 网络=${cfg.networkLatencyOptEnabled} " +
                 "音频=${cfg.audioPriorityBoostEnabled} 内存=${cfg.memoryDefragEnabled}")
 
@@ -86,6 +87,9 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
         // ===== [5] 分辨率伪装（可选）=====
         if (cfg.resolutionSpoofEnabled) ResolutionSpoofHook.apply(lpparam, cfg)
+
+        // ===== Shizuku 系统级调优（adb级 dumpsys/wm/cmd） =====
+        if (cfg.shizukuSystemTuneEnabled) ShizukuSystemTuneHook.apply(lpparam, cfg)
 
         // ===== 实验性功能 =====
         if (cfg.touchSamplingBoostEnabled) TouchSamplingBoostHook.apply(lpparam, cfg)

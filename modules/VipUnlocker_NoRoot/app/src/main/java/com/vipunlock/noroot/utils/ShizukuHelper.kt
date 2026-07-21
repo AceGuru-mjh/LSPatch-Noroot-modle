@@ -1,18 +1,24 @@
-package com.gameunlocker.noroot.utils
+package com.vipunlock.noroot.utils
 
 /**
- * Shizuku 反射调用助手（NoRoot 版仅用于轻量刷新率设置 / 后台冻结提示，不进行系统级 setprop）
+ * Shizuku 反射调用助手（NoRoot 版 — adb-level ONLY）
  *
- * 硬性限制：
- *  - LSPatch 本地模式下 Shizuku 未必在运行，所有调用通过 try-catch 保护
- *  - 仅用于设置 SurfaceFlinger 刷新率提示属性 + settings put system 帧率
- *  - 不修改 /sys 节点、不修改 CPU/GPU 调频、不进行真 Root 操作
+ * 允许的命令：
+ *  - sqlite3 <db> '<SQL>'        — 执行 SQL 修改
+ *  - content query/insert         — ContentProvider 操作
+ *  - pm grant/revoke/list         — 权限管理
+ *  - cmd notification, dumpsys, settings
+ *  - am start/stop/broadcast, monkey, logcat
+ *
+ * FORBIDDEN（不在本类中实现）：
+ *  - setprop(write), mount/umount, iptables
+ *  - 写 /sys/proc/vendor/system
+ *  - chcon, kill system_server, Magisk overlay
  */
 object ShizukuHelper {
 
     private var available: Boolean? = null
 
-    /** 检测 Shizuku 是否可用 */
     fun isAvailable(): Boolean {
         if (available != null) return available!!
         available = try {
@@ -26,8 +32,7 @@ object ShizukuHelper {
     }
 
     /**
-     * 通过 Shizuku 执行 Shell 命令
-     * 用于：settings put system 帧率属性、am force-stop 冻结后台
+     * 通过 Shizuku 执行 Shell 命令（adb-level）
      */
     fun execShell(cmd: String): String? {
         if (!isAvailable()) return null
@@ -49,21 +54,19 @@ object ShizukuHelper {
         }
     }
 
+    /**
+     * 通过 Shizuku sqlite3 执行数据库修改
+     * 格式: "sqlite3 /path/to/db 'SQL_STATEMENT'"
+     */
+    fun execSqlite(dbPath: String, sql: String): String? {
+        if (!isAvailable()) return null
+        return try {
+            execShell("sqlite3 '$dbPath' '$sql'")
+        } catch (e: Throwable) {
+            LogX.e("Shizuku sqlite3 异常: $dbPath", e)
+            null
+        }
+    }
+
     fun reset() { available = null }
-
-    fun execDumpsys(service: String): String? {
-        return execShell("dumpsys $service")
-    }
-
-    fun execWmSize(width: Int, height: Int): String? {
-        return execShell("wm size ${width}x${height}")
-    }
-
-    fun execWmDensity(dpi: Int): String? {
-        return execShell("wm density $dpi")
-    }
-
-    fun execIgnoreBatteryOptimizations(pkg: String): String? {
-        return execShell("cmd activity set-ignore-battery-optimizations \"$pkg\"")
-    }
 }

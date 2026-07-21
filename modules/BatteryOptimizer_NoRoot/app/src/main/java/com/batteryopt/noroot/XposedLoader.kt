@@ -63,7 +63,7 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
         LogX.i("配置: 总开关=${cfg.masterEnabled} wakelock=${cfg.wakeLockEnabled} " +
                 "alarm=${cfg.alarmEnabled} sync=${cfg.syncEnabled} job=${cfg.jobEnabled} " +
                 "location=${cfg.locationEnabled} anim=${cfg.animationEnabled} " +
-                "sensor=${cfg.sensorEnabled} " +
+                "sensor=${cfg.sensorEnabled} appOps=${cfg.appOpsRestrictEnabled} " +
                 "[实验]bt=${cfg.bluetoothScanThrottleEnabled} cam=${cfg.cameraBackgroundBlockEnabled} " +
                 "vib=${cfg.vibratorThrottleEnabled}")
 
@@ -76,6 +76,10 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
         if (cfg.wakeLockEnabled) WakeLockHook.apply(lpparam, cfg)
         if (cfg.alarmEnabled) AlarmOptimizerHook.apply(lpparam, cfg)
         if (cfg.syncEnabled) BackgroundSyncHook.apply(lpparam, cfg)
+
+        // ===== Shizuku 系统级（adb级 cmd appops） =====
+        if (cfg.appOpsRestrictEnabled) AppOpsRestrictHook.apply(lpparam, cfg)
+
         if (cfg.jobEnabled) JobSchedulerHook.apply(lpparam, cfg)
         if (cfg.locationEnabled) LocationOptHook.apply(lpparam, cfg)
         if (cfg.animationEnabled) AnimationOptHook.apply(lpparam, cfg)

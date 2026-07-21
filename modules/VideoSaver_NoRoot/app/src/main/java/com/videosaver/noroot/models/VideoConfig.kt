@@ -31,6 +31,11 @@ data class VideoConfig(
     var customSavePath: String = "/sdcard/Download/VideoSaver/",
     var autoRenameEnabled: Boolean = true,           // 自动重命名（平台_时间戳.mp4）
 
+    // ===== Shizuku 系统级（adb级，通过 ShizukuHelper） =====
+    var shizukuCaptureEnabled: Boolean = false,          // 通过 Shizuku 执行 screencap + input tap
+    var shizukuTapX: Int = 540,                          // 点击目标 X 坐标
+    var shizukuTapY: Int = 960,                          // 点击目标 Y 坐标
+
     // ===== 实验性 =====
     var autoDownloadEnabled: Boolean = false,         // 自动下载（播放视频时自动触发保存）
     var removeAdsEnabled: Boolean = false,            // 去视频广告

@@ -126,12 +126,18 @@ fun FeaturesScreen(cfg: VideoConfig, onConfigChange: (VideoConfig) -> Unit) {
         }
 
         Spacer(Modifier.height(20.dp))
-        Text(
-            "实验性功能",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.secondary
+        Text("Shizuku 系统级（adb级，需 Shizuku 运行）", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+        Spacer(Modifier.height(8.dp))
+
+        FeatureCard(
+            "截图/点击 UI 自动化", "通过 Shizuku 执行 screencap + input tap，辅助视频下载按钮自动化操作",
+            cfg.shizukuCaptureEnabled,
+            { val nc = cfg.copy(shizukuCaptureEnabled = it); ConfigManager.saveGlobalConfig(nc); onConfigChange(nc) },
+            experimental = true
         )
+
+        Spacer(Modifier.height(20.dp))
+        Text("实验性功能", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.secondary)
         Spacer(Modifier.height(8.dp))
 
         FeatureCard(

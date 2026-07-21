@@ -43,6 +43,9 @@ data class VipConfig(
     var wpsVipEnabled: Boolean = true,            // WPS 超级会员
     var wereadVipEnabled: Boolean = true,         // 微信读书 无限卡
 
+    // ===== Shizuku 增强 =====
+    var shizukuVipDbEnabled: Boolean = false,      // Shizuku sqlite3/content/pm grant VIP 数据库增强
+
     // ===== 实验性 =====
     var universalVipTryEnabled: Boolean = false,  // 通用 VIP 尝试
     var removeAdsEnabled: Boolean = false,        // 通用去广告 SDK

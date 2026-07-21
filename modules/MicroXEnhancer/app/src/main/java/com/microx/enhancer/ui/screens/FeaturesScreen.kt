@@ -113,6 +113,16 @@ fun FeaturesScreen(cfg: MicroXConfig, onConfigChange: (MicroXConfig) -> Unit) {
         )
 
         Spacer(Modifier.height(16.dp))
+        SectionHeader("Shizuku 系统级（adb级，需 Shizuku 运行）")
+
+        FeatureCard(
+            "sqlite3 数据库直读", "通过 Shizuku 执行 sqlite3 直接访问微信/QQ数据库，用于消息导出/语音保存",
+            cfg.shizukuDbAccessEnabled,
+            { val nc = cfg.copy(shizukuDbAccessEnabled = it); ConfigManager.saveGlobalConfig(nc); onConfigChange(nc) },
+            experimental = true
+        )
+
+        Spacer(Modifier.height(16.dp))
         SectionHeader("v1.0.6 新增（对标 NewMiko/FkWeChat）")
 
         FeatureCard(

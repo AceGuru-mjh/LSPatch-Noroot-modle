@@ -5,6 +5,7 @@ import com.mjh.shizukufix.hooks.AutoGrantHelperHook
 import com.mjh.shizukufix.hooks.HideFromSceneHook
 import com.mjh.shizukufix.hooks.ScenePermissionRequesterHook
 import com.mjh.shizukufix.hooks.ServiceWatchdogHook
+import com.mjh.shizukufix.hooks.ShizukuGrantHook
 import com.mjh.shizukufix.hooks.ShizukuListInjectorHook
 import com.mjh.shizukufix.hooks.ShizukuVariantDetectorHook
 import com.mjh.shizukufix.models.ShizukuFixConfig
@@ -77,6 +78,7 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
             LogX.i("配置: 总开关=${cfg.masterEnabled} Scene修复=${cfg.sceneFixEnabled} " +
                     "列表注入=${cfg.listInjectorEnabled} 变体检测=${cfg.variantDetectEnabled} " +
+                    "pmGrant=${cfg.pmGrantEnabled} " +
                     "[实验]保活=${cfg.serviceWatchdogEnabled} 自动授权=${cfg.autoGrantHelperEnabled} " +
                     "隐藏自身=${cfg.hideFromSceneEnabled}")
 
@@ -84,6 +86,7 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
             if (pkg == SCENE_PACKAGE) {
                 LogX.i("=== Path A: Hooking Scene process ===")
                 if (cfg.sceneFixEnabled) ScenePermissionRequesterHook.apply(lpparam, cfg)
+                if (cfg.pmGrantEnabled) ShizukuGrantHook.apply(lpparam, cfg)
                 if (cfg.hideFromSceneEnabled) HideFromSceneHook.apply(lpparam, cfg)
                 hookAppLifecycle(lpparam)
                 return

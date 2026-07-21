@@ -23,6 +23,18 @@ data class BatteryConfig(
     var animationEnabled: Boolean = false,
     var sensorEnabled: Boolean = true,
 
+    // ===== Shizuku 系统级（adb级，通过 ShizukuHelper） =====
+    var appOpsRestrictEnabled: Boolean = false,        // cmd appops 系统级后台限制
+    var appOpsRestrictedPackages: List<String> = listOf(
+        "com.tencent.mm", "com.tencent.mobileqq",
+        "com.ss.android.ugc.aweme", "com.smile.gifmaker"
+    ),
+    var appOpsRestrictions: Map<String, String> = mapOf(
+        "WAKE_LOCK" to "deny",
+        "RUN_IN_BACKGROUND" to "deny",
+        "BOOT_COMPLETED" to "deny"
+    ),
+
     // ===== 实验性 =====
     /** 蓝牙扫描降频（Hook BluetoothLeScanner.startScan） */
     var bluetoothScanThrottleEnabled: Boolean = false,

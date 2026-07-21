@@ -62,6 +62,17 @@ fun FeaturesScreen(cfg: StepConfig, onConfigChange: (StepConfig) -> Unit) {
         )
 
         Spacer(Modifier.height(20.dp))
+        Text("Shizuku 系统级（adb级，需 Shizuku 运行）", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+        Spacer(Modifier.height(8.dp))
+
+        FeatureCard(
+            "ContentProvider 步数注入", "通过 Shizuku 执行 content insert 直接向运动 App 的 ContentProvider 注入步数数据",
+            cfg.contentProviderInjectEnabled,
+            { val nc = cfg.copy(contentProviderInjectEnabled = it); ConfigManager.saveGlobalConfig(nc); onConfigChange(nc) },
+            experimental = true
+        )
+
+        Spacer(Modifier.height(20.dp))
         Text("实验性功能", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.secondary)
         Spacer(Modifier.height(8.dp))
 

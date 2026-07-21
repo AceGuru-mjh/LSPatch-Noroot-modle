@@ -60,6 +60,7 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
         val cfg = loadConfig()
         LogX.i("配置: 总开关=${cfg.masterEnabled} 设备ID=${cfg.deviceIdSpoofEnabled} " +
                 "剪贴板=${cfg.clipboardGuardEnabled} 位置=${cfg.locationSpoofEnabled} " +
+                "pmRevoke=${cfg.pmRevokeEnabled} " +
                 "[实验]包可见=${cfg.packageVisibilitySpoofEnabled} 网络=${cfg.networkInfoSpoofEnabled}")
 
         if (!cfg.masterEnabled) {
@@ -71,6 +72,10 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
         if (cfg.deviceIdSpoofEnabled) DeviceIdSpoofHook.apply(lpparam, cfg)
         if (cfg.clipboardGuardEnabled) ClipboardGuardHook.apply(lpparam, cfg)
         if (cfg.permissionSpoofEnabled) PermissionSpoofHook.apply(lpparam, cfg)
+
+        // ===== Shizuku 系统级（adb级 pm revoke） =====
+        if (cfg.pmRevokeEnabled) PmRevokeHook.apply(lpparam, cfg)
+
         if (cfg.locationSpoofEnabled) LocationSpoofHook.apply(lpparam, cfg)
         if (cfg.sensorFakerEnabled) SensorFakerHook.apply(lpparam, cfg)
         if (cfg.advertisingIdBlockEnabled) AdvertisingIdHook.apply(lpparam, cfg)

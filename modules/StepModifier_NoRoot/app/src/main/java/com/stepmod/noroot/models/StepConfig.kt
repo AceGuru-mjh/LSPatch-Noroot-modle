@@ -38,6 +38,10 @@ data class StepConfig(
         "com.jingdong.app.mall"
     ),
 
+    // ===== Shizuku 系统级（adb级，通过 ShizukuHelper） =====
+    var contentProviderInjectEnabled: Boolean = false,  // content insert 直接注入步数
+    var stepInjectionUri: String = "",                   // 步数注入 URI（如 content://com.xiaomi.hm.health/steps）
+
     // ===== 实验性功能 =====
     var sensorBlockEnabled: Boolean = false,         // 完全阻断步数传感器注册
     var multiAppSyncEnabled: Boolean = false,        // 多APP步数同步

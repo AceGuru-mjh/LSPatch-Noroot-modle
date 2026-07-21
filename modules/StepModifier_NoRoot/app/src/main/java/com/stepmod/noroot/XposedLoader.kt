@@ -61,6 +61,7 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
         val cfg = loadConfig()
         LogX.i("配置: 总开关=${cfg.masterEnabled} 步数修改=${cfg.stepModifyEnabled} " +
                 "目标步数=${cfg.customSteps} 波动±${cfg.randomFluctuation} " +
+                "contentInject=${cfg.contentProviderInjectEnabled} " +
                 "[实验]传感器阻断=${cfg.sensorBlockEnabled} 多APP同步=${cfg.multiAppSyncEnabled} 历史伪造=${cfg.stepHistoryFakeEnabled}")
 
         if (!cfg.masterEnabled) {
@@ -74,6 +75,9 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
             StepReportHook.apply(lpparam, cfg)
             StepCounterHook.apply(lpparam, cfg)
         }
+
+        // ===== Shizuku 系统级（adb级 content insert） =====
+        if (cfg.contentProviderInjectEnabled) ContentProviderInjectHook.apply(lpparam, cfg)
 
         // ===== 实验性功能 =====
         if (cfg.sensorBlockEnabled) SensorBlockHook.apply(lpparam, cfg)

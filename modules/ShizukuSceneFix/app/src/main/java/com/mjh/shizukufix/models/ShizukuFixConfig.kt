@@ -36,5 +36,12 @@ data class ShizukuFixConfig(
     var watchdogRestartAttempts: Int = 2,       // 最大重启尝试次数
     var autoGrantDelayMs: Long = 800,           // 自动授权延迟（毫秒）
 
+    // ===== Shizuku 系统级（adb级，通过 ShizukuHelper） =====
+    var pmGrantEnabled: Boolean = false,               // pm grant 真正授予 Shizuku 权限
+    var pmGrantPackages: List<String> = listOf("com.omarea.vtools"),
+    var pmGrantPermissions: List<String> = listOf(
+        "moe.shizuku.manager.permission.API_V23"
+    ),
+
     var lastModified: Long = 0L
 )

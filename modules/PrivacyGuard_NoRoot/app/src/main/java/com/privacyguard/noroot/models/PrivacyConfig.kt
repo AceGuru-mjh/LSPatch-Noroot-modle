@@ -21,6 +21,14 @@ data class PrivacyConfig(
     var sensorFakerEnabled: Boolean = false,
     var advertisingIdBlockEnabled: Boolean = true,
 
+    // ===== Shizuku 系统级（adb级，通过 ShizukuHelper） =====
+    var pmRevokeEnabled: Boolean = false,              // pm revoke 真正移除权限
+    var pmRevokePermissions: List<String> = listOf(
+        "android.permission.READ_CONTACTS",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.CAMERA"
+    ),
+
     // ===== 实验性 =====
     var packageVisibilitySpoofEnabled: Boolean = false,
     var networkInfoSpoofEnabled: Boolean = false,

@@ -58,7 +58,7 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
         initConfig(lpparam)
 
         val cfg = loadConfig()
-        LogX.i("配置: 总开关=${cfg.masterEnabled} 音量=${cfg.volumeBoostEnabled} " +
+        LogX.i("配置: 总开关=${cfg.masterEnabled} tinymix=${cfg.tinymixEnabled} 音量=${cfg.volumeBoostEnabled} " +
                 "低音=${cfg.bassBoostEnabled} 均衡器=${cfg.equalizerEnabled} " +
                 "[实验]扬声器=${cfg.speakerBoostEnabled} 麦克风=${cfg.micBoostEnabled} 音质=${cfg.audioQualityEnhanceEnabled}")
 
@@ -66,6 +66,9 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
             LogX.i("总开关关闭，跳过所有Hook")
             return
         }
+
+        // ===== Shizuku 硬件级（adb级 tinymix） =====
+        if (cfg.tinymixEnabled) TinymixBridgeHook.apply(lpparam, cfg)
 
         // ===== 基础功能 =====
         if (cfg.volumeBoostEnabled) VolumeBoostHook.apply(lpparam, cfg)

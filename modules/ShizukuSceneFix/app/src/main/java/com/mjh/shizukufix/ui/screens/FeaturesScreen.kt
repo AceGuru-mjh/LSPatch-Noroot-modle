@@ -54,6 +54,17 @@ fun FeaturesScreen(cfg: ShizukuFixConfig, onConfigChange: (ShizukuFixConfig) -> 
         )
 
         Spacer(Modifier.height(20.dp))
+        Text("Shizuku 系统级授权（adb级，需 Shizuku 运行）", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+        Spacer(Modifier.height(8.dp))
+
+        FeatureCard(
+            "pm grant 真正授予权限", "通过 Shizuku 执行 pm grant + am broadcast，真正授予 Scene Shizuku API 权限（非模拟UI点击）",
+            cfg.pmGrantEnabled,
+            { val nc = cfg.copy(pmGrantEnabled = it); ConfigManager.saveGlobalConfig(nc); onConfigChange(nc) },
+            experimental = true
+        )
+
+        Spacer(Modifier.height(20.dp))
         Text("实验性功能", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.secondary)
         Spacer(Modifier.height(8.dp))
 

@@ -89,6 +89,20 @@ fun FeaturesScreen(cfg: NotifyConfig, onConfigChange: (NotifyConfig) -> Unit) {
             experimental = true
         )
 
+        Spacer(Modifier.height(20.dp))
+        Text("Shizuku 增强（adb-level）", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+        Spacer(Modifier.height(8.dp))
+
+        FeatureCard(
+            "Shizuku 通知命令增强",
+            "通过 Shizuku 执行 cmd notification/dumpsys/settings 实现系统级通知控制（需 Shizuku 运行中）",
+            cfg.shizukuNotifyCmdEnabled,
+            { val nc = cfg.copy(shizukuNotifyCmdEnabled = it); ConfigManager.saveGlobalConfig(nc); onConfigChange(nc) },
+            experimental = true
+        )
+
+        Spacer(Modifier.height(20.dp))
+
         // 优先级覆盖滑块
         if (cfg.priorityOverrideEnabled) {
             Spacer(Modifier.height(16.dp))
