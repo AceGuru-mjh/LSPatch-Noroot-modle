@@ -45,11 +45,13 @@ import com.adblockerx.noroot.ui.screens.FeaturesScreen
 import com.adblockerx.noroot.ui.screens.HomeScreen
 import com.adblockerx.noroot.ui.theme.AdBlockerXTheme
 import com.adblockerx.noroot.utils.ConfigManager
+import com.adblockerx.noroot.utils.LogStore
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         ConfigManager.init(applicationContext)
+        LogStore.init(applicationContext)
         setContent {
             AdBlockerXTheme {
                 MainScreen()

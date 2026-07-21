@@ -46,11 +46,13 @@ import com.notifymaster.noroot.ui.screens.HomeScreen
 import com.notifymaster.noroot.ui.screens.UpdateScreen
 import com.notifymaster.noroot.ui.theme.NotifyMasterTheme
 import com.notifymaster.noroot.utils.ConfigManager
+import com.notifymaster.noroot.utils.LogStore
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         ConfigManager.init(applicationContext)
+        LogStore.init(applicationContext)
         setContent {
             MainScreen()
         }

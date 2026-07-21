@@ -46,11 +46,13 @@ import com.videosaver.noroot.ui.screens.HomeScreen
 import com.videosaver.noroot.ui.screens.UpdateScreen
 import com.videosaver.noroot.ui.theme.VideoSaverTheme
 import com.videosaver.noroot.utils.ConfigManager
+import com.videosaver.noroot.utils.LogStore
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         ConfigManager.init(applicationContext)
+        LogStore.init(applicationContext)
         setContent {
             MainScreen()
         }

@@ -45,11 +45,13 @@ import com.microx.enhancer.ui.screens.FeaturesScreen
 import com.microx.enhancer.ui.screens.HomeScreen
 import com.microx.enhancer.ui.theme.MicroXEnhancerTheme
 import com.microx.enhancer.utils.ConfigManager
+import com.microx.enhancer.utils.LogStore
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         ConfigManager.init(applicationContext)
+        LogStore.init(applicationContext)
         setContent {
             MicroXEnhancerTheme {
                 MainScreen()

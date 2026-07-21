@@ -45,11 +45,13 @@ import com.mjh.shizukufix.ui.screens.FeaturesScreen
 import com.mjh.shizukufix.ui.screens.HomeScreen
 import com.mjh.shizukufix.ui.theme.ShizukuFixTheme
 import com.mjh.shizukufix.utils.ConfigManager
+import com.mjh.shizukufix.utils.LogStore
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         ConfigManager.init(applicationContext)
+        LogStore.init(applicationContext)
         setContent {
             ShizukuFixTheme {
                 MainScreen()

@@ -46,11 +46,13 @@ import com.privacyguard.noroot.ui.screens.HomeScreen
 import com.privacyguard.noroot.ui.screens.UpdateScreen
 import com.privacyguard.noroot.ui.theme.PrivacyGuardTheme
 import com.privacyguard.noroot.utils.ConfigManager
+import com.privacyguard.noroot.utils.LogStore
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         ConfigManager.init(applicationContext)
+        LogStore.init(applicationContext)
         setContent {
             MainScreen()
         }

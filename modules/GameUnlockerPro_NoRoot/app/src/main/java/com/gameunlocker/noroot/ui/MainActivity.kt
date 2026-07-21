@@ -45,11 +45,13 @@ import com.gameunlocker.noroot.ui.screens.FeaturesScreen
 import com.gameunlocker.noroot.ui.screens.HomeScreen
 import com.gameunlocker.noroot.ui.theme.GameUnlockerTheme
 import com.gameunlocker.noroot.utils.ConfigManager
+import com.gameunlocker.noroot.utils.LogStore
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         ConfigManager.init(applicationContext)
+        LogStore.init(applicationContext)
         setContent {
             GameUnlockerTheme {
                 MainScreen()

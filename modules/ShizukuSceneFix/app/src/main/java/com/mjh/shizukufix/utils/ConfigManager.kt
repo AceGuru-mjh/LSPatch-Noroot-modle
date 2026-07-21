@@ -21,6 +21,7 @@ object ConfigManager {
     const val PREFS_NAME = "shizuku_scene_fix_prefs"
     private const val KEY_ALL = "all_app_configs"
     private const val KEY_GLOBAL = "global_config"
+    private const val KEY_BLOCKED_COUNT = "blocked_count"
 
     private val gson = Gson()
     private var prefs: SharedPreferences? = null
@@ -35,6 +36,19 @@ object ConfigManager {
     }
 
     fun isInitialized(): Boolean = prefs != null
+
+    /** 累计计数（Hook 写入 → FloatingBallService / PanelActivity 读取） */
+    fun getBlockedCount(): Long = try { prefs?.getLong(KEY_BLOCKED_COUNT, 0L) ?: 0L } catch (_: Throwable) { 0L }
+
+    fun incrementBlockedCount(delta: Long = 1L) {
+        try {
+            prefs?.edit()?.putLong(KEY_BLOCKED_COUNT, getBlockedCount() + delta)?.apply()
+        } catch (_: Throwable) {}
+    }
+
+    fun resetBlockedCount() {
+        try { prefs?.edit()?.putLong(KEY_BLOCKED_COUNT, 0L)?.apply() } catch (_: Throwable) {}
+    }
 
     // ===== 全局配置（UI总开关使用，作用于所有目标APP） =====
     fun getGlobalConfig(): ShizukuFixConfig {

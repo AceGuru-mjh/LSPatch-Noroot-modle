@@ -46,11 +46,13 @@ import com.stepmod.noroot.ui.screens.HomeScreen
 import com.stepmod.noroot.ui.screens.UpdateScreen
 import com.stepmod.noroot.ui.theme.StepModifierTheme
 import com.stepmod.noroot.utils.ConfigManager
+import com.stepmod.noroot.utils.LogStore
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         ConfigManager.init(applicationContext)
+        LogStore.init(applicationContext)
         setContent {
             MainScreen()
         }
