@@ -1,6 +1,11 @@
 package com.videosaver.noroot.ui
 
+import android.content.Intent
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.PaddingValues
@@ -46,6 +51,7 @@ import com.videosaver.noroot.ui.screens.HomeScreen
 import com.videosaver.noroot.ui.screens.UpdateScreen
 import com.videosaver.noroot.ui.theme.VideoSaverTheme
 import com.videosaver.noroot.utils.ConfigManager
+import com.videosaver.noroot.services.FloatingBallService
 import com.videosaver.noroot.utils.LogStore
 
 class MainActivity : ComponentActivity() {
@@ -53,9 +59,39 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         ConfigManager.init(applicationContext)
         LogStore.init(applicationContext)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(this)) {
+            val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                Uri.parse("package:$packageName"))
+            startActivityForResult(intent, 100)
+        } else {
+            startFloatingBallService()
+        }
+
         setContent {
             MainScreen()
         }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == 100) {
+            if (Settings.canDrawOverlays(this)) {
+                startFloatingBallService()
+                Toast.makeText(this, "悬浮球已启动", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun startFloatingBallService() {
+        try {
+            val intent = Intent(this, FloatingBallService::class.java)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startForegroundService(intent)
+            } else {
+                startService(intent)
+            }
+        } catch (e: Exception) { }
     }
 }
 
@@ -73,7 +109,7 @@ fun MainScreen() {
         val onCfgChange: (VideoConfig) -> Unit = { cfg = it }
 
         val screens = listOf(
-            Triple("home", "总开�?, Icons.Default.PowerSettingsNew),
+            Triple("home", "总开�?, Icons.Default.PowerSettingsNew),
             Triple("features", "功能", Icons.Default.Build),
             Triple("diagnostics", "诊断", Icons.Default.BugReport),
             Triple("update", "更新", Icons.Default.CloudDownload),

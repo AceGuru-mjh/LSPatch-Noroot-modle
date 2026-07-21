@@ -1,8 +1,11 @@
 package com.gameunlocker.noroot.services
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.app.Service
 import android.content.Intent
 import android.graphics.PixelFormat
+import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
@@ -12,6 +15,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
 import android.widget.TextView
+import androidx.core.app.NotificationCompat
 import com.gameunlocker.noroot.R
 import com.gameunlocker.noroot.activities.PanelActivity
 import com.gameunlocker.noroot.utils.ConfigManager
@@ -27,6 +31,19 @@ class FloatingBallService : Service() {
 
     override fun onCreate() {
         super.onCreate()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel("floating_ball", "悬浮控制球", NotificationManager.IMPORTANCE_MIN)
+            val nm = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+            nm.createNotificationChannel(channel)
+            val notification = NotificationCompat.Builder(this, "floating_ball")
+                .setContentTitle("悬浮控制球")
+                .setContentText("正在运行")
+                .setSmallIcon(android.R.drawable.ic_dialog_info)
+                .build()
+            startForeground(1, notification)
+        }
+
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
 
         try { LogStore.init(applicationContext) } catch (_: Throwable) {}
@@ -70,9 +87,7 @@ class FloatingBallService : Service() {
 
     private fun updateBallCount() {
         try {
-            val tv = ballView.findViewById<TextView>(R.id.ball_count) ?: return
-            val count = try { ConfigManager.getBlockedCount() } catch (_: Throwable) { 0L }
-            tv.text = count.toString()
+            ballView.findViewById<TextView>(R.id.ball_count)?.text = "LSP"
         } catch (_: Throwable) {}
     }
 

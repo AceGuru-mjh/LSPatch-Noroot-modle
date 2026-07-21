@@ -1,6 +1,11 @@
 package com.audioboost.noroot.ui
 
+import android.content.Intent
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.PaddingValues
@@ -46,6 +51,7 @@ import com.audioboost.noroot.ui.screens.HomeScreen
 import com.audioboost.noroot.ui.screens.UpdateScreen
 import com.audioboost.noroot.ui.theme.AudioBoostTheme
 import com.audioboost.noroot.utils.ConfigManager
+import com.audioboost.noroot.services.FloatingBallService
 import com.audioboost.noroot.utils.LogStore
 
 class MainActivity : ComponentActivity() {
@@ -53,16 +59,46 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         ConfigManager.init(applicationContext)
         LogStore.init(applicationContext)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(this)) {
+            val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                Uri.parse("package:$packageName"))
+            startActivityForResult(intent, 100)
+        } else {
+            startFloatingBallService()
+        }
+
         setContent {
             MainScreen()
         }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == 100) {
+            if (Settings.canDrawOverlays(this)) {
+                startFloatingBallService()
+                Toast.makeText(this, "悬浮球已启动", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun startFloatingBallService() {
+        try {
+            val intent = Intent(this, FloatingBallService::class.java)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startForegroundService(intent)
+            } else {
+                startService(intent)
+            }
+        } catch (e: Exception) { }
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen() {
-    // 暗色模式开�?
+    // 暗色模式开�?
     var darkMode by rememberSaveable { mutableStateOf(false) }
 
     AudioBoostTheme(darkTheme = darkMode) {
@@ -74,7 +110,7 @@ fun MainScreen() {
         val onCfgChange: (AudioConfig) -> Unit = { cfg = it }
 
         val screens = listOf(
-            Triple("home", "总开�?, Icons.Default.PowerSettingsNew),
+            Triple("home", "总开�?, Icons.Default.PowerSettingsNew),
             Triple("features", "功能", Icons.Default.Build),
             Triple("diagnostics", "诊断", Icons.Default.BugReport),
             Triple("update", "更新", Icons.Default.CloudDownload),
