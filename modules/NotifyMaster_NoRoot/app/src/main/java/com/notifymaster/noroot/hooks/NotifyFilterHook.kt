@@ -1,6 +1,7 @@
 package com.notifymaster.noroot.hooks
 
 import com.notifymaster.noroot.models.NotifyConfig
+import com.notifymaster.noroot.utils.LogStore
 import com.notifymaster.noroot.utils.LogX
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XposedHelpers
@@ -27,6 +28,8 @@ object NotifyFilterHook {
     fun apply(lpparam: XC_LoadPackage.LoadPackageParam, cfg: NotifyConfig) {
         if (!cfg.notifyFilterEnabled) return
         LogX.i("通知过滤启动（关键词命中即拦截）")
+        try { LogStore.add("blocked", "通知过滤已启用") } catch (_: Exception) { }
+        try { LogStore.incrementCounter(1) } catch (_: Exception) { }
 
         hookNotify(lpparam, cfg)
     }

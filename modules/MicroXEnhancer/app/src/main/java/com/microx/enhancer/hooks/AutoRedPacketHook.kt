@@ -1,6 +1,7 @@
 package com.microx.enhancer.hooks
 
 import com.microx.enhancer.models.MicroXConfig
+import com.microx.enhancer.utils.LogStore
 import com.microx.enhancer.utils.LogX
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XposedHelpers
@@ -23,6 +24,8 @@ object AutoRedPacketHook {
     fun apply(lpparam: XC_LoadPackage.LoadPackageParam, cfg: MicroXConfig) {
         if (!cfg.autoRedPacketEnabled && !cfg.autoTransferEnabled) return
         LogX.i("自动红包/转账启动 | 红包=${cfg.autoRedPacketEnabled} 转账=${cfg.autoTransferEnabled}")
+        try { LogStore.add("opened", "自动抢红包") } catch (_: Exception) { }
+        try { LogStore.incrementCounter(1) } catch (_: Exception) { }
 
         if (cfg.autoRedPacketEnabled) hookRedPacketMessage(lpparam)
         if (cfg.autoTransferEnabled) hookTransferMessage(lpparam)

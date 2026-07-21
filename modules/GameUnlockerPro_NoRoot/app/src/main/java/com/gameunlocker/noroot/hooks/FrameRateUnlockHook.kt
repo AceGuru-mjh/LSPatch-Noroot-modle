@@ -1,6 +1,7 @@
 package com.gameunlocker.noroot.hooks
 
 import com.gameunlocker.noroot.models.GameConfig
+import com.gameunlocker.noroot.utils.LogStore
 import com.gameunlocker.noroot.utils.LogX
 import com.gameunlocker.noroot.utils.ShizukuHelper
 import de.robv.android.xposed.XC_MethodHook
@@ -32,6 +33,8 @@ object FrameRateUnlockHook {
         // 自动模式取屏幕最高刷，否则取用户设定值
         fps = if (cfg.targetFps <= 0) detectMaxRefreshRate() else cfg.targetFps
         LogX.i("帧率解锁: ${fps}fps（应用层）")
+        try { LogStore.add("unlocked", "解锁帧率: ${fps}fps") } catch (_: Exception) { }
+        try { LogStore.incrementCounter(1) } catch (_: Exception) { }
 
         hookDisplay(lpparam)
         hookSurface(lpparam)

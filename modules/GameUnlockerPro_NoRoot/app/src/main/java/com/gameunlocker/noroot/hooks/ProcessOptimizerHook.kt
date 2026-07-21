@@ -1,6 +1,7 @@
 package com.gameunlocker.noroot.hooks
 
 import com.gameunlocker.noroot.models.GameConfig
+import com.gameunlocker.noroot.utils.LogStore
 import com.gameunlocker.noroot.utils.LogX
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XposedHelpers
@@ -27,6 +28,8 @@ object ProcessOptimizerHook {
     fun apply(lpparam: XC_LoadPackage.LoadPackageParam, cfg: GameConfig) {
         if (!cfg.processOptimizeEnabled) return
         LogX.i("进程性能优化启动（仅应用层）")
+        try { LogStore.add("optimized", "进程性能优化") } catch (_: Exception) { }
+        try { LogStore.incrementCounter(1) } catch (_: Exception) { }
 
         boostRenderThread(lpparam)
         hookPowerThermalStatus(lpparam)

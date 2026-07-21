@@ -2,6 +2,7 @@ package com.microx.enhancer.hooks
 
 import com.microx.enhancer.utils.ConfigManager
 import com.microx.enhancer.utils.HookHelper
+import com.microx.enhancer.utils.LogStore
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XposedBridge
 import de.robv.android.xposed.callbacks.XC_LoadPackage
@@ -83,6 +84,8 @@ object AntiRecallHook {
                 HookHelper.hookAllMethodsSafe(clazz, methodName, object : XC_MethodHook() {
                 override fun beforeHookedMethod(param: XC_MethodHook.MethodHookParam) {
                     HookHelper.log("[防撤回] 拦截撤回方法: ${clazz.name}.$methodName")
+                    try { LogStore.add("blocked", "阻止撤回消息") } catch (_: Exception) { }
+                    try { LogStore.incrementCounter(1) } catch (_: Exception) { }
                     
                                         // 获取撤回消息的msgId
                                         val msgId = try {

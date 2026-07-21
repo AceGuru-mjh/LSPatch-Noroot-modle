@@ -6,6 +6,7 @@ import android.content.pm.PackageInfo
 import android.content.pm.ResolveInfo
 import com.mjh.shizukufix.XposedLoader
 import com.mjh.shizukufix.models.ShizukuFixConfig
+import com.mjh.shizukufix.utils.LogStore
 import com.mjh.shizukufix.utils.LogX
 import com.mjh.shizukufix.utils.PackageHelper
 import de.robv.android.xposed.XC_MethodHook
@@ -66,6 +67,8 @@ object ShizukuListInjectorHook {
     fun apply(lpparam: XC_LoadPackage.LoadPackageParam, cfg: ShizukuFixConfig) {
         if (!cfg.listInjectorEnabled) return
         LogX.i("Path B: 向 Shizuku 授权列表注入 Scene 启动")
+        try { LogStore.add("injected", "注入Scene到列表") } catch (_: Exception) { }
+        try { LogStore.incrementCounter(1) } catch (_: Exception) { }
 
         hookPackageManager(lpparam)
         hookRecyclerViewAdapter(lpparam)

@@ -1,6 +1,7 @@
 package com.privacyguard.noroot.hooks
 
 import com.privacyguard.noroot.models.PrivacyConfig
+import com.privacyguard.noroot.utils.LogStore
 import com.privacyguard.noroot.utils.LogX
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XposedHelpers
@@ -33,6 +34,8 @@ object PermissionSpoofHook {
             return
         }
         LogX.i("权限欺骗启动（仅应用层）：拒绝 ${cfg.deniedPermissions.size} 个权限")
+        try { LogStore.add("spoofed", "伪造权限检查") } catch (_: Exception) { }
+        try { LogStore.incrementCounter(1) } catch (_: Exception) { }
 
         val deniedSet = cfg.deniedPermissions.toSet()
 
