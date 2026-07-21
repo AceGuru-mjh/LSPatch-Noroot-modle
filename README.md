@@ -1,5 +1,14 @@
 # LSPatch 免 Root 模块合集
 
+<p align="center">
+  <img src="https://img.shields.io/badge/Modules-11-brightgreen?style=flat-square" />
+  <img src="https://img.shields.io/badge/Hooks-104-green?style=flat-square" />
+  <img src="https://img.shields.io/badge/LSPatch-NoRoot-blue?style=flat-square" />
+  <img src="https://img.shields.io/badge/Shizuku-adb级-lightgrey?style=flat-square" />
+  <img src="https://img.shields.io/github/actions/workflow/status/AceGuru-mjh/LSPatch-Noroot-modle/build.yml?style=flat-square" />
+  <img src="https://img.shields.io/github/v/release/AceGuru-mjh/LSPatch-Noroot-modle?style=flat-square" />
+</p>
+
 > **无需 Root** · 11 个纯应用层增强模块 · 通过 LSPatch 注入
 
 ## 模块列表
