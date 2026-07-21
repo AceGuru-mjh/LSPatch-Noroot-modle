@@ -3,11 +3,14 @@ package com.microx.enhancer
 import android.app.Application
 import com.microx.enhancer.hooks.*
 import com.microx.enhancer.models.MicroXConfig
+import com.microx.enhancer.utils.AntiDetectionHelper
 import com.microx.enhancer.utils.ConfigManager
+import com.microx.enhancer.utils.EnvDetector
 import com.microx.enhancer.utils.HookConfigReader
 import com.microx.enhancer.utils.HookHelper
 import com.microx.enhancer.utils.LogStore
 import com.microx.enhancer.utils.LogX
+import com.microx.enhancer.utils.ModuleConflictDetector
 import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.IXposedHookZygoteInit
 import de.robv.android.xposed.XC_MethodHook
@@ -60,6 +63,7 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
                 }
             }
         } catch (e: Throwable) {
+            AntiDetectionHelper.sleepDuringVerify()
             LogX.e("模块崩溃防护: ${lpparam.packageName}", e)
             try { LogStore.add("error", "模块异常: ${e.message}") } catch (_: Exception) { }
         }
@@ -69,6 +73,11 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
     private fun onWeChatLoaded(lpparam: XC_LoadPackage.LoadPackageParam) {
         LogX.i("===== 微X增强模块开始注入微信 =====")
         LogX.i("进程名: ${lpparam.processName}")
+        LogX.i("环境: ${if (EnvDetector.isLocalMode) "LSPatch本地" else "LSPosed集成"}模式")
+        if (ModuleConflictDetector.checkConflict()) {
+            LogX.w("检测到模块冲突，跳过Hook")
+            return
+        }
         currentPkg = "com.tencent.mm"
 
         initConfig(lpparam)
@@ -137,6 +146,11 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
     private fun onQQLoaded(lpparam: XC_LoadPackage.LoadPackageParam) {
         LogX.i("===== 微X增强模块开始注入QQ =====")
         LogX.i("进程名: ${lpparam.processName}")
+        LogX.i("环境: ${if (EnvDetector.isLocalMode) "LSPatch本地" else "LSPosed集成"}模式")
+        if (ModuleConflictDetector.checkConflict()) {
+            LogX.w("检测到模块冲突，跳过Hook")
+            return
+        }
         currentPkg = "com.tencent.mobileqq"
 
         initConfig(lpparam)
@@ -170,6 +184,7 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
     /** 优先使用 XSharedPreferences 预读取，再延迟到 Application.onCreate 初始化 ConfigManager */
     private fun initConfig(lpparam: XC_LoadPackage.LoadPackageParam) {
+        EnvDetector.detect(lpparam)
         // 预读：尝试通过 XSharedPreferences 读取，让 Hook 早期能用
         try { HookConfigReader.readGlobal() } catch (e: Throwable) { LogX.w("异常: ${e.message}") }
 

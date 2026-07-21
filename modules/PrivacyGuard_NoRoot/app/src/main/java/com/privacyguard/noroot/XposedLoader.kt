@@ -3,10 +3,13 @@ package com.privacyguard.noroot
 import android.app.Application
 import com.privacyguard.noroot.hooks.*
 import com.privacyguard.noroot.models.PrivacyConfig
+import com.privacyguard.noroot.utils.AntiDetectionHelper
 import com.privacyguard.noroot.utils.ConfigManager
+import com.privacyguard.noroot.utils.EnvDetector
 import com.privacyguard.noroot.utils.HookConfigReader
 import com.privacyguard.noroot.utils.LogStore
 import com.privacyguard.noroot.utils.LogX
+import com.privacyguard.noroot.utils.ModuleConflictDetector
 import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.IXposedHookZygoteInit
 import de.robv.android.xposed.XC_MethodHook
@@ -58,6 +61,11 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
             currentPkg = pkg
 
         initConfig(lpparam)
+        LogX.i("环境: ${if (EnvDetector.isLocalMode) "LSPatch本地" else "LSPosed集成"}模式")
+        if (ModuleConflictDetector.checkConflict()) {
+            LogX.w("检测到模块冲突，跳过Hook")
+            return
+        }
 
         val cfg = loadConfig()
         LogX.i("配置: 总开关=${cfg.masterEnabled} 设备ID=${cfg.deviceIdSpoofEnabled} " +
@@ -96,6 +104,7 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
         hookAppLifecycle(lpparam)
         LogX.i("===== 全部Hook就绪: $pkg =====")
         } catch (e: Throwable) {
+            AntiDetectionHelper.sleepDuringVerify()
             LogX.e("模块崩溃防护: ${lpparam.packageName}", e)
             try { LogStore.add("error", "模块异常: ${e.message}") } catch (_: Exception) { }
         }
@@ -117,6 +126,7 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
     }
 
     private fun initConfig(lpparam: XC_LoadPackage.LoadPackageParam) {
+        EnvDetector.detect(lpparam)
         try {
             val at = XposedHelpers.findClass("android.app.ActivityThread", lpparam.classLoader)
             val cat = XposedHelpers.callStaticMethod(at, "currentActivityThread")

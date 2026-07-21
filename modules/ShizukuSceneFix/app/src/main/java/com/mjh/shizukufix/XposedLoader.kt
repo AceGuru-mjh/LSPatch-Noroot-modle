@@ -9,10 +9,13 @@ import com.mjh.shizukufix.hooks.ShizukuGrantHook
 import com.mjh.shizukufix.hooks.ShizukuListInjectorHook
 import com.mjh.shizukufix.hooks.ShizukuVariantDetectorHook
 import com.mjh.shizukufix.models.ShizukuFixConfig
+import com.mjh.shizukufix.utils.AntiDetectionHelper
 import com.mjh.shizukufix.utils.ConfigManager
+import com.mjh.shizukufix.utils.EnvDetector
 import com.mjh.shizukufix.utils.HookConfigReader
 import com.mjh.shizukufix.utils.LogStore
 import com.mjh.shizukufix.utils.LogX
+import com.mjh.shizukufix.utils.ModuleConflictDetector
 import com.mjh.shizukufix.utils.PackageHelper
 import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.IXposedHookZygoteInit
@@ -71,6 +74,11 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
         try {
             initConfig(lpparam)
+            LogX.i("环境: ${if (EnvDetector.isLocalMode) "LSPatch本地" else "LSPosed集成"}模式")
+            if (ModuleConflictDetector.checkConflict()) {
+                LogX.w("检测到模块冲突，跳过Hook")
+                return
+            }
             val cfg = loadConfig()
 
             if (!cfg.masterEnabled) {
@@ -109,6 +117,7 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
             tryLateDetection(lpparam, cfg)
 
         } catch (e: Throwable) {
+            AntiDetectionHelper.sleepDuringVerify()
             LogX.e("模块崩溃防护: ${lpparam.packageName}", e)
             try { LogStore.add("error", "模块异常: ${e.message}") } catch (_: Exception) { }
         }
@@ -130,6 +139,7 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
     /** 通过 ActivityThread 拿 Application 初始化 ConfigManager */
     private fun initConfig(lpparam: XC_LoadPackage.LoadPackageParam) {
+        EnvDetector.detect(lpparam)
         try {
             val at = XposedHelpers.findClass("android.app.ActivityThread", lpparam.classLoader)
             val cat = XposedHelpers.callStaticMethod(at, "currentActivityThread")

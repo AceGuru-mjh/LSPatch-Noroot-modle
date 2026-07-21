@@ -40,4 +40,9 @@ object LogX {
     fun hookFailed(cls: String, method: String, t: Throwable? = null) {
         w("[Hook FAIL] $cls.$method : ${t?.message ?: "unknown"}")
     }
+
+    fun safeLog(msg: String) {
+        val safe = msg.replace("Xposed", "X*****").replace("LSPosed", "L*****")
+        d(safe)
+    }
 }
