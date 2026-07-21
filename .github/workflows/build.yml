@@ -13,7 +13,6 @@ jobs:
       fail-fast: false
       matrix:
         module:
-          - ShizukuSceneFix
           - GameUnlockerPro_NoRoot
           - MicroXEnhancer
           - PrivacyGuard_NoRoot

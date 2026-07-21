@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string-array name="xposed_scope">
-        <item>com.omarea.vtools</item>
-        <item>moe.shizuku.privileged.api</item>
-        <item>rikka.shizuku.manager</item>
-    </string-array>
-</resources>
