@@ -1,6 +1,7 @@
 package com.adblockerx.noroot
 
 import android.util.Log
+import com.adblockerx.noroot.core.ConfigClient
 import com.adblockerx.noroot.hooks.AdViewHideHook
 import com.adblockerx.noroot.hooks.AdClosePlusHook
 import com.adblockerx.noroot.hooks.CookieCleanHook
@@ -12,7 +13,6 @@ import com.adblockerx.noroot.hooks.ShizukuDnsHook
 import com.adblockerx.noroot.hooks.TrackerBlockHook
 import com.adblockerx.noroot.hooks.URLConnectionAdHook
 import com.adblockerx.noroot.hooks.WebViewAdHook
-import com.adblockerx.noroot.utils.AntiDetectionHelper
 import com.adblockerx.noroot.utils.EnvDetector
 import com.adblockerx.noroot.utils.HookConfigReader
 import de.robv.android.xposed.IXposedHookLoadPackage
@@ -24,6 +24,7 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
     companion object {
         const val VERSION = "1.0.11"
         const val TAG = "LSP-AdBlockerX"
+        const val MODULE_PKG = "com.adblockerx.noroot"
         var currentPkg: String? = null
         var isIntegratedMode: Boolean = false
     }
@@ -44,7 +45,20 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
     }
 
     override fun handleLoadPackage(lpparam: XC_LoadPackage.LoadPackageParam) {
-        Log.e(TAG, "handleLoadPackage entered: pkg=${lpparam.packageName}")
+        Log.e(TAG, "handleLoadPackage entry: pkg=${lpparam.packageName}")
+
+        if (lpparam.packageName == MODULE_PKG) {
+            Log.e(TAG, "Module own process: loading UI")
+            try {
+                Class.forName("com.adblockerx.noroot.ui.UiInitializer")
+                    .getDeclaredMethod("initAllUi", android.content.Context::class.java)
+                    .invoke(null, Class.forName("android.app.ActivityThread")
+                        .getMethod("currentApplication").invoke(null))
+            } catch (t: Throwable) {
+                Log.e(TAG, "UI init failed: ${t.message}")
+            }
+            return
+        }
 
         if (lpparam.processName != lpparam.packageName) return
 
@@ -59,11 +73,20 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
             EnvDetector.detect(lpparam)
 
-            val cfg = loadConfig()
-            if (!cfg.masterEnabled) {
-                Log.e(TAG, "Master disabled, skipping hooks")
+            val ctx = try {
+                val at = Class.forName("android.app.ActivityThread")
+                    .getMethod("currentActivityThread").invoke(null)
+                Class.forName("android.app.ActivityThread")
+                    .getMethod("getApplication").invoke(at) as? android.content.Context
+            } catch (_: Throwable) { null }
+
+            val masterSwitch = if (ctx != null) ConfigClient.readMasterSwitch(ctx) else true
+            if (!masterSwitch) {
+                Log.e(TAG, "Master switch OFF via ContentProvider, skipping hooks")
                 return
             }
+
+            val cfg = loadConfig()
 
             Log.e(TAG, "Loading HostsFilterHook...")
             try { if (cfg.hostsFilterEnabled) HostsFilterHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "HostsFilterHook FAIL: ${e.message}") }

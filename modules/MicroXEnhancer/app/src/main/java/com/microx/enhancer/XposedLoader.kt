@@ -1,10 +1,8 @@
 package com.microx.enhancer
 
 import android.util.Log
+import com.microx.enhancer.core.ConfigClient
 import com.microx.enhancer.hooks.*
-import com.microx.enhancer.models.MicroXConfig
-import com.microx.enhancer.utils.EnvDetector
-import com.microx.enhancer.utils.HookConfigReader
 import com.microx.enhancer.utils.HookHelper
 import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.IXposedHookZygoteInit
@@ -15,6 +13,7 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
     companion object {
         const val VERSION = "1.0.11"
         const val TAG = "LSP-MicroX"
+        const val MODULE_PKG = "com.microx.enhancer"
         var currentPkg: String? = null
         var isIntegratedMode: Boolean = false
     }
@@ -35,15 +34,39 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
     }
 
     override fun handleLoadPackage(lpparam: XC_LoadPackage.LoadPackageParam) {
-        Log.e(TAG, "handleLoadPackage entered: pkg=${lpparam.packageName}")
+        Log.e(TAG, "handleLoadPackage entry: pkg=${lpparam.packageName}")
 
-        if (lpparam.processName != lpparam.packageName) return
+        if (lpparam.packageName == MODULE_PKG) {
+            Log.e(TAG, "Module own process: loading UI")
+            try {
+                Class.forName("com.microx.enhancer.ui.UiInitializer")
+                    .getDeclaredMethod("initAllUi", android.content.Context::class.java)
+                    .invoke(null, Class.forName("android.app.ActivityThread")
+                        .getMethod("currentApplication").invoke(null))
+            } catch (t: Throwable) {
+                Log.e(TAG, "UI init failed: ${t.message}")
+            }
+            return
+        }
 
         try {
-            if (lpparam.packageName == "android") return
-            if (!lpparam.isFirstApplication) return
             val pkg = lpparam.packageName ?: return
             val processName = lpparam.processName ?: return
+
+            if (pkg == "android") return
+
+            val ctx = try {
+                val at = Class.forName("android.app.ActivityThread")
+                    .getMethod("currentActivityThread").invoke(null)
+                Class.forName("android.app.ActivityThread")
+                    .getMethod("getApplication").invoke(at) as? android.content.Context
+            } catch (_: Throwable) { null }
+
+            val masterSwitch = if (ctx != null) ConfigClient.readMasterSwitch(ctx) else true
+            if (!masterSwitch) {
+                Log.e(TAG, "Master switch OFF via ContentProvider, skipping hooks")
+                return
+            }
 
             when (pkg) {
                 "com.tencent.mm" -> {
@@ -61,7 +84,6 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
     private fun onWeChatLoaded(lpparam: XC_LoadPackage.LoadPackageParam) {
         Log.e(TAG, "Loading WeChat hooks (integrated=${isIntegratedMode})")
         currentPkg = "com.tencent.mm"
-        EnvDetector.detect(lpparam)
 
         val modules = listOf(
             "SecurityBypass" to { SecurityBypassHook.hook(lpparam) },
@@ -92,7 +114,6 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
     private fun onQQLoaded(lpparam: XC_LoadPackage.LoadPackageParam) {
         Log.e(TAG, "Loading QQ hooks (integrated=${isIntegratedMode})")
         currentPkg = "com.tencent.mobileqq"
-        EnvDetector.detect(lpparam)
 
         val modules = listOf(
             "SecurityBypass" to { SecurityBypassHook.hook(lpparam) },

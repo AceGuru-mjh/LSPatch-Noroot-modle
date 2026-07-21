@@ -1,6 +1,7 @@
 package com.mjh.shizukufix
 
 import android.util.Log
+import com.mjh.shizukufix.core.ConfigClient
 import com.mjh.shizukufix.hooks.AutoGrantHelperHook
 import com.mjh.shizukufix.hooks.HideFromSceneHook
 import com.mjh.shizukufix.hooks.ScenePermissionRequesterHook
@@ -20,6 +21,7 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
     companion object {
         const val VERSION = "1.0.11"
         const val TAG = "LSP-ShizukuFix"
+        const val MODULE_PKG = "com.mjh.shizukufix"
         const val SCENE_PACKAGE = "com.omarea.vtools"
         val DEFAULT_SHIZUKU_PACKAGES = setOf("moe.shizuku.privileged.api", "rikka.shizuku.manager")
         var currentPkg: String? = null
@@ -42,10 +44,22 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
     }
 
     override fun handleLoadPackage(lpparam: XC_LoadPackage.LoadPackageParam) {
-        Log.e(TAG, "handleLoadPackage entered: pkg=${lpparam.packageName}")
+        Log.e(TAG, "handleLoadPackage entry: pkg=${lpparam.packageName}")
+
+        if (lpparam.packageName == MODULE_PKG) {
+            Log.e(TAG, "Module own process: loading UI")
+            try {
+                Class.forName("com.mjh.shizukufix.ui.UiInitializer")
+                    .getDeclaredMethod("initAllUi", android.content.Context::class.java)
+                    .invoke(null, Class.forName("android.app.ActivityThread")
+                        .getMethod("currentApplication").invoke(null))
+            } catch (t: Throwable) {
+                Log.e(TAG, "UI init failed: ${t.message}")
+            }
+            return
+        }
 
         val pkg = lpparam.packageName ?: return
-        val proc = lpparam.processName ?: pkg
 
         if (lpparam.processName != lpparam.packageName) return
 
@@ -54,12 +68,21 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
             Log.e(TAG, "Loading hooks for $pkg (integrated=${isIntegratedMode})")
 
             EnvDetector.detect(lpparam)
-            val cfg = loadConfig()
 
-            if (!cfg.masterEnabled) {
-                Log.e(TAG, "Master disabled, skipping hooks")
+            val ctx = try {
+                val at = Class.forName("android.app.ActivityThread")
+                    .getMethod("currentActivityThread").invoke(null)
+                Class.forName("android.app.ActivityThread")
+                    .getMethod("getApplication").invoke(at) as? android.content.Context
+            } catch (_: Throwable) { null }
+
+            val masterSwitch = if (ctx != null) ConfigClient.readMasterSwitch(ctx) else true
+            if (!masterSwitch) {
+                Log.e(TAG, "Master switch OFF via ContentProvider, skipping hooks")
                 return
             }
+
+            val cfg = loadConfig()
 
             if (pkg == SCENE_PACKAGE) {
                 Log.e(TAG, "=== Path A: Hooking Scene process ===")

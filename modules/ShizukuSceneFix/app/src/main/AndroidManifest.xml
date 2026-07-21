@@ -4,6 +4,8 @@
 
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 
     <application
         android:allowBackup="true"
@@ -14,8 +16,42 @@
 
         <meta-data android:name="xposedmodule" android:value="true" />
         <meta-data android:name="xposedminversion" android:value="82" />
-        <meta-data android:name="xposeddescription" android:value="ShizukuSceneFix - Shizuku Scene修复(纯Hook/无UI冲突)" />
+        <meta-data android:name="xposeddescription" android:value="ShizukuSceneFix - Shizuku Scene修复(核心/UI隔离架构)" />
         <meta-data android:name="xposedscope" android:resource="@array/xposed_scope" />
+
+        <provider
+            android:name=".core.ConfigProvider"
+            android:authorities="${applicationId}.configprovider"
+            android:exported="true" />
+
+        <activity
+            android:name=".ui.MainActivity"
+            android:exported="true"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".activities.PanelActivity"
+            android:exported="false" />
+
+        <service
+            android:name=".services.FloatingBallService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse" />
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
 
     </application>
 </manifest>

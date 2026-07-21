@@ -1,6 +1,7 @@
 package com.stepmod.noroot
 
 import android.util.Log
+import com.stepmod.noroot.core.ConfigClient
 import com.stepmod.noroot.hooks.*
 import com.stepmod.noroot.models.StepConfig
 import com.stepmod.noroot.utils.EnvDetector
@@ -14,6 +15,7 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
     companion object {
         const val VERSION = "1.0.11"
         const val TAG = "LSP-StepModifier"
+        const val MODULE_PKG = "com.stepmod.noroot"
         var currentPkg: String? = null
         var isIntegratedMode: Boolean = false
     }
@@ -34,7 +36,20 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
     }
 
     override fun handleLoadPackage(lpparam: XC_LoadPackage.LoadPackageParam) {
-        Log.e(TAG, "handleLoadPackage entered: pkg=${lpparam.packageName}")
+        Log.e(TAG, "handleLoadPackage entry: pkg=${lpparam.packageName}")
+
+        if (lpparam.packageName == MODULE_PKG) {
+            Log.e(TAG, "Module own process: loading UI")
+            try {
+                Class.forName("com.stepmod.noroot.ui.UiInitializer")
+                    .getDeclaredMethod("initAllUi", android.content.Context::class.java)
+                    .invoke(null, Class.forName("android.app.ActivityThread")
+                        .getMethod("currentApplication").invoke(null))
+            } catch (t: Throwable) {
+                Log.e(TAG, "UI init failed: ${t.message}")
+            }
+            return
+        }
 
         if (lpparam.processName != lpparam.packageName) return
 
@@ -49,11 +64,20 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
             EnvDetector.detect(lpparam)
 
-            val cfg = loadConfig()
-            if (!cfg.masterEnabled) {
-                Log.e(TAG, "Master disabled, skipping hooks")
+            val ctx = try {
+                val at = Class.forName("android.app.ActivityThread")
+                    .getMethod("currentActivityThread").invoke(null)
+                Class.forName("android.app.ActivityThread")
+                    .getMethod("getApplication").invoke(at) as? android.content.Context
+            } catch (_: Throwable) { null }
+
+            val masterSwitch = if (ctx != null) ConfigClient.readMasterSwitch(ctx) else true
+            if (!masterSwitch) {
+                Log.e(TAG, "Master switch OFF via ContentProvider, skipping hooks")
                 return
             }
+
+            val cfg = loadConfig()
 
             Log.e(TAG, "Loading StepSensorHook...")
             try { if (cfg.stepModifyEnabled) StepSensorHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "StepSensorHook FAIL: ${e.message}") }

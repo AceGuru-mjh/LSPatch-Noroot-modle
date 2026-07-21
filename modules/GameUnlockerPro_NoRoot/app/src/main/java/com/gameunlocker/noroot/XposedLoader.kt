@@ -1,6 +1,7 @@
 package com.gameunlocker.noroot
 
 import android.util.Log
+import com.gameunlocker.noroot.core.ConfigClient
 import com.gameunlocker.noroot.hooks.*
 import com.gameunlocker.noroot.models.GameConfig
 import com.gameunlocker.noroot.utils.EnvDetector
@@ -14,6 +15,7 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
     companion object {
         const val VERSION = "1.0.11"
         const val TAG = "LSP-GameUnlocker"
+        const val MODULE_PKG = "com.gameunlocker.noroot"
         var currentPkg: String? = null
         var isIntegratedMode: Boolean = false
     }
@@ -34,7 +36,20 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
     }
 
     override fun handleLoadPackage(lpparam: XC_LoadPackage.LoadPackageParam) {
-        Log.e(TAG, "handleLoadPackage entered: pkg=${lpparam.packageName}")
+        Log.e(TAG, "handleLoadPackage entry: pkg=${lpparam.packageName}")
+
+        if (lpparam.packageName == MODULE_PKG) {
+            Log.e(TAG, "Module own process: loading UI")
+            try {
+                Class.forName("com.gameunlocker.noroot.ui.UiInitializer")
+                    .getDeclaredMethod("initAllUi", android.content.Context::class.java)
+                    .invoke(null, Class.forName("android.app.ActivityThread")
+                        .getMethod("currentApplication").invoke(null))
+            } catch (t: Throwable) {
+                Log.e(TAG, "UI init failed: ${t.message}")
+            }
+            return
+        }
 
         if (lpparam.processName != lpparam.packageName) return
 
@@ -49,11 +64,20 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
             EnvDetector.detect(lpparam)
 
-            val cfg = loadConfig()
-            if (!cfg.masterEnabled) {
-                Log.e(TAG, "Master disabled, skipping hooks")
+            val ctx = try {
+                val at = Class.forName("android.app.ActivityThread")
+                    .getMethod("currentActivityThread").invoke(null)
+                Class.forName("android.app.ActivityThread")
+                    .getMethod("getApplication").invoke(at) as? android.content.Context
+            } catch (_: Throwable) { null }
+
+            val masterSwitch = if (ctx != null) ConfigClient.readMasterSwitch(ctx) else true
+            if (!masterSwitch) {
+                Log.e(TAG, "Master switch OFF via ContentProvider, skipping hooks")
                 return
             }
+
+            val cfg = loadConfig()
 
             Log.e(TAG, "Loading GameDetectionHideHook...")
             try { if (cfg.detectionHideEnabled) GameDetectionHideHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "GameDetectionHideHook FAIL: ${e.message}") }
