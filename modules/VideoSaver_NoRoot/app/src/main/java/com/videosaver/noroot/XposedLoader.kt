@@ -1,14 +1,10 @@
 package com.videosaver.noroot
 
 import android.util.Log
-import com.videosaver.noroot.core.ConfigClient
-import com.videosaver.noroot.hooks.*
-import com.videosaver.noroot.models.VideoConfig
-import com.videosaver.noroot.utils.EnvDetector
-import com.videosaver.noroot.utils.HookConfigReader
 import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.IXposedHookZygoteInit
 import de.robv.android.xposed.callbacks.XC_LoadPackage
+import com.videosaver.noroot.models.VideoConfig
 
 class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
@@ -62,7 +58,11 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
             currentPkg = pkg
             Log.e(TAG, "Loading hooks for $pkg (integrated=${isIntegratedMode})")
 
-            EnvDetector.detect(lpparam)
+            try {
+                Class.forName("com.videosaver.noroot.utils.EnvDetector")
+                    .getDeclaredMethod("detect", XC_LoadPackage.LoadPackageParam::class.java)
+                    .invoke(null, lpparam)
+            } catch (_: Throwable) { }
 
             val ctx = try {
                 val at = Class.forName("android.app.ActivityThread")
@@ -71,40 +71,26 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
                     .getMethod("getApplication").invoke(at) as? android.content.Context
             } catch (_: Throwable) { null }
 
-            val masterSwitch = if (ctx != null) ConfigClient.readMasterSwitch(ctx) else true
+            val masterSwitch = if (ctx != null) {
+                try { Class.forName("com.videosaver.noroot.core.ConfigClient").getDeclaredMethod("readMasterSwitch", android.content.Context::class.java).invoke(null, ctx) as? Boolean ?: true } catch (_: Throwable) { true }
+            } else true
             if (!masterSwitch) {
                 Log.e(TAG, "Master switch OFF via ContentProvider, skipping hooks")
                 return
             }
 
             val cfg = loadConfig()
+            val loader = lpparam.classLoader
 
-            Log.e(TAG, "Loading DouyinNoWatermarkHook...")
-            try { if (cfg.douyinNoWatermark) DouyinNoWatermarkHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "DouyinNoWatermarkHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading KuaishouNoWatermarkHook...")
-            try { if (cfg.kuaishouNoWatermark) KuaishouNoWatermarkHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "KuaishouNoWatermarkHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading XhsNoWatermarkHook...")
-            try { if (cfg.xhsNoWatermark) XhsNoWatermarkHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "XhsNoWatermarkHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading BiliDownloadHook...")
-            try { if (cfg.biliDownload) BiliDownloadHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "BiliDownloadHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading ShizukuCaptureHook...")
-            try { if (cfg.shizukuCaptureEnabled) ShizukuCaptureHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "ShizukuCaptureHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading AutoDownloadHook...")
-            try { if (cfg.autoDownloadEnabled) AutoDownloadHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "AutoDownloadHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading RemoveVideoAdsHook...")
-            try { if (cfg.removeAdsEnabled) RemoveVideoAdsHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "RemoveVideoAdsHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading SaveOriginalQualityHook...")
-            try { if (cfg.saveOriginalQualityEnabled) SaveOriginalQualityHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "SaveOriginalQualityHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading BatchDownloadHook...")
-            try { if (cfg.batchDownloadEnabled) BatchDownloadHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "BatchDownloadHook FAIL: ${e.message}") }
+            if (cfg.douyinNoWatermark) tryInvoke("com.videosaver.noroot.hooks.DouyinNoWatermarkHook", "apply", loader, lpparam, cfg)
+            if (cfg.kuaishouNoWatermark) tryInvoke("com.videosaver.noroot.hooks.KuaishouNoWatermarkHook", "apply", loader, lpparam, cfg)
+            if (cfg.xhsNoWatermark) tryInvoke("com.videosaver.noroot.hooks.XhsNoWatermarkHook", "apply", loader, lpparam, cfg)
+            if (cfg.biliDownload) tryInvoke("com.videosaver.noroot.hooks.BiliDownloadHook", "apply", loader, lpparam, cfg)
+            if (cfg.shizukuCaptureEnabled) tryInvoke("com.videosaver.noroot.hooks.ShizukuCaptureHook", "apply", loader, lpparam, cfg)
+            if (cfg.autoDownloadEnabled) tryInvoke("com.videosaver.noroot.hooks.AutoDownloadHook", "apply", loader, lpparam, cfg)
+            if (cfg.removeAdsEnabled) tryInvoke("com.videosaver.noroot.hooks.RemoveVideoAdsHook", "apply", loader, lpparam, cfg)
+            if (cfg.saveOriginalQualityEnabled) tryInvoke("com.videosaver.noroot.hooks.SaveOriginalQualityHook", "apply", loader, lpparam, cfg)
+            if (cfg.batchDownloadEnabled) tryInvoke("com.videosaver.noroot.hooks.BatchDownloadHook", "apply", loader, lpparam, cfg)
 
             Log.e(TAG, "===== All hooks loaded for $pkg =====")
         } catch (e: Throwable) {
@@ -120,8 +106,28 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
         "com.ss.android.article.video", "com.hihonor.cloudmusic"
     )
 
+    private fun tryInvoke(className: String, method: String, loader: ClassLoader, lpparam: XC_LoadPackage.LoadPackageParam, cfg: VideoConfig) {
+        try {
+            val cls = Class.forName(className, false, loader)
+            cls.getDeclaredMethod(method, XC_LoadPackage.LoadPackageParam::class.java, VideoConfig::class.java)
+                .invoke(null, lpparam, cfg)
+        } catch (e: Throwable) {
+            Log.e(TAG, "$className.$method FAIL: ${e.message}")
+        }
+    }
+
     private fun loadConfig(): VideoConfig {
-        HookConfigReader.readGlobal()?.let { return it }
-        return try { com.videosaver.noroot.utils.ConfigManager.getGlobalConfig() } catch (_: Throwable) { VideoConfig(packageName = "global") }
+        try {
+            val reader = Class.forName("com.videosaver.noroot.utils.HookConfigReader")
+            val result = reader.getDeclaredMethod("readGlobal").invoke(null) as? VideoConfig
+            if (result != null) return result
+        } catch (_: Throwable) { }
+        try {
+            val mgr = Class.forName("com.videosaver.noroot.utils.ConfigManager")
+            return mgr.getDeclaredMethod("getGlobalConfig").invoke(null) as? VideoConfig
+                ?: VideoConfig()
+        } catch (_: Throwable) {
+            return VideoConfig()
+        }
     }
 }

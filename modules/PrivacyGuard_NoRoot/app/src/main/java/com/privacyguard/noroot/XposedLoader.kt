@@ -1,14 +1,10 @@
 package com.privacyguard.noroot
 
 import android.util.Log
-import com.privacyguard.noroot.core.ConfigClient
-import com.privacyguard.noroot.hooks.*
-import com.privacyguard.noroot.models.PrivacyConfig
-import com.privacyguard.noroot.utils.EnvDetector
-import com.privacyguard.noroot.utils.HookConfigReader
 import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.IXposedHookZygoteInit
 import de.robv.android.xposed.callbacks.XC_LoadPackage
+import com.privacyguard.noroot.models.PrivacyConfig
 
 class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
@@ -62,7 +58,11 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
             currentPkg = pkg
             Log.e(TAG, "Loading hooks for $pkg (integrated=${isIntegratedMode})")
 
-            EnvDetector.detect(lpparam)
+            try {
+                Class.forName("com.privacyguard.noroot.utils.EnvDetector")
+                    .getDeclaredMethod("detect", XC_LoadPackage.LoadPackageParam::class.java)
+                    .invoke(null, lpparam)
+            } catch (_: Throwable) { }
 
             val ctx = try {
                 val at = Class.forName("android.app.ActivityThread")
@@ -71,49 +71,29 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
                     .getMethod("getApplication").invoke(at) as? android.content.Context
             } catch (_: Throwable) { null }
 
-            val masterSwitch = if (ctx != null) ConfigClient.readMasterSwitch(ctx) else true
+            val masterSwitch = if (ctx != null) {
+                try { Class.forName("com.privacyguard.noroot.core.ConfigClient").getDeclaredMethod("readMasterSwitch", android.content.Context::class.java).invoke(null, ctx) as? Boolean ?: true } catch (_: Throwable) { true }
+            } else true
             if (!masterSwitch) {
                 Log.e(TAG, "Master switch OFF via ContentProvider, skipping hooks")
                 return
             }
 
             val cfg = loadConfig()
+            val loader = lpparam.classLoader
 
-            Log.e(TAG, "Loading DeviceIdSpoofHook...")
-            try { if (cfg.deviceIdSpoofEnabled) DeviceIdSpoofHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "DeviceIdSpoofHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading ClipboardGuardHook...")
-            try { if (cfg.clipboardGuardEnabled) ClipboardGuardHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "ClipboardGuardHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading PermissionSpoofHook...")
-            try { if (cfg.permissionSpoofEnabled) PermissionSpoofHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "PermissionSpoofHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading PmRevokeHook...")
-            try { if (cfg.pmRevokeEnabled) PmRevokeHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "PmRevokeHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading LocationSpoofHook...")
-            try { if (cfg.locationSpoofEnabled) LocationSpoofHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "LocationSpoofHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading SensorFakerHook...")
-            try { if (cfg.sensorFakerEnabled) SensorFakerHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "SensorFakerHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading AdvertisingIdHook...")
-            try { if (cfg.advertisingIdBlockEnabled) AdvertisingIdHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "AdvertisingIdHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading PackageVisibilitySpoofHook...")
-            try { if (cfg.packageVisibilitySpoofEnabled) PackageVisibilitySpoofHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "PackageVisibilitySpoofHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading NetworkInfoSpoofHook...")
-            try { if (cfg.networkInfoSpoofEnabled) NetworkInfoSpoofHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "NetworkInfoSpoofHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading ScreenMetricsSpoofHook...")
-            try { if (cfg.screenMetricsSpoofEnabled) ScreenMetricsSpoofHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "ScreenMetricsSpoofHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading StoragePathSpoofHook...")
-            try { if (cfg.storagePathSpoofEnabled) StoragePathSpoofHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "StoragePathSpoofHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading PrivacyPlusHook...")
-            try { if (cfg.installStatusSpoofEnabled || cfg.mockLocationSystemLevelEnabled) PrivacyPlusHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "PrivacyPlusHook FAIL: ${e.message}") }
+            if (cfg.deviceIdSpoofEnabled) tryInvoke("com.privacyguard.noroot.hooks.DeviceIdSpoofHook", "apply", loader, lpparam, cfg)
+            if (cfg.clipboardGuardEnabled) tryInvoke("com.privacyguard.noroot.hooks.ClipboardGuardHook", "apply", loader, lpparam, cfg)
+            if (cfg.permissionSpoofEnabled) tryInvoke("com.privacyguard.noroot.hooks.PermissionSpoofHook", "apply", loader, lpparam, cfg)
+            if (cfg.pmRevokeEnabled) tryInvoke("com.privacyguard.noroot.hooks.PmRevokeHook", "apply", loader, lpparam, cfg)
+            if (cfg.locationSpoofEnabled) tryInvoke("com.privacyguard.noroot.hooks.LocationSpoofHook", "apply", loader, lpparam, cfg)
+            if (cfg.sensorFakerEnabled) tryInvoke("com.privacyguard.noroot.hooks.SensorFakerHook", "apply", loader, lpparam, cfg)
+            if (cfg.advertisingIdBlockEnabled) tryInvoke("com.privacyguard.noroot.hooks.AdvertisingIdHook", "apply", loader, lpparam, cfg)
+            if (cfg.packageVisibilitySpoofEnabled) tryInvoke("com.privacyguard.noroot.hooks.PackageVisibilitySpoofHook", "apply", loader, lpparam, cfg)
+            if (cfg.networkInfoSpoofEnabled) tryInvoke("com.privacyguard.noroot.hooks.NetworkInfoSpoofHook", "apply", loader, lpparam, cfg)
+            if (cfg.screenMetricsSpoofEnabled) tryInvoke("com.privacyguard.noroot.hooks.ScreenMetricsSpoofHook", "apply", loader, lpparam, cfg)
+            if (cfg.storagePathSpoofEnabled) tryInvoke("com.privacyguard.noroot.hooks.StoragePathSpoofHook", "apply", loader, lpparam, cfg)
+            if (cfg.installStatusSpoofEnabled || cfg.mockLocationSystemLevelEnabled) tryInvoke("com.privacyguard.noroot.hooks.PrivacyPlusHook", "apply", loader, lpparam, cfg)
 
             Log.e(TAG, "===== All hooks loaded for $pkg =====")
         } catch (e: Throwable) {
@@ -129,8 +109,28 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
         "com.sina.weibo"
     )
 
+    private fun tryInvoke(className: String, method: String, loader: ClassLoader, lpparam: XC_LoadPackage.LoadPackageParam, cfg: PrivacyConfig) {
+        try {
+            val cls = Class.forName(className, false, loader)
+            cls.getDeclaredMethod(method, XC_LoadPackage.LoadPackageParam::class.java, PrivacyConfig::class.java)
+                .invoke(null, lpparam, cfg)
+        } catch (e: Throwable) {
+            Log.e(TAG, "$className.$method FAIL: ${e.message}")
+        }
+    }
+
     private fun loadConfig(): PrivacyConfig {
-        HookConfigReader.readGlobal()?.let { return it }
-        return try { com.privacyguard.noroot.utils.ConfigManager.getGlobalConfig() } catch (_: Throwable) { PrivacyConfig(packageName = "global") }
+        try {
+            val reader = Class.forName("com.privacyguard.noroot.utils.HookConfigReader")
+            val result = reader.getDeclaredMethod("readGlobal").invoke(null) as? PrivacyConfig
+            if (result != null) return result
+        } catch (_: Throwable) { }
+        try {
+            val mgr = Class.forName("com.privacyguard.noroot.utils.ConfigManager")
+            return mgr.getDeclaredMethod("getGlobalConfig").invoke(null) as? PrivacyConfig
+                ?: PrivacyConfig()
+        } catch (_: Throwable) {
+            return PrivacyConfig()
+        }
     }
 }

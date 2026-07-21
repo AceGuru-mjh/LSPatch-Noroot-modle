@@ -1,20 +1,10 @@
 package com.mjh.shizukufix
 
 import android.util.Log
-import com.mjh.shizukufix.core.ConfigClient
-import com.mjh.shizukufix.hooks.AutoGrantHelperHook
-import com.mjh.shizukufix.hooks.HideFromSceneHook
-import com.mjh.shizukufix.hooks.ScenePermissionRequesterHook
-import com.mjh.shizukufix.hooks.ServiceWatchdogHook
-import com.mjh.shizukufix.hooks.ShizukuGrantHook
-import com.mjh.shizukufix.hooks.ShizukuListInjectorHook
-import com.mjh.shizukufix.hooks.ShizukuVariantDetectorHook
-import com.mjh.shizukufix.models.ShizukuFixConfig
-import com.mjh.shizukufix.utils.EnvDetector
-import com.mjh.shizukufix.utils.HookConfigReader
 import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.IXposedHookZygoteInit
 import de.robv.android.xposed.callbacks.XC_LoadPackage
+import com.mjh.shizukufix.models.ShizukuFixConfig
 
 class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
@@ -67,7 +57,11 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
             currentPkg = pkg
             Log.e(TAG, "Loading hooks for $pkg (integrated=${isIntegratedMode})")
 
-            EnvDetector.detect(lpparam)
+            try {
+                Class.forName("com.mjh.shizukufix.utils.EnvDetector")
+                    .getDeclaredMethod("detect", XC_LoadPackage.LoadPackageParam::class.java)
+                    .invoke(null, lpparam)
+            } catch (_: Throwable) { }
 
             val ctx = try {
                 val at = Class.forName("android.app.ActivityThread")
@@ -76,28 +70,31 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
                     .getMethod("getApplication").invoke(at) as? android.content.Context
             } catch (_: Throwable) { null }
 
-            val masterSwitch = if (ctx != null) ConfigClient.readMasterSwitch(ctx) else true
+            val masterSwitch = if (ctx != null) {
+                try { Class.forName("com.mjh.shizukufix.core.ConfigClient").getDeclaredMethod("readMasterSwitch", android.content.Context::class.java).invoke(null, ctx) as? Boolean ?: true } catch (_: Throwable) { true }
+            } else true
             if (!masterSwitch) {
                 Log.e(TAG, "Master switch OFF via ContentProvider, skipping hooks")
                 return
             }
 
             val cfg = loadConfig()
+            val loader = lpparam.classLoader
 
             if (pkg == SCENE_PACKAGE) {
                 Log.e(TAG, "=== Path A: Hooking Scene process ===")
-                try { if (cfg.sceneFixEnabled) ScenePermissionRequesterHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "ScenePermissionRequesterHook FAIL: ${e.message}") }
-                try { if (cfg.pmGrantEnabled) ShizukuGrantHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "ShizukuGrantHook FAIL: ${e.message}") }
-                try { if (cfg.hideFromSceneEnabled) HideFromSceneHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "HideFromSceneHook FAIL: ${e.message}") }
+                if (cfg.sceneFixEnabled) tryInvoke("com.mjh.shizukufix.hooks.ScenePermissionRequesterHook", "apply", loader, lpparam, cfg)
+                if (cfg.pmGrantEnabled) tryInvoke("com.mjh.shizukufix.hooks.ShizukuGrantHook", "apply", loader, lpparam, cfg)
+                if (cfg.hideFromSceneEnabled) tryInvoke("com.mjh.shizukufix.hooks.HideFromSceneHook", "apply", loader, lpparam, cfg)
                 return
             }
 
             if (isShizukuTarget(pkg)) {
                 Log.e(TAG, "=== Path B: Hooking Shizuku process ===")
-                try { if (cfg.variantDetectEnabled) ShizukuVariantDetectorHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "ShizukuVariantDetectorHook FAIL: ${e.message}") }
-                try { if (cfg.listInjectorEnabled) ShizukuListInjectorHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "ShizukuListInjectorHook FAIL: ${e.message}") }
-                try { if (cfg.serviceWatchdogEnabled) ServiceWatchdogHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "ServiceWatchdogHook FAIL: ${e.message}") }
-                try { if (cfg.autoGrantHelperEnabled) AutoGrantHelperHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "AutoGrantHelperHook FAIL: ${e.message}") }
+                if (cfg.variantDetectEnabled) tryInvoke("com.mjh.shizukufix.hooks.ShizukuVariantDetectorHook", "apply", loader, lpparam, cfg)
+                if (cfg.listInjectorEnabled) tryInvoke("com.mjh.shizukufix.hooks.ShizukuListInjectorHook", "apply", loader, lpparam, cfg)
+                if (cfg.serviceWatchdogEnabled) tryInvoke("com.mjh.shizukufix.hooks.ServiceWatchdogHook", "apply", loader, lpparam, cfg)
+                if (cfg.autoGrantHelperEnabled) tryInvoke("com.mjh.shizukufix.hooks.AutoGrantHelperHook", "apply", loader, lpparam, cfg)
                 return
             }
         } catch (e: Throwable) {
@@ -107,11 +104,35 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
     private fun isShizukuTarget(pkg: String): Boolean {
         if (pkg in DEFAULT_SHIZUKU_PACKAGES) return true
-        return ShizukuVariantDetectorHook.isShizukuProcess(pkg)
+        return try {
+            Class.forName("com.mjh.shizukufix.hooks.ShizukuVariantDetectorHook")
+                .getDeclaredMethod("isShizukuProcess", String::class.java)
+                .invoke(null, pkg) as? Boolean ?: false
+        } catch (_: Throwable) { false }
+    }
+
+    private fun tryInvoke(className: String, method: String, loader: ClassLoader, lpparam: XC_LoadPackage.LoadPackageParam, cfg: ShizukuFixConfig) {
+        try {
+            val cls = Class.forName(className, false, loader)
+            cls.getDeclaredMethod(method, XC_LoadPackage.LoadPackageParam::class.java, ShizukuFixConfig::class.java)
+                .invoke(null, lpparam, cfg)
+        } catch (e: Throwable) {
+            Log.e(TAG, "$className.$method FAIL: ${e.message}")
+        }
     }
 
     private fun loadConfig(): ShizukuFixConfig {
-        HookConfigReader.readGlobal()?.let { return it }
-        return try { com.mjh.shizukufix.utils.ConfigManager.getGlobalConfig() } catch (_: Throwable) { ShizukuFixConfig(packageName = "global") }
+        try {
+            val reader = Class.forName("com.mjh.shizukufix.utils.HookConfigReader")
+            val result = reader.getDeclaredMethod("readGlobal").invoke(null) as? ShizukuFixConfig
+            if (result != null) return result
+        } catch (_: Throwable) { }
+        try {
+            val mgr = Class.forName("com.mjh.shizukufix.utils.ConfigManager")
+            return mgr.getDeclaredMethod("getGlobalConfig").invoke(null) as? ShizukuFixConfig
+                ?: ShizukuFixConfig()
+        } catch (_: Throwable) {
+            return ShizukuFixConfig()
+        }
     }
 }

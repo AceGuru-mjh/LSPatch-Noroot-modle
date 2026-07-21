@@ -1,9 +1,6 @@
 package com.microx.enhancer
 
 import android.util.Log
-import com.microx.enhancer.core.ConfigClient
-import com.microx.enhancer.hooks.*
-import com.microx.enhancer.utils.HookHelper
 import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.IXposedHookZygoteInit
 import de.robv.android.xposed.callbacks.XC_LoadPackage
@@ -62,18 +59,25 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
                     .getMethod("getApplication").invoke(at) as? android.content.Context
             } catch (_: Throwable) { null }
 
-            val masterSwitch = if (ctx != null) ConfigClient.readMasterSwitch(ctx) else true
+            val masterSwitch = if (ctx != null) {
+                try { Class.forName("com.microx.enhancer.core.ConfigClient").getDeclaredMethod("readMasterSwitch", android.content.Context::class.java).invoke(null, ctx) as? Boolean ?: true } catch (_: Throwable) { true }
+            } else true
             if (!masterSwitch) {
                 Log.e(TAG, "Master switch OFF via ContentProvider, skipping hooks")
                 return
             }
 
+            val loader = lpparam.classLoader
+            val hHelper = Class.forName("com.microx.enhancer.utils.HookHelper")
+
             when (pkg) {
                 "com.tencent.mm" -> {
-                    if (HookHelper.isWeChatMainProcess(processName)) onWeChatLoaded(lpparam)
+                    val isMain = hHelper.getDeclaredMethod("isWeChatMainProcess", String::class.java).invoke(null, processName) as? Boolean ?: false
+                    if (isMain) onWeChatLoaded(lpparam, loader)
                 }
                 "com.tencent.mobileqq" -> {
-                    if (HookHelper.isQQMainProcess(processName)) onQQLoaded(lpparam)
+                    val isMain = hHelper.getDeclaredMethod("isQQMainProcess", String::class.java).invoke(null, processName) as? Boolean ?: false
+                    if (isMain) onQQLoaded(lpparam, loader)
                 }
             }
         } catch (e: Throwable) {
@@ -81,59 +85,47 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
         }
     }
 
-    private fun onWeChatLoaded(lpparam: XC_LoadPackage.LoadPackageParam) {
+    private fun onWeChatLoaded(lpparam: XC_LoadPackage.LoadPackageParam, loader: ClassLoader) {
         Log.e(TAG, "Loading WeChat hooks (integrated=${isIntegratedMode})")
         currentPkg = "com.tencent.mm"
 
-        val modules = listOf(
-            "SecurityBypass" to { SecurityBypassHook.hook(lpparam) },
-            "AdBlock" to { AdBlockHook.hook(lpparam) },
-            "AntiRecall" to { AntiRecallHook.hook(lpparam) },
-            "Moment" to { MomentHook.hook(lpparam) },
-            "UIMod" to { UIModHook.hook(lpparam) },
-            "Privacy" to { PrivacyHook.hook(lpparam) },
-            "BatchManager" to { BatchManagerHook.hook(lpparam) },
-            "AutoReply" to { AutoReplyHook.hook(lpparam) },
-            "VoiceMessageExport" to { VoiceMessageExportHook.hook(lpparam) },
-            "MessageSearchEnhance" to { MessageSearchEnhanceHook.hook(lpparam) },
-            "CustomTheme" to { CustomThemeHook.hook(lpparam) }
-        )
-
-        for ((name, hookAction) in modules) {
-            try {
-                hookAction.invoke()
-                Log.e(TAG, "[$name] OK")
-            } catch (e: Throwable) {
-                Log.e(TAG, "[$name] FAIL: ${e.message}")
-            }
-        }
+        tryInvokeNoCfg("com.microx.enhancer.hooks.SecurityBypassHook", "hook", loader, lpparam)
+        tryInvokeNoCfg("com.microx.enhancer.hooks.AdBlockHook", "hook", loader, lpparam)
+        tryInvokeNoCfg("com.microx.enhancer.hooks.AntiRecallHook", "hook", loader, lpparam)
+        tryInvokeNoCfg("com.microx.enhancer.hooks.MomentHook", "hook", loader, lpparam)
+        tryInvokeNoCfg("com.microx.enhancer.hooks.UIModHook", "hook", loader, lpparam)
+        tryInvokeNoCfg("com.microx.enhancer.hooks.PrivacyHook", "hook", loader, lpparam)
+        tryInvokeNoCfg("com.microx.enhancer.hooks.BatchManagerHook", "hook", loader, lpparam)
+        tryInvokeNoCfg("com.microx.enhancer.hooks.AutoReplyHook", "hook", loader, lpparam)
+        tryInvokeNoCfg("com.microx.enhancer.hooks.VoiceMessageExportHook", "hook", loader, lpparam)
+        tryInvokeNoCfg("com.microx.enhancer.hooks.MessageSearchEnhanceHook", "hook", loader, lpparam)
+        tryInvokeNoCfg("com.microx.enhancer.hooks.CustomThemeHook", "hook", loader, lpparam)
 
         Log.e(TAG, "===== WeChat hooks loaded =====")
     }
 
-    private fun onQQLoaded(lpparam: XC_LoadPackage.LoadPackageParam) {
+    private fun onQQLoaded(lpparam: XC_LoadPackage.LoadPackageParam, loader: ClassLoader) {
         Log.e(TAG, "Loading QQ hooks (integrated=${isIntegratedMode})")
         currentPkg = "com.tencent.mobileqq"
 
-        val modules = listOf(
-            "SecurityBypass" to { SecurityBypassHook.hook(lpparam) },
-            "AdBlock-QQ" to { AdBlockHook.hookQQ(lpparam) },
-            "AntiRecall-QQ" to { AntiRecallHook.hookQQ(lpparam) },
-            "UIMod-QQ" to { UIModHook.hookQQ(lpparam) },
-            "Privacy-QQ" to { PrivacyHook.hookQQ(lpparam) },
-            "AutoReply-QQ" to { AutoReplyHook.hookQQ(lpparam) },
-            "CustomTheme-QQ" to { CustomThemeHook.hookQQ(lpparam) }
-        )
-
-        for ((name, hookAction) in modules) {
-            try {
-                hookAction.invoke()
-                Log.e(TAG, "[$name] OK")
-            } catch (e: Throwable) {
-                Log.e(TAG, "[$name] FAIL: ${e.message}")
-            }
-        }
+        tryInvokeNoCfg("com.microx.enhancer.hooks.SecurityBypassHook", "hook", loader, lpparam)
+        tryInvokeNoCfg("com.microx.enhancer.hooks.AdBlockHook", "hookQQ", loader, lpparam)
+        tryInvokeNoCfg("com.microx.enhancer.hooks.AntiRecallHook", "hookQQ", loader, lpparam)
+        tryInvokeNoCfg("com.microx.enhancer.hooks.UIModHook", "hookQQ", loader, lpparam)
+        tryInvokeNoCfg("com.microx.enhancer.hooks.PrivacyHook", "hookQQ", loader, lpparam)
+        tryInvokeNoCfg("com.microx.enhancer.hooks.AutoReplyHook", "hookQQ", loader, lpparam)
+        tryInvokeNoCfg("com.microx.enhancer.hooks.CustomThemeHook", "hookQQ", loader, lpparam)
 
         Log.e(TAG, "===== QQ hooks loaded =====")
+    }
+
+    private fun tryInvokeNoCfg(className: String, method: String, loader: ClassLoader, lpparam: XC_LoadPackage.LoadPackageParam) {
+        try {
+            val cls = Class.forName(className, false, loader)
+            cls.getDeclaredMethod(method, XC_LoadPackage.LoadPackageParam::class.java)
+                .invoke(null, lpparam)
+        } catch (e: Throwable) {
+            Log.e(TAG, "$className.$method FAIL: ${e.message}")
+        }
     }
 }

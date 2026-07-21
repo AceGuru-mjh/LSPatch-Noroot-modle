@@ -1,23 +1,11 @@
 package com.adblockerx.noroot
 
 import android.util.Log
-import com.adblockerx.noroot.core.ConfigClient
-import com.adblockerx.noroot.hooks.AdViewHideHook
-import com.adblockerx.noroot.hooks.AdClosePlusHook
-import com.adblockerx.noroot.hooks.CookieCleanHook
-import com.adblockerx.noroot.hooks.HostsFilterHook
-import com.adblockerx.noroot.hooks.IntentInterceptorHook
-import com.adblockerx.noroot.hooks.OkHttpAdHook
-import com.adblockerx.noroot.hooks.RedirectBlockHook
-import com.adblockerx.noroot.hooks.ShizukuDnsHook
-import com.adblockerx.noroot.hooks.TrackerBlockHook
-import com.adblockerx.noroot.hooks.URLConnectionAdHook
-import com.adblockerx.noroot.hooks.WebViewAdHook
-import com.adblockerx.noroot.utils.EnvDetector
-import com.adblockerx.noroot.utils.HookConfigReader
 import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.IXposedHookZygoteInit
+import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.callbacks.XC_LoadPackage
+import com.adblockerx.noroot.models.AdBlockConfig
 
 class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
@@ -26,100 +14,65 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
         const val TAG = "LSP-AdBlockerX"
         const val MODULE_PKG = "com.adblockerx.noroot"
         var currentPkg: String? = null
-        var isIntegratedMode: Boolean = false
+        var ctx: android.content.Context? = null
     }
 
     override fun initZygote(param: IXposedHookZygoteInit.StartupParam) {
-        isIntegratedMode = try {
-            Class.forName("org.lsposed.lspatch.LSPatch")
-            false
-        } catch (_: Throwable) {
-            true
-        }
-
-        if (isIntegratedMode) {
-            Log.e(TAG, "Integrated mode: UI stripped, hooks only")
-        } else {
-            Log.e(TAG, "AdBlockerX NoRoot v$VERSION initZygote (local mode)")
-        }
+        Log.e(TAG, "AdBlockerX NoRoot v$VERSION initZygote")
     }
 
     override fun handleLoadPackage(lpparam: XC_LoadPackage.LoadPackageParam) {
-        Log.e(TAG, "handleLoadPackage entry: pkg=${lpparam.packageName}")
-
-        if (lpparam.packageName == MODULE_PKG) {
-            Log.e(TAG, "Module own process: loading UI")
-            try {
-                Class.forName("com.adblockerx.noroot.ui.UiInitializer")
-                    .getDeclaredMethod("initAllUi", android.content.Context::class.java)
-                    .invoke(null, Class.forName("android.app.ActivityThread")
-                        .getMethod("currentApplication").invoke(null))
-            } catch (t: Throwable) {
-                Log.e(TAG, "UI init failed: ${t.message}")
-            }
-            return
-        }
-
+        // 非主进程直接跳过
         if (lpparam.processName != lpparam.packageName) return
 
         try {
-            if (lpparam.packageName == "android") return
-            if (!lpparam.isFirstApplication) return
-            val pkg = lpparam.packageName ?: return
-            if (!isTargetApp(pkg)) return
-
-            currentPkg = pkg
-            Log.e(TAG, "Loading hooks for $pkg (integrated=${isIntegratedMode})")
-
-            EnvDetector.detect(lpparam)
-
-            val ctx = try {
-                val at = Class.forName("android.app.ActivityThread")
-                    .getMethod("currentActivityThread").invoke(null)
-                Class.forName("android.app.ActivityThread")
-                    .getMethod("getApplication").invoke(at) as? android.content.Context
-            } catch (_: Throwable) { null }
-
-            val masterSwitch = if (ctx != null) ConfigClient.readMasterSwitch(ctx) else true
-            if (!masterSwitch) {
-                Log.e(TAG, "Master switch OFF via ContentProvider, skipping hooks")
+            // ===== 模块自身进程: 反射加载UI =====
+            if (lpparam.packageName == MODULE_PKG) {
+                Log.e(TAG, "Module own process - loading UI via reflection")
+                initConfig(lpparam)
+                try {
+                    Class.forName("com.adblockerx.noroot.ui.UiInitializer")
+                        .getDeclaredMethod("initAllUi", android.content.Context::class.java)
+                        .invoke(null, ctx)
+                } catch (t: Throwable) {
+                    Log.e(TAG, "UI init failed: ${t.message}")
+                }
                 return
             }
 
+            // ===== 宿主进程: 纯Hook(反射加载, 绝不import hook类) =====
+            val pkg = lpparam.packageName ?: return
+            if (pkg == "android") return
+            if (!isTargetApp(pkg)) return
+
+            currentPkg = pkg
+            initConfig(lpparam)
+            Log.e(TAG, "Host process: loading hooks for $pkg (reflection mode)")
+
             val cfg = loadConfig()
+            if (!cfg.masterEnabled) return
 
-            Log.e(TAG, "Loading HostsFilterHook...")
-            try { if (cfg.hostsFilterEnabled) HostsFilterHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "HostsFilterHook FAIL: ${e.message}") }
+            // 全部用反射调用, 宿主进程不 import 任何 hook 类
+            val loader = lpparam.classLoader
 
-            Log.e(TAG, "Loading WebViewAdHook...")
-            try { if (cfg.webviewAdEnabled) WebViewAdHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "WebViewAdHook FAIL: ${e.message}") }
+            tryInvoke("com.adblockerx.noroot.hooks.HostsFilterHook", "apply", loader, lpparam, cfg)
+            if (cfg.hostsFilterEnabled) tryInvoke("com.adblockerx.noroot.hooks.HostsFilterHook", "apply", loader, lpparam, cfg)
 
-            Log.e(TAG, "Loading OkHttpAdHook...")
-            try { if (cfg.okHttpAdEnabled) OkHttpAdHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "OkHttpAdHook FAIL: ${e.message}") }
+            if (cfg.webviewAdEnabled) tryInvoke("com.adblockerx.noroot.hooks.WebViewAdHook", "apply", loader, lpparam, cfg)
+            if (cfg.okHttpAdEnabled) tryInvoke("com.adblockerx.noroot.hooks.OkHttpAdHook", "apply", loader, lpparam, cfg)
+            if (cfg.urlConnectionAdEnabled) tryInvoke("com.adblockerx.noroot.hooks.URLConnectionAdHook", "apply", loader, lpparam, cfg)
+            if (cfg.adViewHideEnabled) tryInvoke("com.adblockerx.noroot.hooks.AdViewHideHook", "apply", loader, lpparam, cfg)
 
-            Log.e(TAG, "Loading URLConnectionAdHook...")
-            try { if (cfg.urlConnectionAdEnabled) URLConnectionAdHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "URLConnectionAdHook FAIL: ${e.message}") }
+            if (cfg.trackerBlockEnabled) tryInvoke("com.adblockerx.noroot.hooks.TrackerBlockHook", "apply", loader, lpparam, cfg)
+            if (cfg.cookieCleanEnabled) tryInvoke("com.adblockerx.noroot.hooks.CookieCleanHook", "apply", loader, lpparam, cfg)
+            if (cfg.redirectBlockEnabled) tryInvoke("com.adblockerx.noroot.hooks.RedirectBlockHook", "apply", loader, lpparam, cfg)
+            if (cfg.intentInterceptorEnabled) tryInvoke("com.adblockerx.noroot.hooks.IntentInterceptorHook", "apply", loader, lpparam, cfg)
 
-            Log.e(TAG, "Loading AdViewHideHook...")
-            try { if (cfg.adViewHideEnabled) AdViewHideHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "AdViewHideHook FAIL: ${e.message}") }
+            if (cfg.screenshotUnlockEnabled || cfg.shakeAdBlockEnabled || cfg.vpnDetectBypassEnabled)
+                tryInvoke("com.adblockerx.noroot.hooks.AdClosePlusHook", "apply", loader, lpparam, cfg)
 
-            Log.e(TAG, "Loading TrackerBlockHook...")
-            try { if (cfg.trackerBlockEnabled) TrackerBlockHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "TrackerBlockHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading CookieCleanHook...")
-            try { if (cfg.cookieCleanEnabled) CookieCleanHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "CookieCleanHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading RedirectBlockHook...")
-            try { if (cfg.redirectBlockEnabled) RedirectBlockHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "RedirectBlockHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading IntentInterceptorHook...")
-            try { if (cfg.intentInterceptorEnabled) IntentInterceptorHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "IntentInterceptorHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading AdClosePlusHook...")
-            try { if (cfg.screenshotUnlockEnabled || cfg.shakeAdBlockEnabled || cfg.vpnDetectBypassEnabled) AdClosePlusHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "AdClosePlusHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading ShizukuDnsHook...")
-            try { if (cfg.dnsAdBlockEnabled) ShizukuDnsHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "ShizukuDnsHook FAIL: ${e.message}") }
+            if (cfg.dnsAdBlockEnabled)
+                tryInvoke("com.adblockerx.noroot.hooks.ShizukuDnsHook", "apply", loader, lpparam, cfg)
 
             Log.e(TAG, "===== All hooks loaded for $pkg =====")
         } catch (e: Throwable) {
@@ -127,26 +80,53 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
         }
     }
 
+    /** 反射调用 hook 的 apply 方法, 绝不 import hook 类 */
+    private fun tryInvoke(className: String, method: String, loader: ClassLoader, lpparam: XC_LoadPackage.LoadPackageParam, cfg: AdBlockConfig) {
+        try {
+            val cls = Class.forName(className, false, loader)
+            cls.getDeclaredMethod(method, XC_LoadPackage.LoadPackageParam::class.java, AdBlockConfig::class.java)
+                .invoke(null, lpparam, cfg)
+        } catch (e: Throwable) {
+            Log.e(TAG, "$className.$method FAIL: ${e.message}")
+        }
+    }
+
     private fun isTargetApp(pkg: String) = pkg in listOf(
-        "com.android.chrome",
-        "com.mi.globalbrowser",
-        "com.huawei.browser",
-        "com.sec.android.app.sbrowser",
-        "com.tencent.mm",
-        "com.tencent.mobileqq",
-        "com.ss.android.ugc.aweme",
-        "com.smile.gifmaker",
-        "com.taobao.taobao",
-        "com.jingdong.app.mall",
-        "com.xunmeng.pinduoduo",
-        "com.eg.android.AlipayGphone",
-        "com.zhihu.android",
-        "com.netease.cloudmusic",
-        "com.tencent.wmusic"
+        "com.android.chrome", "com.mi.globalbrowser", "com.huawei.browser",
+        "com.sec.android.app.sbrowser", "com.tencent.mm", "com.tencent.mobileqq",
+        "com.ss.android.ugc.aweme", "com.smile.gifmaker", "com.taobao.taobao",
+        "com.jingdong.app.mall", "com.xunmeng.pinduoduo", "com.eg.android.AlipayGphone",
+        "com.zhihu.android", "com.netease.cloudmusic", "com.tencent.wmusic"
     )
 
-    private fun loadConfig(): com.adblockerx.noroot.models.AdBlockConfig {
-        HookConfigReader.readGlobal()?.let { return it }
-        return try { com.adblockerx.noroot.utils.ConfigManager.getGlobalConfig() } catch (_: Throwable) { com.adblockerx.noroot.models.AdBlockConfig() }
+    private fun initConfig(lpparam: XC_LoadPackage.LoadPackageParam) {
+        try {
+            val at = XposedHelpers.findClass("android.app.ActivityThread", lpparam.classLoader)
+            val cat = XposedHelpers.callStaticMethod(at, "currentActivityThread")
+            val app = XposedHelpers.callMethod(cat, "getApplication") as? android.app.Application
+            if (app != null) {
+                ctx = app
+                try {
+                    Class.forName("com.adblockerx.noroot.utils.ConfigManager")
+                        .getDeclaredMethod("init", android.content.Context::class.java)
+                        .invoke(null, app)
+                } catch (_: Throwable) { }
+            }
+        } catch (_: Throwable) { }
+    }
+
+    private fun loadConfig(): AdBlockConfig {
+        try {
+            val reader = Class.forName("com.adblockerx.noroot.utils.HookConfigReader")
+            val result = reader.getDeclaredMethod("readGlobal").invoke(null) as? AdBlockConfig
+            if (result != null) return result
+        } catch (_: Throwable) { }
+        try {
+            val mgr = Class.forName("com.adblockerx.noroot.utils.ConfigManager")
+            return mgr.getDeclaredMethod("getGlobalConfig").invoke(null) as? AdBlockConfig
+                ?: AdBlockConfig()
+        } catch (_: Throwable) {
+            return AdBlockConfig()
+        }
     }
 }

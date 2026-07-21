@@ -1,20 +1,16 @@
 package com.stepmod.noroot
 
 import android.util.Log
-import com.stepmod.noroot.core.ConfigClient
-import com.stepmod.noroot.hooks.*
-import com.stepmod.noroot.models.StepConfig
-import com.stepmod.noroot.utils.EnvDetector
-import com.stepmod.noroot.utils.HookConfigReader
 import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.IXposedHookZygoteInit
 import de.robv.android.xposed.callbacks.XC_LoadPackage
+import com.stepmod.noroot.models.StepConfig
 
 class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
     companion object {
         const val VERSION = "1.0.12"
-        const val TAG = "LSP-StepModifier"
+        const val TAG = "LSP-StepMod"
         const val MODULE_PKG = "com.stepmod.noroot"
         var currentPkg: String? = null
         var isIntegratedMode: Boolean = false
@@ -62,7 +58,11 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
             currentPkg = pkg
             Log.e(TAG, "Loading hooks for $pkg (integrated=${isIntegratedMode})")
 
-            EnvDetector.detect(lpparam)
+            try {
+                Class.forName("com.stepmod.noroot.utils.EnvDetector")
+                    .getDeclaredMethod("detect", XC_LoadPackage.LoadPackageParam::class.java)
+                    .invoke(null, lpparam)
+            } catch (_: Throwable) { }
 
             val ctx = try {
                 val at = Class.forName("android.app.ActivityThread")
@@ -71,34 +71,24 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
                     .getMethod("getApplication").invoke(at) as? android.content.Context
             } catch (_: Throwable) { null }
 
-            val masterSwitch = if (ctx != null) ConfigClient.readMasterSwitch(ctx) else true
+            val masterSwitch = if (ctx != null) {
+                try { Class.forName("com.stepmod.noroot.core.ConfigClient").getDeclaredMethod("readMasterSwitch", android.content.Context::class.java).invoke(null, ctx) as? Boolean ?: true } catch (_: Throwable) { true }
+            } else true
             if (!masterSwitch) {
                 Log.e(TAG, "Master switch OFF via ContentProvider, skipping hooks")
                 return
             }
 
             val cfg = loadConfig()
+            val loader = lpparam.classLoader
 
-            Log.e(TAG, "Loading StepSensorHook...")
-            try { if (cfg.stepModifyEnabled) StepSensorHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "StepSensorHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading StepReportHook...")
-            try { if (cfg.stepModifyEnabled) StepReportHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "StepReportHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading StepCounterHook...")
-            try { if (cfg.stepModifyEnabled) StepCounterHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "StepCounterHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading ContentProviderInjectHook...")
-            try { if (cfg.contentProviderInjectEnabled) ContentProviderInjectHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "ContentProviderInjectHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading SensorBlockHook...")
-            try { if (cfg.sensorBlockEnabled) SensorBlockHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "SensorBlockHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading MultiAppSyncHook...")
-            try { if (cfg.multiAppSyncEnabled) MultiAppSyncHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "MultiAppSyncHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading StepHistoryFakeHook...")
-            try { if (cfg.stepHistoryFakeEnabled) StepHistoryFakeHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "StepHistoryFakeHook FAIL: ${e.message}") }
+            if (cfg.stepModifyEnabled) tryInvoke("com.stepmod.noroot.hooks.StepSensorHook", "apply", loader, lpparam, cfg)
+            if (cfg.stepModifyEnabled) tryInvoke("com.stepmod.noroot.hooks.StepReportHook", "apply", loader, lpparam, cfg)
+            if (cfg.stepModifyEnabled) tryInvoke("com.stepmod.noroot.hooks.StepCounterHook", "apply", loader, lpparam, cfg)
+            if (cfg.contentProviderInjectEnabled) tryInvoke("com.stepmod.noroot.hooks.ContentProviderInjectHook", "apply", loader, lpparam, cfg)
+            if (cfg.sensorBlockEnabled) tryInvoke("com.stepmod.noroot.hooks.SensorBlockHook", "apply", loader, lpparam, cfg)
+            if (cfg.multiAppSyncEnabled) tryInvoke("com.stepmod.noroot.hooks.MultiAppSyncHook", "apply", loader, lpparam, cfg)
+            if (cfg.stepHistoryFakeEnabled) tryInvoke("com.stepmod.noroot.hooks.StepHistoryFakeHook", "apply", loader, lpparam, cfg)
 
             Log.e(TAG, "===== All hooks loaded for $pkg =====")
         } catch (e: Throwable) {
@@ -115,8 +105,28 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
         "com.taobao.taobao", "com.jingdong.app.mall"
     )
 
+    private fun tryInvoke(className: String, method: String, loader: ClassLoader, lpparam: XC_LoadPackage.LoadPackageParam, cfg: StepConfig) {
+        try {
+            val cls = Class.forName(className, false, loader)
+            cls.getDeclaredMethod(method, XC_LoadPackage.LoadPackageParam::class.java, StepConfig::class.java)
+                .invoke(null, lpparam, cfg)
+        } catch (e: Throwable) {
+            Log.e(TAG, "$className.$method FAIL: ${e.message}")
+        }
+    }
+
     private fun loadConfig(): StepConfig {
-        HookConfigReader.readGlobal()?.let { return it }
-        return try { com.stepmod.noroot.utils.ConfigManager.getGlobalConfig() } catch (_: Throwable) { StepConfig(packageName = "global") }
+        try {
+            val reader = Class.forName("com.stepmod.noroot.utils.HookConfigReader")
+            val result = reader.getDeclaredMethod("readGlobal").invoke(null) as? StepConfig
+            if (result != null) return result
+        } catch (_: Throwable) { }
+        try {
+            val mgr = Class.forName("com.stepmod.noroot.utils.ConfigManager")
+            return mgr.getDeclaredMethod("getGlobalConfig").invoke(null) as? StepConfig
+                ?: StepConfig()
+        } catch (_: Throwable) {
+            return StepConfig()
+        }
     }
 }

@@ -1,14 +1,10 @@
 package com.batteryopt.noroot
 
 import android.util.Log
-import com.batteryopt.noroot.core.ConfigClient
-import com.batteryopt.noroot.hooks.*
-import com.batteryopt.noroot.models.BatteryConfig
-import com.batteryopt.noroot.utils.EnvDetector
-import com.batteryopt.noroot.utils.HookConfigReader
 import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.IXposedHookZygoteInit
 import de.robv.android.xposed.callbacks.XC_LoadPackage
+import com.batteryopt.noroot.models.BatteryConfig
 
 class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
@@ -62,7 +58,11 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
             currentPkg = pkg
             Log.e(TAG, "Loading hooks for $pkg (integrated=${isIntegratedMode})")
 
-            EnvDetector.detect(lpparam)
+            try {
+                Class.forName("com.batteryopt.noroot.utils.EnvDetector")
+                    .getDeclaredMethod("detect", XC_LoadPackage.LoadPackageParam::class.java)
+                    .invoke(null, lpparam)
+            } catch (_: Throwable) { }
 
             val ctx = try {
                 val at = Class.forName("android.app.ActivityThread")
@@ -71,46 +71,28 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
                     .getMethod("getApplication").invoke(at) as? android.content.Context
             } catch (_: Throwable) { null }
 
-            val masterSwitch = if (ctx != null) ConfigClient.readMasterSwitch(ctx) else true
+            val masterSwitch = if (ctx != null) {
+                try { Class.forName("com.batteryopt.noroot.core.ConfigClient").getDeclaredMethod("readMasterSwitch", android.content.Context::class.java).invoke(null, ctx) as? Boolean ?: true } catch (_: Throwable) { true }
+            } else true
             if (!masterSwitch) {
                 Log.e(TAG, "Master switch OFF via ContentProvider, skipping hooks")
                 return
             }
 
             val cfg = loadConfig()
+            val loader = lpparam.classLoader
 
-            Log.e(TAG, "Loading WakeLockHook...")
-            try { if (cfg.wakeLockEnabled) WakeLockHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "WakeLockHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading AlarmOptimizerHook...")
-            try { if (cfg.alarmEnabled) AlarmOptimizerHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "AlarmOptimizerHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading BackgroundSyncHook...")
-            try { if (cfg.syncEnabled) BackgroundSyncHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "BackgroundSyncHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading AppOpsRestrictHook...")
-            try { if (cfg.appOpsRestrictEnabled) AppOpsRestrictHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "AppOpsRestrictHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading JobSchedulerHook...")
-            try { if (cfg.jobEnabled) JobSchedulerHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "JobSchedulerHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading LocationOptHook...")
-            try { if (cfg.locationEnabled) LocationOptHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "LocationOptHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading AnimationOptHook...")
-            try { if (cfg.animationEnabled) AnimationOptHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "AnimationOptHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading SensorOptHook...")
-            try { if (cfg.sensorEnabled) SensorOptHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "SensorOptHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading BluetoothScanThrottleHook...")
-            try { if (cfg.bluetoothScanThrottleEnabled) BluetoothScanThrottleHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "BluetoothScanThrottleHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading CameraBackgroundBlockHook...")
-            try { if (cfg.cameraBackgroundBlockEnabled) CameraBackgroundBlockHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "CameraBackgroundBlockHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading VibratorThrottleHook...")
-            try { if (cfg.vibratorThrottleEnabled) VibratorThrottleHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "VibratorThrottleHook FAIL: ${e.message}") }
+            if (cfg.wakeLockEnabled) tryInvoke("com.batteryopt.noroot.hooks.WakeLockHook", "apply", loader, lpparam, cfg)
+            if (cfg.alarmEnabled) tryInvoke("com.batteryopt.noroot.hooks.AlarmOptimizerHook", "apply", loader, lpparam, cfg)
+            if (cfg.syncEnabled) tryInvoke("com.batteryopt.noroot.hooks.BackgroundSyncHook", "apply", loader, lpparam, cfg)
+            if (cfg.appOpsRestrictEnabled) tryInvoke("com.batteryopt.noroot.hooks.AppOpsRestrictHook", "apply", loader, lpparam, cfg)
+            if (cfg.jobEnabled) tryInvoke("com.batteryopt.noroot.hooks.JobSchedulerHook", "apply", loader, lpparam, cfg)
+            if (cfg.locationEnabled) tryInvoke("com.batteryopt.noroot.hooks.LocationOptHook", "apply", loader, lpparam, cfg)
+            if (cfg.animationEnabled) tryInvoke("com.batteryopt.noroot.hooks.AnimationOptHook", "apply", loader, lpparam, cfg)
+            if (cfg.sensorEnabled) tryInvoke("com.batteryopt.noroot.hooks.SensorOptHook", "apply", loader, lpparam, cfg)
+            if (cfg.bluetoothScanThrottleEnabled) tryInvoke("com.batteryopt.noroot.hooks.BluetoothScanThrottleHook", "apply", loader, lpparam, cfg)
+            if (cfg.cameraBackgroundBlockEnabled) tryInvoke("com.batteryopt.noroot.hooks.CameraBackgroundBlockHook", "apply", loader, lpparam, cfg)
+            if (cfg.vibratorThrottleEnabled) tryInvoke("com.batteryopt.noroot.hooks.VibratorThrottleHook", "apply", loader, lpparam, cfg)
 
             Log.e(TAG, "===== All hooks loaded for $pkg =====")
         } catch (e: Throwable) {
@@ -128,8 +110,28 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
         "com.netease.mail", "com.tencent.androidqqmail"
     )
 
+    private fun tryInvoke(className: String, method: String, loader: ClassLoader, lpparam: XC_LoadPackage.LoadPackageParam, cfg: BatteryConfig) {
+        try {
+            val cls = Class.forName(className, false, loader)
+            cls.getDeclaredMethod(method, XC_LoadPackage.LoadPackageParam::class.java, BatteryConfig::class.java)
+                .invoke(null, lpparam, cfg)
+        } catch (e: Throwable) {
+            Log.e(TAG, "$className.$method FAIL: ${e.message}")
+        }
+    }
+
     private fun loadConfig(): BatteryConfig {
-        HookConfigReader.readGlobal()?.let { return it }
-        return try { com.batteryopt.noroot.utils.ConfigManager.getGlobalConfig() } catch (_: Throwable) { BatteryConfig(packageName = "global") }
+        try {
+            val reader = Class.forName("com.batteryopt.noroot.utils.HookConfigReader")
+            val result = reader.getDeclaredMethod("readGlobal").invoke(null) as? BatteryConfig
+            if (result != null) return result
+        } catch (_: Throwable) { }
+        try {
+            val mgr = Class.forName("com.batteryopt.noroot.utils.ConfigManager")
+            return mgr.getDeclaredMethod("getGlobalConfig").invoke(null) as? BatteryConfig
+                ?: BatteryConfig()
+        } catch (_: Throwable) {
+            return BatteryConfig()
+        }
     }
 }

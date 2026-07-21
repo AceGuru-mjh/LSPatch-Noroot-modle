@@ -1,14 +1,10 @@
 package com.notifymaster.noroot
 
 import android.util.Log
-import com.notifymaster.noroot.core.ConfigClient
-import com.notifymaster.noroot.hooks.*
-import com.notifymaster.noroot.models.NotifyConfig
-import com.notifymaster.noroot.utils.EnvDetector
-import com.notifymaster.noroot.utils.HookConfigReader
 import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.IXposedHookZygoteInit
 import de.robv.android.xposed.callbacks.XC_LoadPackage
+import com.notifymaster.noroot.models.NotifyConfig
 
 class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
@@ -62,7 +58,11 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
             currentPkg = pkg
             Log.e(TAG, "Loading hooks for $pkg (integrated=${isIntegratedMode})")
 
-            EnvDetector.detect(lpparam)
+            try {
+                Class.forName("com.notifymaster.noroot.utils.EnvDetector")
+                    .getDeclaredMethod("detect", XC_LoadPackage.LoadPackageParam::class.java)
+                    .invoke(null, lpparam)
+            } catch (_: Throwable) { }
 
             val ctx = try {
                 val at = Class.forName("android.app.ActivityThread")
@@ -71,7 +71,9 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
                     .getMethod("getApplication").invoke(at) as? android.content.Context
             } catch (_: Throwable) { null }
 
-            val masterSwitch = if (ctx != null) ConfigClient.readMasterSwitch(ctx) else true
+            val masterSwitch = if (ctx != null) {
+                try { Class.forName("com.notifymaster.noroot.core.ConfigClient").getDeclaredMethod("readMasterSwitch", android.content.Context::class.java).invoke(null, ctx) as? Boolean ?: true } catch (_: Throwable) { true }
+            } else true
             if (!masterSwitch) {
                 Log.e(TAG, "Master switch OFF via ContentProvider, skipping hooks")
                 return
@@ -79,30 +81,16 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
             val cfg = loadConfig()
             cfg.packageName = pkg
+            val loader = lpparam.classLoader
 
-            Log.e(TAG, "Loading NotifyFilterHook...")
-            try { if (cfg.notifyFilterEnabled) NotifyFilterHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "NotifyFilterHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading AntiRecallNotifyHook...")
-            try { if (cfg.antiRecallNotifyEnabled) AntiRecallNotifyHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "AntiRecallNotifyHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading NotifyHistoryHook...")
-            try { if (cfg.notifyHistoryEnabled) NotifyHistoryHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "NotifyHistoryHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading NotifyBeautifyHook...")
-            try { if (cfg.notifyBeautifyEnabled) NotifyBeautifyHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "NotifyBeautifyHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading BatchNotifyHook...")
-            try { if (cfg.batchNotifyEnabled) BatchNotifyHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "BatchNotifyHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading PriorityOverrideHook...")
-            try { if (cfg.priorityOverrideEnabled) PriorityOverrideHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "PriorityOverrideHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading SilentNotifyHook...")
-            try { if (cfg.silentNotifyEnabled) SilentNotifyHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "SilentNotifyHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading ShizukuNotifyCmdHook...")
-            try { if (cfg.shizukuNotifyCmdEnabled) ShizukuNotifyCmdHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "ShizukuNotifyCmdHook FAIL: ${e.message}") }
+            if (cfg.notifyFilterEnabled) tryInvoke("com.notifymaster.noroot.hooks.NotifyFilterHook", "apply", loader, lpparam, cfg)
+            if (cfg.antiRecallNotifyEnabled) tryInvoke("com.notifymaster.noroot.hooks.AntiRecallNotifyHook", "apply", loader, lpparam, cfg)
+            if (cfg.notifyHistoryEnabled) tryInvoke("com.notifymaster.noroot.hooks.NotifyHistoryHook", "apply", loader, lpparam, cfg)
+            if (cfg.notifyBeautifyEnabled) tryInvoke("com.notifymaster.noroot.hooks.NotifyBeautifyHook", "apply", loader, lpparam, cfg)
+            if (cfg.batchNotifyEnabled) tryInvoke("com.notifymaster.noroot.hooks.BatchNotifyHook", "apply", loader, lpparam, cfg)
+            if (cfg.priorityOverrideEnabled) tryInvoke("com.notifymaster.noroot.hooks.PriorityOverrideHook", "apply", loader, lpparam, cfg)
+            if (cfg.silentNotifyEnabled) tryInvoke("com.notifymaster.noroot.hooks.SilentNotifyHook", "apply", loader, lpparam, cfg)
+            if (cfg.shizukuNotifyCmdEnabled) tryInvoke("com.notifymaster.noroot.hooks.ShizukuNotifyCmdHook", "apply", loader, lpparam, cfg)
 
             Log.e(TAG, "===== All hooks loaded for $pkg =====")
         } catch (e: Throwable) {
@@ -120,8 +108,28 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
         "com.baidu.searchbox", "com.ss.android.article.news"
     )
 
+    private fun tryInvoke(className: String, method: String, loader: ClassLoader, lpparam: XC_LoadPackage.LoadPackageParam, cfg: NotifyConfig) {
+        try {
+            val cls = Class.forName(className, false, loader)
+            cls.getDeclaredMethod(method, XC_LoadPackage.LoadPackageParam::class.java, NotifyConfig::class.java)
+                .invoke(null, lpparam, cfg)
+        } catch (e: Throwable) {
+            Log.e(TAG, "$className.$method FAIL: ${e.message}")
+        }
+    }
+
     private fun loadConfig(): NotifyConfig {
-        HookConfigReader.readGlobal()?.let { return it }
-        return try { com.notifymaster.noroot.utils.ConfigManager.getGlobalConfig() } catch (_: Throwable) { NotifyConfig(packageName = "global") }
+        try {
+            val reader = Class.forName("com.notifymaster.noroot.utils.HookConfigReader")
+            val result = reader.getDeclaredMethod("readGlobal").invoke(null) as? NotifyConfig
+            if (result != null) return result
+        } catch (_: Throwable) { }
+        try {
+            val mgr = Class.forName("com.notifymaster.noroot.utils.ConfigManager")
+            return mgr.getDeclaredMethod("getGlobalConfig").invoke(null) as? NotifyConfig
+                ?: NotifyConfig()
+        } catch (_: Throwable) {
+            return NotifyConfig()
+        }
     }
 }
