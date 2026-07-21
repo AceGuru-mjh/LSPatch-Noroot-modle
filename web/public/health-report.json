@@ -1,10 +1,10 @@
 {
-  "version": "1.0.10",
-  "timestamp": "2026-07-20T14:47:49.011194+00:00",
+  "version": "1.0.11",
+  "timestamp": "2026-07-21T04:32:36.060337+00:00",
   "modules": [
     {
       "name": "AdBlockerX_NoRoot",
-      "version": "1.0.10",
+      "version": "1.0.11",
       "hooks": [
         {
           "file": "AdClosePlusHook.kt",
@@ -109,7 +109,7 @@
     },
     {
       "name": "AudioBoost_NoRoot",
-      "version": "1.0.10",
+      "version": "1.0.11",
       "hooks": [
         {
           "file": "AudioQualityEnhanceHook.kt",
@@ -178,7 +178,7 @@
     },
     {
       "name": "BatteryOptimizer_NoRoot",
-      "version": "1.0.10",
+      "version": "1.0.11",
       "hooks": [
         {
           "file": "AlarmOptimizerHook.kt",
@@ -283,7 +283,7 @@
     },
     {
       "name": "GameUnlockerPro_NoRoot",
-      "version": "1.0.10",
+      "version": "1.0.11",
       "hooks": [
         {
           "file": "AudioPriorityBoostHook.kt",
@@ -379,7 +379,7 @@
     },
     {
       "name": "MicroXEnhancer",
-      "version": "1.0.10",
+      "version": "1.0.11",
       "hooks": [
         {
           "file": "AdBlockHook.kt",
@@ -511,7 +511,7 @@
     },
     {
       "name": "NotifyMaster_NoRoot",
-      "version": "1.0.10",
+      "version": "1.0.11",
       "hooks": [
         {
           "file": "AntiRecallNotifyHook.kt",
@@ -589,7 +589,7 @@
     },
     {
       "name": "PrivacyGuard_NoRoot",
-      "version": "1.0.10",
+      "version": "1.0.11",
       "hooks": [
         {
           "file": "AdvertisingIdHook.kt",
@@ -703,7 +703,7 @@
     },
     {
       "name": "ShizukuSceneFix",
-      "version": "1.0.10",
+      "version": "1.0.11",
       "hooks": [
         {
           "file": "AutoGrantHelperHook.kt",
@@ -772,7 +772,7 @@
     },
     {
       "name": "StepModifier_NoRoot",
-      "version": "1.0.10",
+      "version": "1.0.11",
       "hooks": [
         {
           "file": "MultiAppSyncHook.kt",
@@ -841,7 +841,7 @@
     },
     {
       "name": "VideoSaver_NoRoot",
-      "version": "1.0.10",
+      "version": "1.0.11",
       "hooks": [
         {
           "file": "AutoDownloadHook.kt",
@@ -928,7 +928,7 @@
     },
     {
       "name": "VipUnlocker_NoRoot",
-      "version": "1.0.10",
+      "version": "1.0.11",
       "hooks": [
         {
           "file": "BilibiliVipHook.kt",

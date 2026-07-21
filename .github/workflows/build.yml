@@ -68,10 +68,10 @@ jobs:
           find all-apks -name "*.apk" | while read f; do cp "$f" "release-assets/$(basename "$f")"; done
       - uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.0.10
-          name: LSP-Model-NoRoot 模块合集 v1.0.10
+          tag_name: v1.0.11
+          name: LSP-Model-NoRoot 模块合集 v1.0.11
           body: |
-            # LSP-Model-NoRoot v1.0.10
+            # LSP-Model-NoRoot v1.0.11
             11 个 LSPatch 免Root 模块 APK
             开发者：MJH
           files: release-assets/*.apk

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp" android:viewportWidth="108" android:viewportHeight="108">
+    <!-- 电池外壳 -->
+    <path android:fillColor="#FFFFFFFF" android:strokeColor="#FFFFFFFF" android:strokeWidth="3"
+        android:pathData="M40,30 L64,30 L64,38 L70,38 L70,72 L64,72 L64,80 L40,80 L40,72 L34,72 L34,38 L40,38 Z" />
+    <!-- 电池电量条 -->
+    <path android:fillColor="#FF2E7D32" android:pathData="M42,42 L62,42 L62,68 L42,68 Z" />
+    <!-- 闪电图标（节能） -->
+    <path android:fillColor="#FFFFFFFF" android:pathData="M52,46 L46,58 L51,58 L49,68 L58,54 L53,54 Z" />
+</vector>

@@ -74,13 +74,13 @@ fun AboutScreen() {
                     Icon(Icons.Default.Code, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                     Column {
                         Text("项目地址", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Text("github.com/mengjinghao/lsp-model", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
+                        Text("github.com/AceGuru-mjh/lsp-model", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
                     }
                 }
                 Spacer(Modifier.height(12.dp))
                 OutlinedButton(
                     onClick = {
-                        val i = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/mengjinghao/lsp-model"))
+                        val i = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/AceGuru-mjh/lsp-model"))
                         i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                         ctx.startActivity(i)
                     },

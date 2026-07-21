@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp" android:viewportWidth="108" android:viewportHeight="108">
+    <!-- 游戏手柄主体 -->
+    <path android:fillColor="#FFFFFFFF"
+        android:strokeColor="#FFFFFFFF" android:strokeWidth="2" android:strokeLineJoin="round"
+        android:pathData="M30,52 Q26,40 36,38 L72,38 Q82,40 78,52 L82,68 Q82,80 70,78 L62,72 L46,72 L38,78 Q26,80 26,68 Z" />
+    <!-- 左侧方向键 -->
+    <path android:fillColor="#FF00838F" android:pathData="M40,52 L46,52 L46,56 L50,56 L50,62 L46,62 L46,66 L40,66 L40,62 L36,62 L36,56 L40,56 Z" />
+    <!-- 右侧两个按钮 -->
+    <path android:fillColor="#FF00838F" android:pathData="M64,54 m-3,0 a3,3 0 1,0 6,0 a3,3 0 1,0 -6,0" />
+    <path android:fillColor="#FF00838F" android:pathData="M72,62 m-3,0 a3,3 0 1,0 6,0 a3,3 0 1,0 -6,0" />
+</vector>

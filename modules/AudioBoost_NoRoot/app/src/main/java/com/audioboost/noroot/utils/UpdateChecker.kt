@@ -19,12 +19,12 @@ import java.net.URL
  *  - 下载缓存清理
  *  - 上次缓存的 UpdateInfo（避免重复网络请求）
  *
- * 数据源: https://api.github.com/repos/mengjinghao/lsp-model/releases/latest
+ * 数据源: https://api.github.com/repos/AceGuru-mjh/lsp-model/releases/latest
  */
 object UpdateChecker {
 
     private const val TAG = "UpdateChecker"
-    private const val REPO = "mengjinghao/lsp-model"
+    private const val REPO = "AceGuru-mjh/lsp-model"
     private const val API_URL = "https://api.github.com/repos/$REPO/releases/latest"
     private const val PREFS_NAME = "update_prefs"
     private const val KEY_IGNORED_VERSION = "ignored_version"

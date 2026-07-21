@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 跑步人形图标 -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp" android:viewportWidth="108" android:viewportHeight="108">
+    <!-- 头部 -->
+    <path android:fillColor="#FFFFFFFF"
+        android:pathData="M62,30 m-6,0 a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0" />
+    <!-- 躯干+手臂 -->
+    <path android:fillColor="#FFFFFFFF" android:strokeColor="#FFFFFFFF" android:strokeWidth="3" android:strokeLineJoin="round"
+        android:pathData="M58,40 L52,55 L46,62 L50,66 L58,58 L64,52 Z" />
+    <!-- 后腿 -->
+    <path android:fillColor="#FFFFFFFF" android:strokeColor="#FFFFFFFF" android:strokeWidth="3" android:strokeLineJoin="round"
+        android:pathData="M52,55 L42,70 L40,82 L46,82 L52,68 Z" />
+    <!-- 前腿 -->
+    <path android:fillColor="#FFFFFFFF" android:strokeColor="#FFFFFFFF" android:strokeWidth="3" android:strokeLineJoin="round"
+        android:pathData="M64,52 L74,62 L80,76 L74,78 L68,66 Z" />
+    <!-- 前臂 -->
+    <path android:fillColor="#FFFFFFFF" android:strokeColor="#FFFFFFFF" android:strokeWidth="3" android:strokeLineJoin="round"
+        android:pathData="M58,40 L66,46 L72,44 L70,40 L62,38 Z" />
+</vector>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp" android:viewportWidth="108" android:viewportHeight="108">
+    <!-- 铃铛主体 -->
+    <path android:fillColor="#FFFFFFFF"
+        android:strokeColor="#FFFFFFFF" android:strokeWidth="2.5" android:strokeLineJoin="round"
+        android:pathData="M54,24 L58,28 L62,32 L62,52 L70,62 L38,62 L46,52 L46,32 L50,28 Z" />
+    <!-- 铃铛顶部圆点 -->
+    <path android:fillColor="#FFFFFFFF" android:pathData="M54,20 m-3,0 a3,3 0 1,0 6,0 a3,3 0 1,0 -6,0" />
+    <!-- 铃铛底部摆锤 -->
+    <path android:fillColor="#FFFFFFFF" android:pathData="M54,68 m-4,0 a4,4 0 1,0 8,0 a4,4 0 1,0 -8,0" />
+    <!-- 中央青色对勾表示主控 -->
+    <path android:fillColor="#FF00695C" android:pathData="M48,46 L52,52 L60,40 L57,37 L52,46 L50,44 Z" />
+</vector>

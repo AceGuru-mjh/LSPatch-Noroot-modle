@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp" android:viewportWidth="108" android:viewportHeight="108">
+    <!-- 皇冠图标，白色描边 -->
+    <path android:fillColor="#FFFFFFFF"
+        android:strokeColor="#FFFFFFFF" android:strokeWidth="2" android:strokeLineJoin="round"
+        android:pathData="M30,72 L24,42 L42,56 L54,34 L66,56 L84,42 L78,72 Z" />
+    <!-- 皇冠底座 -->
+    <path android:fillColor="#FFFFFFFF" android:pathData="M30,76 L78,76 L78,82 L30,82 Z" />
+    <!-- 三颗宝石 -->
+    <path android:fillColor="#FFFFD54F" android:pathData="M42,56 m-3,0 a3,3 0 1,0 6,0 a3,3 0 1,0 -6,0" />
+    <path android:fillColor="#FFFFD54F" android:pathData="M54,34 m-3,0 a3,3 0 1,0 6,0 a3,3 0 1,0 -6,0" />
+    <path android:fillColor="#FFFFD54F" android:pathData="M66,56 m-3,0 a3,3 0 1,0 6,0 a3,3 0 1,0 -6,0" />
+</vector>

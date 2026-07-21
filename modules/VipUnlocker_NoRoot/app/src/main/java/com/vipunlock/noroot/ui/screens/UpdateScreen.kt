@@ -317,7 +317,7 @@ fun UpdateScreen() {
             Column(modifier = Modifier.padding(12.dp)) {
                 Text("说明", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
                 Spacer(Modifier.height(4.dp))
-                Text("• 更新源: github.com/mengjinghao/lsp-model/releases", style = MaterialTheme.typography.bodySmall)
+                Text("• 更新源: github.com/AceGuru-mjh/lsp-model/releases", style = MaterialTheme.typography.bodySmall)
                 Text("• 下载完成自动弹出安装界面（需允许\"安装未知应用\"）", style = MaterialTheme.typography.bodySmall)
                 Text("• 模块更新后需在 LSPosed/LSPatch 重新启用并重启目标 APP", style = MaterialTheme.typography.bodySmall)
                 Text("• 自动检查间隔最少5分钟，避免频繁请求 GitHub API", style = MaterialTheme.typography.bodySmall)

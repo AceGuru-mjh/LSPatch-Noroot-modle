@@ -12,7 +12,7 @@ import java.net.URL
 /**
  * 热更新检查器
  *
- * 数据源: https://api.github.com/repos/mengjinghao/lsp-model/releases/latest
+ * 数据源: https://api.github.com/repos/AceGuru-mjh/lsp-model/releases/latest
  *
  * 能力：
  *  - 忽略指定版本（用户不想更新的版本不再提示）
@@ -24,7 +24,7 @@ import java.net.URL
 object UpdateChecker {
 
     private const val TAG = "UpdateChecker"
-    private const val REPO = "mengjinghao/lsp-model"
+    private const val REPO = "AceGuru-mjh/lsp-model"
     private const val API_URL = "https://api.github.com/repos/$REPO/releases/latest"
     private const val PREFS_NAME = "update_prefs"
     private const val KEY_IGNORED_VERSION = "ignored_version"
