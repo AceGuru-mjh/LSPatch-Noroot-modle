@@ -122,29 +122,35 @@ object OkHttpAdHook {
         return try {
             val respClass = XposedHelpers.findClassIfExists(RESPONSE_CLASS, lpparam.classLoader) ?: return null
             val builderClass = XposedHelpers.findClassIfExists(RESPONSE_BUILDER_CLASS, lpparam.classLoader) ?: return null
-            val requestClass = XposedHelpers.findClassIfExists(REQUEST_CLASS, lpparam.classLoader) ?: return null
-            val httpUrlClass = XposedHelpers.findClassIfExists(HTTP_URL_CLASS, lpparam.classLoader)
 
-            val reqBuilder = XposedHelpers.callStaticMethod(requestClass, "newBuilder") ?: return null
-            val fakeReq = try {
-                if (httpUrlClass != null) {
-                    val urlObj = XposedHelpers.callStaticMethod(httpUrlClass, "get", url)
-                    XposedHelpers.callMethod(reqBuilder, "url", urlObj)
-                }
-                XposedHelpers.callMethod(reqBuilder, "build")
-            } catch (_: Throwable) { null } ?: return null
+            val builder = try {
+                val b = XposedHelpers.newInstance(builderClass)
+                try {
+                    val requestClass = XposedHelpers.findClassIfExists(REQUEST_CLASS, lpparam.classLoader)
+                    if (requestClass != null) {
+                        val reqBuilder = XposedHelpers.callStaticMethod(requestClass, "newBuilder") ?: return@try
+                        val fakeReq = try {
+                            val httpUrlClass = XposedHelpers.findClassIfExists(HTTP_URL_CLASS, lpparam.classLoader)
+                            if (httpUrlClass != null) {
+                                val urlObj = XposedHelpers.callStaticMethod(httpUrlClass, "get", "http://localhost")
+                                XposedHelpers.callMethod(reqBuilder, "url", urlObj)
+                            }
+                            XposedHelpers.callMethod(reqBuilder, "build")
+                        } catch (_: Throwable) { null }
 
-            val builder = XposedHelpers.newInstance(builderClass)
-            XposedHelpers.callMethod(builder, "request", fakeReq)
-            XposedHelpers.callMethod(builder, "code", 404)
-            try { XposedHelpers.callMethod(builder, "message", "AdBlockerX Blocked") } catch (e: Throwable) { LogX.w("异常: ${e.message}") }
-            try { XposedHelpers.callMethod(builder, "protocol",
-                XposedHelpers.getStaticObjectField(
-                    XposedHelpers.findClass("okhttp3.Protocol", lpparam.classLoader), "HTTP_1_1"))
-            } catch (e: Throwable) { LogX.w("异常: ${e.message}") }
-            XposedHelpers.callMethod(builder, "build")
+                        if (fakeReq != null) {
+                            try { XposedHelpers.callMethod(b, "request", fakeReq) } catch (_: NoSuchMethodError) { }
+                        }
+                    }
+                } catch (_: Throwable) { }
+
+                try { XposedHelpers.callMethod(b, "code", 404) } catch (_: Throwable) { }
+                XposedHelpers.callMethod(b, "build")
+            } catch (_: Throwable) { null }
+
+            builder
         } catch (e: Throwable) {
-            LogX.e("[OkHttp] 构造空 Response 异常", e)
+            LogX.e("[OkHttp] buildEmptyResponse failed", e)
             null
         }
     }

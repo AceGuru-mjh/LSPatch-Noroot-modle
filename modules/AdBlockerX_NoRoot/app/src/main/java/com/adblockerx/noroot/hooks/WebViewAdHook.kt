@@ -45,10 +45,22 @@ object WebViewAdHook {
         if (!cfg.webviewAdEnabled) return
         LogX.i("WebViewAdHook 启动（应用进程内）")
 
+        hookX5WebView(lpparam, cfg)
         hookShouldOverrideUrlLoading(lpparam)
         hookShouldInterceptRequest(lpparam)
         hookLoadUrl(lpparam)
         if (cfg.injectJsEnabled) hookOnPageFinished(lpparam)
+    }
+
+    private fun hookX5WebView(lpparam: XC_LoadPackage.LoadPackageParam, cfg: AdBlockConfig) {
+        val x5Exists = try {
+            XposedHelpers.findClassIfExists("com.tencent.smtt.sdk.WebView", lpparam.classLoader) != null
+        } catch (_: Throwable) { false }
+
+        if (!x5Exists) {
+            LogX.d("[WebView] X5 WebView not found, skipping")
+            return
+        }
     }
 
     private fun hookShouldOverrideUrlLoading(lpparam: XC_LoadPackage.LoadPackageParam) {
