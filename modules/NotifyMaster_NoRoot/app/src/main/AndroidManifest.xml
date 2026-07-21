@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
@@ -10,6 +10,8 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
 
     <application
         android:allowBackup="true"
@@ -33,10 +35,10 @@
 
         <meta-data android:name="xposedmodule" android:value="true" />
         <meta-data android:name="xposedminversion" android:value="93" />
-        <meta-data android:name="xposeddescription" android:value="NotifyMaster NoRoot - 通知管理：通知过滤/防通知撤回/通知历史/通知美化/通知分组/优先级覆盖/静默通知" />
+        <meta-data android:name="xposeddescription" android:value="NotifyMaster NoRoot - 閫氱煡绠＄悊锛氶€氱煡杩囨护/闃查€氱煡鎾ゅ洖/閫氱煡鍘嗗彶/閫氱煡缇庡寲/閫氱煡鍒嗙粍/浼樺厛绾ц鐩?闈欓粯閫氱煡" />
         <meta-data android:name="xposedscope" android:resource="@array/xposed_scope" />
 
-        <!-- FileProvider: APK 热更新安装 -->
+        <!-- FileProvider: APK 鐑洿鏂板畨瑁?-->
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
@@ -46,6 +48,19 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
+        <service
+            android:name=".services.FloatingBallService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="floating_ball_for_module_control"/>
+        </service>
+
+        <activity android:name=".activities.PanelActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Translucent"/>
 
     </application>
 </manifest>
+
+

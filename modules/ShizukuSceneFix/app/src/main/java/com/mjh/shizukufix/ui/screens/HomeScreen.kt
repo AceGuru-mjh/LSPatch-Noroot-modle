@@ -2,131 +2,174 @@ package com.mjh.shizukufix.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Build
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.mjh.shizukufix.XposedLoader
 import com.mjh.shizukufix.models.ShizukuFixConfig
 import com.mjh.shizukufix.utils.ConfigManager
 
 @Composable
-fun HomeScreen(cfg: ShizukuFixConfig, onConfigChange: (ShizukuFixConfig) -> Unit) {
+fun HomeScreen(
+    cfg: ShizukuFixConfig,
+    onConfigChange: (ShizukuFixConfig) -> Unit,
+    darkMode: Boolean = false,
+    onToggleDarkMode: () -> Unit = {}
+) {
+    val scroll = rememberScrollState()
+    val logs = remember { mutableStateListOf<String>() }
+    val stats = remember { mutableLongStateOf(0L) }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .verticalScroll(scroll)
+            .padding(16.dp)
     ) {
         Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer
-            )
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp)
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Build,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onPrimaryContainer
-                )
+            Column(modifier = Modifier.padding(16.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Default.Build,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(Modifier.padding(horizontal = 8.dp))
+                    Text("Shizuku Scene Fix", style = MaterialTheme.typography.headlineSmall)
+                }
+                Text("v${XposedLoader.VERSION}", style = MaterialTheme.typography.bodyMedium)
                 Spacer(Modifier.height(8.dp))
                 Text(
-                    "Shizuku Scene Fix",
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-                Text(
-                    "v${XposedLoader.VERSION}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                    "已修复 ${stats.longValue} 次授权",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.primary
                 )
             }
         }
 
-        Spacer(Modifier.height(16.dp))
-
-        Card(modifier = Modifier.fillMaxWidth()) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text("模块总开关", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    "开启后，所有已启用的修复功能将在 Scene / Shizuku 进程中生效",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp)
+        ) {
+            Row(
+                modifier = Modifier.padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text("模块总开关", style = MaterialTheme.typography.titleMedium)
+                    Text("开启后所有功能将在目标应用生效", style = MaterialTheme.typography.bodySmall)
+                }
+                Switch(
+                    checked = cfg.masterEnabled,
+                    onCheckedChange = { newVal ->
+                        val nc = cfg.copy(masterEnabled = newVal)
+                        ConfigManager.saveGlobalConfig(nc)
+                        onConfigChange(nc)
+                    }
                 )
-                Spacer(Modifier.height(12.dp))
-                androidx.compose.foundation.layout.Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(if (cfg.masterEnabled) "已启用" else "已禁用", style = MaterialTheme.typography.titleMedium)
-                    Switch(
-                        checked = cfg.masterEnabled,
-                        onCheckedChange = {
-                            val nc = cfg.copy(masterEnabled = it)
-                    ConfigManager.saveGlobalConfig(nc)
-                    onConfigChange(nc)
-                        }
-                    )
+            }
+        }
+
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp)
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text("实时统计", style = MaterialTheme.typography.titleMedium)
+                Spacer(Modifier.height(8.dp))
+                Row {
+                    StatBox("已修复", stats.longValue.toString(), modifier = Modifier.weight(1f))
+                    StatBox("授权注入", "${stats.longValue * 3}", modifier = Modifier.weight(1f))
                 }
             }
         }
 
-        Spacer(Modifier.height(16.dp))
-
-        Card(modifier = Modifier.fillMaxWidth()) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp)
+        ) {
             Column(modifier = Modifier.padding(16.dp)) {
-                Text("使用说明", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Text("快捷操作", style = MaterialTheme.typography.titleMedium)
                 Spacer(Modifier.height(8.dp))
-                Text("1. 在「功能」页勾选需要的修复项", style = MaterialTheme.typography.bodySmall)
-                Text("2. 在 LSPosed/LSPatch 中勾选作用域（Scene + Shizuku）", style = MaterialTheme.typography.bodySmall)
-                Text("3. 强制停止 Scene 与 Shizuku 后重新打开生效", style = MaterialTheme.typography.bodySmall)
-                Text("4. 实验性功能可能不稳定，请谨慎开启", style = MaterialTheme.typography.bodySmall)
-                Spacer(Modifier.height(8.dp))
-                Text(
-                    "修复 Scene 在 Shizuku 授权列表不显示问题：Path A 在 Scene 进程主动申请权限；" +
-                        "Path B 在 Shizuku 进程向授权列表注入 Scene。",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.secondary
-                )
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedButton(
+                        onClick = { logs.clear() },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text("清空日志")
+                    }
+                    OutlinedButton(
+                        onClick = { /* 导出配置 */ },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text("导出")
+                    }
+                }
             }
         }
 
-        Spacer(Modifier.height(16.dp))
-
-        Button(
-            onClick = {
-                ConfigManager.resetAll()
-                onConfigChange(ShizukuFixConfig(packageName = "global"))
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("恢复默认配置")
+        Card(modifier = Modifier.fillMaxWidth()) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("控制台", style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
+                    Text("${logs.size} 条", style = MaterialTheme.typography.bodySmall)
+                }
+                Spacer(Modifier.height(8.dp))
+                Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)) {
+                    Column(modifier = Modifier
+                        .heightIn(max = 200.dp)
+                        .padding(8.dp)
+                    ) {
+                        if (logs.isEmpty()) {
+                            Text("暂无日志", style = MaterialTheme.typography.bodySmall)
+                        } else {
+                            logs.takeLast(50).forEach { log ->
+                                Text(log, style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(vertical = 2.dp))
+                            }
+                        }
+                    }
+                }
+            }
         }
+    }
+}
+
+@Composable
+private fun StatBox(label: String, value: String, modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier.padding(8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(value, style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.primary)
+        Text(label, style = MaterialTheme.typography.bodySmall)
     }
 }

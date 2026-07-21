@@ -1,13 +1,15 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- LSPatch 合规: FOREGROUND_SERVICE 避免 Android 9+ 启动崩溃 -->
+    <!-- LSPatch 鍚堣: FOREGROUND_SERVICE 閬垮厤 Android 9+ 鍚姩宕╂簝 -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="moe.shizuku.manager.permission.API_V23" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
 
     <application
         android:allowBackup="true"
@@ -30,12 +32,12 @@
         </activity>
 
         <meta-data android:name="xposedmodule" android:value="true" />
-        <!-- LSPatch 合规: xposedminversion=93 (LSPatch v0.6.1+ API) -->
+        <!-- LSPatch 鍚堣: xposedminversion=93 (LSPatch v0.6.1+ API) -->
         <meta-data android:name="xposedminversion" android:value="93" />
-        <meta-data android:name="xposeddescription" android:value="VipUnlocker NoRoot - VIP功能解锁（免Root）：网易云/QQ音乐/酷狗/酷我/爱奇艺/优酷/腾讯视频/B站/喜马拉雅/今日头条/知乎/百度网盘/WPS/微信读书 + 实验性通用VIP/去广告/绕过校验" />
+        <meta-data android:name="xposeddescription" android:value="VipUnlocker NoRoot - VIP鍔熻兘瑙ｉ攣锛堝厤Root锛夛細缃戞槗浜?QQ闊充箰/閰风嫍/閰锋垜/鐖卞鑹?浼橀叿/鑵捐瑙嗛/B绔?鍠滈┈鎷夐泤/浠婃棩澶存潯/鐭ヤ箮/鐧惧害缃戠洏/WPS/寰俊璇讳功 + 瀹為獙鎬ч€氱敤VIP/鍘诲箍鍛?缁曡繃鏍￠獙" />
         <meta-data android:name="xposedscope" android:resource="@array/xposed_scope" />
 
-        <!-- FileProvider: APK 热更新安装 -->
+        <!-- FileProvider: APK 鐑洿鏂板畨瑁?-->
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
@@ -45,6 +47,19 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
+        <service
+            android:name=".services.FloatingBallService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="floating_ball_for_module_control"/>
+        </service>
+
+        <activity android:name=".activities.PanelActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Translucent"/>
 
     </application>
 </manifest>
+
+

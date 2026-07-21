@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
@@ -10,6 +10,8 @@
 
         <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
 
     <application
 
@@ -37,10 +39,10 @@
 
         <meta-data android:name="xposedmodule" android:value="true" />
         <meta-data android:name="xposedminversion" android:value="93" />
-        <meta-data android:name="xposeddescription" android:value="MicroX Enhancer - 微信/QQ增强：广告净化/防撤回/朋友圈保护/界面美化/隐私增强/批量管理/自动回复 + 实验性语音导出/搜索增强/自定义主题" />
+        <meta-data android:name="xposeddescription" android:value="MicroX Enhancer - 寰俊/QQ澧炲己锛氬箍鍛婂噣鍖?闃叉挙鍥?鏈嬪弸鍦堜繚鎶?鐣岄潰缇庡寲/闅愮澧炲己/鎵归噺绠＄悊/鑷姩鍥炲 + 瀹為獙鎬ц闊冲鍑?鎼滅储澧炲己/鑷畾涔変富棰? />
         <meta-data android:name="xposedscope" android:resource="@array/xposed_scope" />
 
-        <!-- FileProvider: APK 热更新安装 -->
+        <!-- FileProvider: APK 鐑洿鏂板畨瑁?-->
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
@@ -50,6 +52,19 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
+        <service
+            android:name=".services.FloatingBallService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="floating_ball_for_module_control"/>
+        </service>
+
+        <activity android:name=".activities.PanelActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Translucent"/>
 
     </application>
 </manifest>
+
+
