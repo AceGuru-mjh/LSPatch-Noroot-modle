@@ -63,11 +63,11 @@ fun AboutScreen() {
             Column(modifier = Modifier.padding(16.dp)) {
                 Row2(Icons.Default.Person, "开发者", "MJH")
                 Spacer(Modifier.height(12.dp))
-                Row2(Icons.Default.Code, "项目地址", "github.com/AceGuru-mjh/lsp-model")
+                Row2(Icons.Default.Code, "项目地址", "github.com/AceGuru-mjh/LSPatch-Noroot-modle")
                 Spacer(Modifier.height(12.dp))
                 OutlinedButton(
                     onClick = {
-                        val i = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/AceGuru-mjh/lsp-model"))
+                        val i = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/AceGuru-mjh/LSPatch-Noroot-modle"))
                         i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                         ctx.startActivity(i)
                     },

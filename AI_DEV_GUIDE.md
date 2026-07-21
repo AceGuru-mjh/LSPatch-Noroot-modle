@@ -299,7 +299,7 @@ Slider(
 
 ### 5.4 关于页必含
 - 开发者：**MJH**
-- 项目地址：`github.com/mengjinghao/lsp-model`
+- 项目地址：`github.com/AceGuru-mjh/LSPatch-Noroot-modle`
 - 功能简介 + 免责声明
 
 ---
@@ -419,7 +419,7 @@ Next.js 应用，功能：
 
 ## 11. 联系点
 
-- 仓库：`github.com/mengjinghao/lsp-model`
+- 仓库：`github.com/AceGuru-mjh/LSPatch-Noroot-modle`
 - 开发者：MJH
 - 签名：`mjh-release.jks` (alias=mjh, pass=meng411722)
 

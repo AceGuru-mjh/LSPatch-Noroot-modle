@@ -1,8 +1,8 @@
-# LSP-Model-NoRoot
+# LSPatch-Noroot-modle
 
 LSPatch 免 Root 模块合集（无需 Root，通过 LSPatch 注入）
 
-## 模块列表
+## 模块列表（11个）
 
 | # | 模块 | 功能 |
 |---|------|------|
@@ -24,5 +24,9 @@ LSPatch 免 Root 模块合集（无需 Root，通过 LSPatch 注入）
 2. 下载模块 APK
 3. 通过 LSPatch 将模块注入目标应用
 4. 重启目标应用生效
+
+## 下载
+
+[Releases 页面](https://github.com/AceGuru-mjh/LSPatch-Noroot-modle/releases)
 
 开发者：MJH
