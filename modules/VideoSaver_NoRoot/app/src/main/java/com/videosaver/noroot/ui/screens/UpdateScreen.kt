@@ -48,9 +48,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import .XposedLoader
-import .utils.ApkDownloader
-import .utils.UpdateChecker
+import com.videosaver.noroot.XposedLoader
+import com.videosaver.noroot.utils.ApkDownloader
+import com.videosaver.noroot.utils.UpdateChecker
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
