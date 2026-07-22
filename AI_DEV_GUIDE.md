@@ -11,10 +11,11 @@
 2. **改任何代码前，先跑体检**：`python3 scripts/healthcheck.py`（见 §6）。体检报告决定优先级。
 3. **禁止空壳**：每个 `hooks/*.kt` 文件必须有真实 `findAndHookMethod`/`XposedBridge.hook*` 调用，或明确标注为"工具类"（见 §4.3）。
 4. **NoRoot 版与 Root 版边界不可混淆**（见 §3）。
-5. **不要新建 Markdown 文档**，除非用户明确要求。本文件 + Web 体检工具已足够。
-6. **提交信息用中文**，描述"做了什么 + 为什么"。
-7. **改完必须本地编译验证**：`./gradlew :app:compileReleaseKotlin`（每个改动模块都要过）。
-8. **推送前更新 worklog**：`/home/z/my-project/worklog.md` 追加（不覆盖）。
+5. **core/ui 隔离架构不可违反**（见 §1.4）—— 这是 LSPatch 集成模式防秒崩的核心。
+6. **不要新建 Markdown 文档**，除非用户明确要求。本文件 + Web 体检工具已足够。
+7. **提交信息用中文**，描述"做了什么 + 为什么"。
+8. **改完必须本地编译验证**：`./gradlew :app:compileReleaseKotlin`（每个改动模块都要过）。
+9. **Windows 用户警告**：PowerShell 的 `Set-Content` 会破坏 UTF-8 中文编码。只使用 `[System.IO.File]::ReadAllText/WriteAllText` 操作 .kt 文件。
 
 ---
 
@@ -66,7 +67,144 @@ lsp-model/
                 └── components/FeatureCard.kt
 ```
 
-### 1.3 数据流
+### 1.4 core/ui 隔离架构（最高安全级别）
+
+> **这是 LSPatch 集成模式防秒崩的核心规则。违反任何一条都会导致宿主 APP 直接崩溃。**
+
+#### 1.4.1 模块内部包结构（强制）
+
+```
+java/<包路径>/
+├── XposedLoader.kt       # 唯一入口 —— 禁止 import hooks/*
+├── core/                  # 纯 Hook 逻辑，绝不允许引用 ui/
+│   ├── ConfigProvider.kt  # ContentProvider IPC 配置服务
+│   └── ConfigClient.kt    # 跨进程配置读取
+├── hooks/                 # Hook 实现 (object 类)
+├── utils/                 # LogX, ConfigManager, HookConfigReader 等
+├── models/                # XxxConfig data class
+├── ui/                    # Compose/Material3 全部 UI 代码
+│   ├── MainActivity.kt
+│   ├── UiInitializer.kt   # 反射加载入口
+│   └── ...
+└── activities/ + services/  # PanelActivity + FloatingBallService
+```
+
+#### 1.4.2 XposedLoader 强制规则（铁律）
+
+**XposedLoader.kt 是模块入口，必须遵守以下三条铁律：**
+
+**铁律 1：禁止 import 任何 hooks/ 或 utils/ 下的类**
+
+```kotlin
+// ❌ 绝对禁止 —— 会导致类加载阶段秒崩
+import com.xxx.hooks.WebViewAdHook
+import com.xxx.hooks.OkHttpAdHook
+import com.xxx.utils.ConfigManager
+import com.xxx.utils.EnvDetector
+
+// ✅ 允许 —— 仅 Xposed 框架 + 模型数据类
+import android.util.Log
+import de.robv.android.xposed.IXposedHookLoadPackage
+import de.robv.android.xposed.callbacks.XC_LoadPackage
+import com.xxx.models.AdBlockConfig
+```
+
+**铁律 2：所有 Hook 都必须用反射调用**
+
+```kotlin
+// ❌ 禁止 —— 直接调用
+WebViewAdHook.apply(lpparam, cfg)
+
+// ✅ 必须 —— 反射调用
+Class.forName("com.xxx.hooks.WebViewAdHook", false, lpparam.classLoader)
+    .getDeclaredMethod("apply", XC_LoadPackage.LoadPackageParam::class.java, AdBlockConfig::class.java)
+    .invoke(null, lpparam, cfg)
+```
+
+**铁律 3：进程双分支（自身进程 vs 宿主进程）**
+
+```kotlin
+override fun handleLoadPackage(lpparam: XC_LoadPackage.LoadPackageParam) {
+    if (lpparam.processName != lpparam.packageName) return  // 跳过子进程
+    
+    // 分支1：模块自身进程 —— 加载 Compose UI
+    if (lpparam.packageName == "com.xxx.模块包名") {
+        // 反射加载 UI（不能用 import）
+        Class.forName("com.xxx.ui.UiInitializer")
+            .getDeclaredMethod("initAllUi", Context::class.java)
+            .invoke(null, context)
+        return  // 模块自身进程不加载 Hook
+    }
+    
+    // 分支2：宿主 APP 进程 —— 纯 Hook，零 UI
+    val cfg = loadConfig()
+    if (!cfg.masterEnabled) return
+    
+    // 全部反射调用（不 import）
+    tryInvoke("com.xxx.hooks.SomeHook", "apply", lpparam.classLoader, lpparam, cfg)
+}
+```
+
+#### 1.4.3 为什么必须这样做（秒崩原理）
+
+LSPatch 集成模式将模块 APK 打包进宿主 APP。当宿主启动时：
+
+1. JVM 类加载器加载 `XposedLoader` 类
+2. 如果 `XposedLoader` 有 `import com.xxx.hooks.WebViewAdHook`，JVM 必须解析这个类
+3. `WebViewAdHook` 的类定义引用了 OkHttp、Compose、Material3 等
+4. 宿主 APP 的类路径可能与模块打包的版本冲突 → **ClassLoader 直接崩溃**
+5. 此时还没执行到 `handleLoadPackage`，try-catch 无效
+
+**用反射后**：
+1. JVM 加载 `XposedLoader` —— 只解析 5 个 import（框架+模型）
+2. `handleLoadPackage` 运行时才调用 `Class.forName("hooks.WebViewAdHook")`
+3. 每个 Hook 独立 try-catch，一个挂了不影响其他的
+
+#### 1.4.4 编写新模块时的检查清单
+
+- [ ] `XposedLoader.kt` 的 import 列表只有 `<10 行`
+- [ ] 没有任何 `import *.hooks.*` 或 `import *.utils.*`
+- [ ] 所有 Hook 调用使用 `tryInvoke()` 反射
+- [ ] 所有工具类初始化使用 `Class.forName()` 反射
+- [ ] 模块自身进程和宿主进程是两个独立分支
+- [ ] `core/` 包下没有任何 Compose/Material3 import
+- [ ] 宿主进程分支不调用任何 UI 相关代码
+
+#### 1.4.5 集成模式配置通信
+
+宿主进程需要读取用户配置时，通过 ContentProvider IPC（不是 SharedPreferences 跨进程）：
+
+```kotlin
+// core/ConfigProvider.kt —— 模块 APP 端提供
+class ConfigProvider : ContentProvider() {
+    override fun query(...): Cursor? {
+        val sp = context?.getSharedPreferences("prefs", MODE_PRIVATE)
+        // 返回所有配置键值对
+    }
+}
+
+// core/ConfigClient.kt —— 宿主进程端读取
+object ConfigClient {
+    fun readMasterSwitch(ctx: Context): Boolean {
+        val cursor = ctx.contentResolver.query(
+            Uri.parse("content://com.xxx.module.configprovider"), ...)
+        // 解析 cursor 返回开关值
+    }
+}
+```
+
+> 原因：Android 13+ 沙箱限制，跨进程 SharedPreferences 不可靠；ContentProvider 是系统级 IPC，稳定。
+
+#### 1.4.6 新增 bug 模式（已踩坑）
+
+| # | Bug | 症状 | 修复 |
+|---|-----|------|------|
+| 11 | XposedLoader import hooks.* | 集成模式秒崩（还没到 handleLoadPackage） | 全部改为反射加载 |
+| 12 | host 进程调用 Compose | 嵌入后宿主打不开 | 进程双分支 + UiInitializer 反射 |
+| 13 | SharedPreferences 跨进程读 | Android 13+ 读不到 | 改用 ContentProvider IPC |
+| 14 | Plugin 进程无过滤 | 微信/QQ小程序进程崩 | `processName != packageName` return |
+| 15 | Windows Set-Content 破坏 UTF-8 | 中文变乱码编译失败 | 只用 ReadAllText/WriteAllText + UTF8 BOM |
+| 16 | config 类 import 没问题 | —— | 模型 data class 可以 import（无依赖） |
 ```
 用户操作 UI (Compose)
   → MainActivity 读写 ConfigManager (SharedPreferences MODE_WORLD_READABLE)
@@ -425,4 +563,4 @@ Next.js 应用，功能：
 
 ---
 
-*本文件由 MJH 维护，AI Agent 每次介入前必读。最后更新：v1.0.1*
+*本文件由 MJH 维护，AI Agent 每次介入前必读。最后更新：v1.2.0 (core/ui 隔离架构)
