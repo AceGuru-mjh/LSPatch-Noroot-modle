@@ -1,4 +1,4 @@
-package .ui.screens
+package com.microx.enhancer.ui.screens
 
 import android.content.Intent
 import android.net.Uri
