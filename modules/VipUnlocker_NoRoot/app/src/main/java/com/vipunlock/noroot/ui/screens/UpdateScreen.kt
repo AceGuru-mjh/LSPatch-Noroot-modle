@@ -48,9 +48,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.vipunlock.noroot.XposedLoader
-import com.vipunlock.noroot.utils.ApkDownloader
-import com.vipunlock.noroot.utils.UpdateChecker
+import .XposedLoader
+import .utils.ApkDownloader
+import .utils.UpdateChecker
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
