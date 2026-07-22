@@ -1,4 +1,4 @@
-package .utils
+package com.mjh.shizukufix.utils
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -16,6 +16,7 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.security.MessageDigest
 import java.util.concurrent.atomic.AtomicBoolean
+import com.mjh.shizukufix.utils.LogX
 
 object ApkDownloader {
 
