@@ -30,33 +30,25 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-      - uses: android-actions/setup-android@v3
-        with:
-          packages: 'platform-tools platforms;android-34 build-tools;34.0.0'
       - uses: gradle/actions/setup-gradle@v3
         with:
           gradle-version: '8.2'
       - name: Generate Gradle Wrapper
         working-directory: modules/${{ matrix.module }}
         run: gradle wrapper --gradle-version 8.2 --distribution-type bin
-      - name: Generate Debug Keystore
-        run: |
-          keytool -genkey -v -keystore modules/keystore/mjh-release.jks -keyalg RSA -keysize 2048 -validity 10000 -alias mjh -storepass debug123 -keypass debug123 -dname "CN=Debug, OU=Dev, O=LSP, L=City, S=State, C=CN" -noprompt
       - name: Build Release APK
         working-directory: modules/${{ matrix.module }}
         env:
-          MJH_STORE_PASSWORD: ${{ secrets.MJH_STORE_PASSWORD || 'debug123' }}
-          MJH_KEY_ALIAS: ${{ secrets.MJH_KEY_ALIAS || 'debug' }}
-          MJH_KEY_PASSWORD: ${{ secrets.MJH_KEY_PASSWORD || 'debug123' }}
+          MJH_STORE_PASSWORD: ${{ secrets.MJH_STORE_PASSWORD }}
+          MJH_KEY_ALIAS: ${{ secrets.MJH_KEY_ALIAS }}
+          MJH_KEY_PASSWORD: ${{ secrets.MJH_KEY_PASSWORD }}
         run: ./gradlew :app:assembleRelease --no-daemon --stacktrace
       - name: Rename APK
-        run: |
-          cd modules/${{ matrix.module }}/app/build/outputs/apk/release/
-          mv app-release.apk ${{ matrix.module }}.apk 2>/dev/null || true
+        run: mv modules/${{ matrix.module }}/app/build/outputs/apk/release/app-release.apk ${{ matrix.module }}.apk 2>/dev/null || true
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.module }}-apk
-          path: modules/${{ matrix.module }}/app/build/outputs/apk/release/${{ matrix.module }}.apk
+          path: ${{ matrix.module }}.apk
   release:
     name: Publish APKs
     needs: build
@@ -71,12 +63,9 @@ jobs:
           find all-apks -name "*.apk" | while read f; do cp "$f" "release-assets/$(basename "$f")"; done
       - uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.0.11
-          name: LSPatch-Noroot-modle 濡€虫健閸氬牓娉?v1.0.11
-          body: |
-            # LSPatch-Noroot-modle v1.0.11
-            10 娑?LSPosed Root 濡€虫健 APK
-            瀵偓閸欐垼鈧拑绱癕JH
+          tag_name: v1.0.12
+          name: LSPatch-Noroot-modle v1.0.12
+          body: "11 LSPatch NoRoot modules. Dev: MJH"
           files: release-assets/*.apk
           prerelease: false
           draft: false
