@@ -15,6 +15,7 @@ import java.io.RandomAccessFile
 import java.net.HttpURLConnection
 import java.net.URL
 import java.security.MessageDigest
+import com.microx.enhancer.utils.LogX
 import java.util.concurrent.atomic.AtomicBoolean
 
 object ApkDownloader {
