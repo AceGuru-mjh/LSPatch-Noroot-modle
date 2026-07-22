@@ -1,4 +1,4 @@
-package .ui.screens
+package com.gameunlocker.noroot.ui.screens
 
 import android.content.Intent
 import android.net.Uri
@@ -10,18 +10,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.DownloadDone
 import androidx.compose.material.icons.filled.NewReleases
-import androidx.compose.material.icons.filled.Pause
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
@@ -33,6 +28,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -48,13 +44,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import .XposedLoader
-import .utils.ApkDownloader
-import .utils.UpdateChecker
+import com.gameunlocker.noroot.XposedLoader
+import com.gameunlocker.noroot.utils.ApkDownloader
+import com.gameunlocker.noroot.utils.UpdateChecker
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.util.concurrent.atomic.AtomicBoolean
 
 @Composable
 fun UpdateScreen() {
@@ -67,20 +62,18 @@ fun UpdateScreen() {
     var error by remember { mutableStateOf<String?>(null) }
     var statusMsg by remember { mutableStateOf<String?>(null) }
     var downloading by remember { mutableStateOf(false) }
-    var paused by remember { mutableStateOf(false) }
-    val pauseFlag = remember { AtomicBoolean(false) }
     var progress by remember { mutableStateOf(0f) }
-    var downloaded by remember { mutableStateOf(false) }
     var autoCheck by remember { mutableStateOf(UpdateChecker.isAutoCheckEnabled()) }
     var cacheSize by remember { mutableStateOf(UpdateChecker.getDownloadCacheSize(ctx)) }
     var showReleaseNotes by remember { mutableStateOf(false) }
-    var currentMirror by remember { mutableStateOf(0) }
 
+    // 进入页面自动检查一次（如果开启自动检查且未缓存）
     LaunchedEffect(Unit) {
         if (UpdateChecker.isAutoCheckEnabled()) {
             checking = true
             val r = withContext(Dispatchers.IO) { UpdateChecker.checkUpdate(XposedLoader.VERSION) }
             checking = false
+            // 只有有更新且非忽略才显示
             if (r != null && r.hasUpdate && !r.isIgnored) {
                 info = r
             }
@@ -88,87 +81,94 @@ fun UpdateScreen() {
     }
 
     Column(
-        modifier = Modifier.fillMaxSize().verticalScroll(scroll).padding(16.dp)
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(scroll)
+            .padding(16.dp)
     ) {
-        Text("Hot Update", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+        Text("热更新", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
         Spacer(Modifier.height(4.dp))
-        Text("Check GitHub Release, download and install in-app. CDN mirrors for faster downloads.",
-            style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(
+            "检查 GitHub Release 新版本，支持应用内下载安装",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
         Spacer(Modifier.height(16.dp))
 
-        // Current version card
+        // 当前版本
         Card(modifier = Modifier.fillMaxWidth()) {
             Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Icon(Icons.Default.Settings, null, tint = MaterialTheme.colorScheme.primary)
+                Icon(Icons.Default.Settings, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                 Column(modifier = Modifier.weight(1f)) {
-                    Text("Current Version", style = MaterialTheme.typography.labelSmall)
+                    Text("当前版本", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Text("v${XposedLoader.VERSION}", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
                 }
             }
         }
         Spacer(Modifier.height(12.dp))
 
-        // Auto check toggle
+        // 自动检查开关
         Card(modifier = Modifier.fillMaxWidth()) {
             Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
                 Column(modifier = Modifier.weight(1f)) {
-                    Text("Auto Check", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                    Text("Check on entering page (5min throttle)", style = MaterialTheme.typography.bodySmall)
+                    Text("自动检查更新", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                    Text("进入页面自动检查（5分钟内不重复）", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
                 Switch(checked = autoCheck, onCheckedChange = {
-                    autoCheck = it; UpdateChecker.setAutoCheck(it)
+                    autoCheck = it
+                    UpdateChecker.setAutoCheck(it)
                 })
             }
         }
         Spacer(Modifier.height(12.dp))
 
-        // Check update button
+        // 检查更新按钮
         Button(
             onClick = {
-                checking = true; error = null; info = null; downloaded = false
+                checking = true
+                error = null
+                info = null
                 scope.launch {
                     val result = withContext(Dispatchers.IO) {
                         UpdateChecker.checkUpdate(XposedLoader.VERSION, force = true)
                     }
                     checking = false
-                    if (result != null) info = result else error = "Check failed, check network"
+                    if (result != null) {
+                        info = result
+                    } else {
+                        error = "检查失败，请检查网络"
+                    }
                 }
             },
             enabled = !checking && !downloading,
             modifier = Modifier.fillMaxWidth()
         ) {
             if (checking) {
-                CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
-                Text("  Checking...", modifier = Modifier.padding(start = 8.dp))
+                CircularProgressIndicator(modifier = Modifier.height(20.dp), strokeWidth = 2.dp)
+                Text("  检查中...")
             } else {
-                Icon(Icons.Default.Refresh, null)
-                Text("  Check Update", modifier = Modifier.padding(start = 8.dp))
+                Icon(Icons.Default.Refresh, contentDescription = null)
+                Text("  检查更新")
             }
         }
 
         error?.let {
             Spacer(Modifier.height(8.dp))
             Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)) {
-                Text(it, modifier = Modifier.padding(12.dp), color = MaterialTheme.colorScheme.onErrorContainer)
+                Text(error!!, modifier = Modifier.padding(12.dp), color = MaterialTheme.colorScheme.onErrorContainer)
             }
         }
 
         statusMsg?.let {
             Spacer(Modifier.height(8.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                if (downloaded) {
-                    Icon(Icons.Default.CheckCircle, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(16.dp))
-                    Spacer(Modifier.size(4.dp))
-                }
-                Text(it, style = MaterialTheme.typography.bodySmall)
-            }
+            Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
 
         info?.let { ui ->
             Spacer(Modifier.height(16.dp))
 
-            // Update status card
+            // 更新状态卡片
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(
@@ -180,31 +180,33 @@ fun UpdateScreen() {
                     horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     Icon(
                         if (ui.hasUpdate) Icons.Default.NewReleases else Icons.Default.CheckCircle,
-                        null,
+                        contentDescription = null,
                         tint = if (ui.hasUpdate) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            if (ui.hasUpdate) "v${ui.latestVersion} Available" else "Up to date",
-                            style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold
+                            if (ui.hasUpdate) "发现新版本 v${ui.latestVersion}" else "已是最新版本",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
                         )
-                        Text("Published: ${ui.publishDate.take(10)}", style = MaterialTheme.typography.bodySmall)
+                        Text("发布日期: ${ui.publishDate.take(10)}",
+                             style = MaterialTheme.typography.bodySmall)
                         if (ui.isIgnored) {
-                            Text("(Ignored)", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.error)
+                            Text("(此版本已忽略)", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.error)
                         }
                     }
                 }
             }
 
-            // Release notes
+            // 更新说明（可展开）
             if (ui.releaseNotes.isNotBlank()) {
                 Spacer(Modifier.height(8.dp))
                 Card(modifier = Modifier.fillMaxWidth()) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text("Release Notes", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+                            Text("更新说明", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
                             TextButton(onClick = { showReleaseNotes = !showReleaseNotes }) {
-                                Text(if (showReleaseNotes) "Collapse" else "Expand")
+                                Text(if (showReleaseNotes) "收起" else "展开")
                             }
                         }
                         if (showReleaseNotes) {
@@ -213,87 +215,50 @@ fun UpdateScreen() {
                         } else {
                             Spacer(Modifier.height(4.dp))
                             Text(ui.releaseNotes.take(80) + if (ui.releaseNotes.length > 80) "..." else "",
-                                style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                 style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     }
                 }
             }
 
-            // Download & install
+            // 下载安装
             if (ui.hasUpdate && !ui.isIgnored) {
                 Spacer(Modifier.height(12.dp))
                 val apk = UpdateChecker.findMatchingApk(ui, "GameUnlockerPro_NoRoot")
                 if (apk != null) {
-                    Text("${apk.name} (%.1f MB)".format(apk.sizeBytes / 1024.0 / 1024.0),
-                        style = MaterialTheme.typography.bodySmall)
+                    Text("下载: ${apk.name} (${"%.2f".format(apk.sizeBytes / 1024.0 / 1024.0)} MB)", style = MaterialTheme.typography.bodySmall)
                     Spacer(Modifier.height(8.dp))
-
-                    if (downloading || downloaded) {
-                        // Progress bar + pause/resume
+                    if (downloading) {
                         LinearProgressIndicator(progress = progress, modifier = Modifier.fillMaxWidth())
                         Spacer(Modifier.height(4.dp))
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text("${(progress * 100).toInt()}% CDN #${currentMirror + 1}",
-                                style = MaterialTheme.typography.labelSmall, modifier = Modifier.weight(1f))
-                            if (!downloaded) {
-                                IconButton(onClick = {
-                                    paused = !paused
-                                    pauseFlag.set(!pauseFlag.get())
-                                }, modifier = Modifier.size(32.dp)) {
-                                    Icon(
-                                        if (paused) Icons.Default.PlayArrow else Icons.Default.Pause,
-                                        if (paused) "Resume" else "Pause",
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                }
-                            }
-                            if (downloaded) {
-                                Icon(Icons.Default.DownloadDone, null,
-                                    tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(24.dp))
-                                Text(" Complete", style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.primary)
-                            }
-                        }
+                        Text("${(progress * 100).toInt()}%", style = MaterialTheme.typography.labelSmall)
                     } else {
                         Button(
                             onClick = {
-                                downloading = true; paused = false; downloaded = false
-                                progress = 0f; statusMsg = "Starting..."
+                                downloading = true
+                                progress = 0f
+                                statusMsg = "开始下载..."
                                 scope.launch {
-                                    val mirrors = ApkDownloader.generateMirrors(apk.downloadUrl)
-                                    currentMirror = 0
-
-                                    // Try mirrors one by one
-                                    var result: ApkDownloader.DownloadResult? = null
-                                    for ((idx, mirror) in mirrors.withIndex()) {
-                                        if (pauseFlag.get()) break
-                                        currentMirror = idx
-                                        statusMsg = "CDN ${idx + 1}/${mirrors.size}"
-                                        result = withContext(Dispatchers.IO) {
-                                            ApkDownloader.download(
-                                                ctx, listOf(mirror), apk.name,
-                                                { p -> progress = p },
-                                                { s -> statusMsg = s },
-                                                pauseFlag
-                                            )
-                                        }
-                                        if (result.success) break
+                                    val result = withContext(Dispatchers.IO) {
+                                        ApkDownloader.download(
+                                            ctx, apk.downloadUrl, apk.name,
+                                            { p -> progress = p },
+                                            { s -> statusMsg = s }
+                                        )
                                     }
-
                                     downloading = false
                                     cacheSize = UpdateChecker.getDownloadCacheSize(ctx)
-                                    if (result != null && result.success) {
-                                        downloaded = true
-                                        statusMsg = "Downloaded - tap notification to install"
+                                    if (!result.success) {
+                                        error = "下载失败: ${result.errorMsg}"
                                     } else {
-                                        error = "Download failed: ${result?.errorMsg ?: "No mirrors worked"}"
+                                        statusMsg = "下载完成，请在弹出的安装界面确认安装"
                                     }
                                 }
                             },
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Icon(Icons.Default.CloudDownload, null)
-                            Text("  Download (${mirrorCount(apk.downloadUrl)} mirrors)", modifier = Modifier.padding(start = 8.dp))
+                            Icon(Icons.Default.CloudDownload, contentDescription = null)
+                            Text("  下载并安装")
                         }
                     }
                 }
@@ -302,67 +267,69 @@ fun UpdateScreen() {
                     OutlinedButton(
                         onClick = { UpdateChecker.ignoreVersion(ui.latestVersion) },
                         modifier = Modifier.weight(1f)
-                    ) { Text("Ignore") }
+                    ) { Text("忽略此版本") }
                     OutlinedButton(
                         onClick = {
-                            ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(ui.releaseUrl))
-                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+                            val i = Intent(Intent.ACTION_VIEW, Uri.parse(ui.releaseUrl))
+                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            ctx.startActivity(i)
                         },
                         modifier = Modifier.weight(1f)
-                    ) { Text("Browser") }
+                    ) { Text("浏览器打开") }
                 }
             }
 
+            // 已忽略版本的恢复
             if (ui.isIgnored) {
                 Spacer(Modifier.height(8.dp))
                 OutlinedButton(
                     onClick = {
                         UpdateChecker.clearIgnored()
+                        // 重新检查
                         checking = true
                         scope.launch {
-                            val r = withContext(Dispatchers.IO) { UpdateChecker.checkUpdate(XposedLoader.VERSION, force = true) }
+                            val r = withContext(Dispatchers.IO) {
+                                UpdateChecker.checkUpdate(XposedLoader.VERSION, force = true)
+                            }
                             checking = false
                             if (r != null) info = r
                         }
                     },
                     modifier = Modifier.fillMaxWidth()
-                ) { Text("Un-ignore & Re-check") }
+                ) { Text("取消忽略并重新检查") }
             }
         }
 
-        // Cache management
+        // 缓存管理
         Spacer(Modifier.height(16.dp))
         Card(modifier = Modifier.fillMaxWidth()) {
             Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
                 Column(modifier = Modifier.weight(1f)) {
-                    Text("Download Cache", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
-                    Text("${cacheSize / 1024} KB", style = MaterialTheme.typography.bodySmall)
+                    Text("下载缓存", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+                    Text("占用: ${cacheSize / 1024} KB", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
                 IconButton(onClick = {
-                    UpdateChecker.clearDownloadCache(ctx); cacheSize = 0L
-                    statusMsg = "Cache cleared"
+                    UpdateChecker.clearDownloadCache(ctx)
+                    cacheSize = 0L
+                    statusMsg = "缓存已清理"
                 }) {
-                    Icon(Icons.Default.Delete, "Clear cache", tint = MaterialTheme.colorScheme.error)
+                    Icon(Icons.Default.Delete, contentDescription = "清理缓存", tint = MaterialTheme.colorScheme.error)
                 }
             }
         }
 
         Spacer(Modifier.height(16.dp))
         Card(modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)) {
+             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)) {
             Column(modifier = Modifier.padding(12.dp)) {
-                Text("Info", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
+                Text("说明", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
                 Spacer(Modifier.height(4.dp))
-                Text("- Source: GitHub Releases + jsDelivr CDN + FastGit mirror", style = MaterialTheme.typography.bodySmall)
-                Text("- Supports resume on network loss (Range header)", style = MaterialTheme.typography.bodySmall)
-                Text("- Allow 'Install unknown apps' permission to auto-install", style = MaterialTheme.typography.bodySmall)
-                Text("- Re-enable in LSPatch/LSPosed after update", style = MaterialTheme.typography.bodySmall)
+                Text("• 更新源: github.com/AceGuru-mjh/LSPatch-Noroot-modle/releases", style = MaterialTheme.typography.bodySmall)
+                Text("• 下载完成自动弹出安装界面（需允许\"安装未知应用\"）", style = MaterialTheme.typography.bodySmall)
+                Text("• 模块更新后需在 LSPosed/LSPatch 重新启用并重启目标 APP", style = MaterialTheme.typography.bodySmall)
+                Text("• 自动检查间隔最少5分钟，避免频繁请求 GitHub API", style = MaterialTheme.typography.bodySmall)
             }
         }
         Spacer(Modifier.height(32.dp))
     }
-}
-
-private fun mirrorCount(url: String): Int {
-    return ApkDownloader.generateMirrors(url).size
 }
