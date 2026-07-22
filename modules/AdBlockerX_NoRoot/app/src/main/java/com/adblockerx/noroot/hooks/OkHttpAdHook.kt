@@ -120,37 +120,12 @@ object OkHttpAdHook {
 
     private fun buildEmptyResponse(lpparam: XC_LoadPackage.LoadPackageParam, url: String): Any? {
         return try {
-            val respClass = XposedHelpers.findClassIfExists(RESPONSE_CLASS, lpparam.classLoader) ?: return null
             val builderClass = XposedHelpers.findClassIfExists(RESPONSE_BUILDER_CLASS, lpparam.classLoader) ?: return null
-
-            val builder = try {
-                val b = XposedHelpers.newInstance(builderClass)
-                try {
-                    val requestClass = XposedHelpers.findClassIfExists(REQUEST_CLASS, lpparam.classLoader)
-                    if (requestClass != null) {
-                        val reqBuilder = XposedHelpers.callStaticMethod(requestClass, "newBuilder") ?: return@try
-                        val fakeReq = try {
-                            val httpUrlClass = XposedHelpers.findClassIfExists(HTTP_URL_CLASS, lpparam.classLoader)
-                            if (httpUrlClass != null) {
-                                val urlObj = XposedHelpers.callStaticMethod(httpUrlClass, "get", "http://localhost")
-                                XposedHelpers.callMethod(reqBuilder, "url", urlObj)
-                            }
-                            XposedHelpers.callMethod(reqBuilder, "build")
-                        } catch (_: Throwable) { null }
-
-                        if (fakeReq != null) {
-                            try { XposedHelpers.callMethod(b, "request", fakeReq) } catch (_: NoSuchMethodError) { }
-                        }
-                    }
-                } catch (_: Throwable) { }
-
-                try { XposedHelpers.callMethod(b, "code", 404) } catch (_: Throwable) { }
-                XposedHelpers.callMethod(b, "build")
-            } catch (_: Throwable) { null }
-
-            builder
+            
+            val b = XposedHelpers.newInstance(builderClass)
+            try { XposedHelpers.callMethod(b, "code", 404) } catch (_: Throwable) { }
+            XposedHelpers.callMethod(b, "build")
         } catch (e: Throwable) {
-            LogX.e("[OkHttp] buildEmptyResponse failed", e)
             null
         }
     }
