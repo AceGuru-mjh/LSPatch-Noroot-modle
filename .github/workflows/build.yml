@@ -41,7 +41,7 @@ jobs:
         run: gradle wrapper --gradle-version 8.2 --distribution-type bin
       - name: Generate Debug Keystore
         run: |
-          keytool -genkey -v -keystore modules/keystore/debug.jks -keyalg RSA -keysize 2048 -validity 10000 -alias debug -storepass debug123 -keypass debug123 -dname "CN=Debug, OU=Dev, O=LSP, L=City, S=State, C=CN" -noprompt
+          keytool -genkey -v -keystore modules/keystore/mjh-release.jks -keyalg RSA -keysize 2048 -validity 10000 -alias debug -storepass debug123 -keypass debug123 -dname "CN=Debug, OU=Dev, O=LSP, L=City, S=State, C=CN" -noprompt
       - name: Build Release APK
         working-directory: modules/${{ matrix.module }}
         env:
@@ -72,11 +72,11 @@ jobs:
       - uses: softprops/action-gh-release@v2
         with:
           tag_name: v1.0.11
-          name: LSPatch-Noroot-modle 模块合集 v1.0.11
+          name: LSPatch-Noroot-modle 妯″潡鍚堥泦 v1.0.11
           body: |
             # LSPatch-Noroot-modle v1.0.11
-            10 个 LSPosed Root 模块 APK
-            开发者：MJH
+            10 涓?LSPosed Root 妯″潡 APK
+            寮€鍙戣€咃細MJH
           files: release-assets/*.apk
           prerelease: false
           draft: false
