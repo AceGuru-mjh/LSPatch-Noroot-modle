@@ -59,7 +59,7 @@ fun HomeScreen(
     val recentLogs = remember { mutableStateOf<List<LogEntry>>(emptyList()) }
 
     LaunchedEffect(Unit) {
-        try { counter.longValue = ConfigManager.getBlockedCount() } catch (_: Throwable) {}
+        try { counter.longValue = LogStore.getCounter() } catch (_: Throwable) {}
         try { counter.longValue = LogStore.getCounter() } catch (_: Throwable) {}
         try { recentLogs.value = LogStore.getRecentLogs(10) } catch (_: Throwable) {}
     }

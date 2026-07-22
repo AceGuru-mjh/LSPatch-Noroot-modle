@@ -71,7 +71,7 @@ class FloatingBallService : Service() {
     private fun updateBallCount() {
         try {
             val tv = ballView.findViewById<TextView>(R.id.ball_count) ?: return
-            val count = try { ConfigManager.getBlockedCount() } catch (_: Throwable) { 0L }
+            val count = try { 0L } catch (_: Throwable) { 0L }
             tv.text = count.toString()
         } catch (_: Throwable) {}
     }
