@@ -1,6 +1,6 @@
 {
   "version": "1.0.11",
-  "timestamp": "2026-07-21T06:44:19.775140+00:00",
+  "timestamp": "2026-07-23T13:38:13.093936+00:00",
   "modules": [
     {
       "name": "AdBlockerX_NoRoot",
@@ -18,10 +18,10 @@
         {
           "file": "AdViewHideHook.kt",
           "hookCalls": 2,
-          "tryCatch": 4,
+          "tryCatch": 6,
           "logs": 7,
           "todo": 0,
-          "lines": 112,
+          "lines": 115,
           "status": "ok"
         },
         {
@@ -54,10 +54,10 @@
         {
           "file": "OkHttpAdHook.kt",
           "hookCalls": 3,
-          "tryCatch": 14,
-          "logs": 13,
+          "tryCatch": 18,
+          "logs": 10,
           "todo": 0,
-          "lines": 145,
+          "lines": 133,
           "status": "ok"
         },
         {
@@ -68,6 +68,15 @@
           "todo": 0,
           "lines": 141,
           "status": "ok"
+        },
+        {
+          "file": "ShizukuDnsHook.kt",
+          "hookCalls": 1,
+          "tryCatch": 3,
+          "logs": 8,
+          "todo": 0,
+          "lines": 76,
+          "status": "weak"
         },
         {
           "file": "TrackerBlockHook.kt",
@@ -90,21 +99,23 @@
         {
           "file": "WebViewAdHook.kt",
           "hookCalls": 7,
-          "tryCatch": 15,
-          "logs": 20,
+          "tryCatch": 20,
+          "logs": 21,
           "todo": 0,
-          "lines": 209,
+          "lines": 226,
           "status": "ok"
         }
       ],
       "uiBugs": 0,
-      "configIssues": [],
+      "configIssues": [
+        "LSPatch: xposedminversion=82(应93)"
+      ],
       "stats": {
-        "hookFiles": 10,
+        "hookFiles": 11,
         "ok": 8,
-        "weak": 1,
+        "weak": 2,
         "hollow": 0,
-        "totalHookCalls": 36
+        "totalHookCalls": 37
       }
     },
     {
@@ -130,6 +141,15 @@
           "status": "ok"
         },
         {
+          "file": "BluetoothDeviceEqHook.kt",
+          "hookCalls": 2,
+          "tryCatch": 6,
+          "logs": 9,
+          "todo": 0,
+          "lines": 113,
+          "status": "ok"
+        },
+        {
           "file": "EqualizerHook.kt",
           "hookCalls": 4,
           "tryCatch": 8,
@@ -137,6 +157,15 @@
           "todo": 0,
           "lines": 129,
           "status": "ok"
+        },
+        {
+          "file": "HeadphoneProfileHook.kt",
+          "hookCalls": 1,
+          "tryCatch": 6,
+          "logs": 12,
+          "todo": 0,
+          "lines": 129,
+          "status": "weak"
         },
         {
           "file": "MicBoostHook.kt",
@@ -148,6 +177,24 @@
           "status": "ok"
         },
         {
+          "file": "PerAppVolumeHook.kt",
+          "hookCalls": 1,
+          "tryCatch": 3,
+          "logs": 6,
+          "todo": 0,
+          "lines": 86,
+          "status": "weak"
+        },
+        {
+          "file": "ScheduledMuteHook.kt",
+          "hookCalls": 1,
+          "tryCatch": 4,
+          "logs": 7,
+          "todo": 0,
+          "lines": 100,
+          "status": "weak"
+        },
+        {
           "file": "SpeakerBoostHook.kt",
           "hookCalls": 3,
           "tryCatch": 5,
@@ -157,23 +204,34 @@
           "status": "ok"
         },
         {
+          "file": "TinymixBridgeHook.kt",
+          "hookCalls": 1,
+          "tryCatch": 4,
+          "logs": 12,
+          "todo": 0,
+          "lines": 93,
+          "status": "weak"
+        },
+        {
           "file": "VolumeBoostHook.kt",
           "hookCalls": 5,
-          "tryCatch": 9,
+          "tryCatch": 11,
           "logs": 16,
           "todo": 0,
-          "lines": 143,
+          "lines": 146,
           "status": "ok"
         }
       ],
       "uiBugs": 0,
-      "configIssues": [],
+      "configIssues": [
+        "LSPatch: xposedminversion=82(应93)"
+      ],
       "stats": {
-        "hookFiles": 6,
-        "ok": 6,
-        "weak": 0,
+        "hookFiles": 11,
+        "ok": 7,
+        "weak": 4,
         "hollow": 0,
-        "totalHookCalls": 20
+        "totalHookCalls": 26
       }
     },
     {
@@ -183,10 +241,10 @@
         {
           "file": "AlarmOptimizerHook.kt",
           "hookCalls": 5,
-          "tryCatch": 8,
+          "tryCatch": 10,
           "logs": 20,
           "todo": 0,
-          "lines": 179,
+          "lines": 182,
           "status": "ok"
         },
         {
@@ -196,6 +254,15 @@
           "logs": 9,
           "todo": 0,
           "lines": 107,
+          "status": "ok"
+        },
+        {
+          "file": "AppOpsRestrictHook.kt",
+          "hookCalls": 1,
+          "tryCatch": 2,
+          "logs": 7,
+          "todo": 0,
+          "lines": 89,
           "status": "ok"
         },
         {
@@ -228,10 +295,10 @@
         {
           "file": "JobSchedulerHook.kt",
           "hookCalls": 3,
-          "tryCatch": 7,
+          "tryCatch": 9,
           "logs": 15,
           "todo": 0,
-          "lines": 129,
+          "lines": 132,
           "status": "ok"
         },
         {
@@ -264,21 +331,23 @@
         {
           "file": "WakeLockHook.kt",
           "hookCalls": 4,
-          "tryCatch": 10,
+          "tryCatch": 14,
           "logs": 21,
           "todo": 0,
-          "lines": 237,
+          "lines": 242,
           "status": "ok"
         }
       ],
       "uiBugs": 0,
-      "configIssues": [],
+      "configIssues": [
+        "LSPatch: xposedminversion=82(应93)"
+      ],
       "stats": {
-        "hookFiles": 10,
-        "ok": 10,
+        "hookFiles": 11,
+        "ok": 11,
         "weak": 0,
         "hollow": 0,
-        "totalHookCalls": 34
+        "totalHookCalls": 35
       }
     },
     {
@@ -297,19 +366,19 @@
         {
           "file": "DeviceSpoofHook.kt",
           "hookCalls": 4,
-          "tryCatch": 8,
+          "tryCatch": 10,
           "logs": 12,
           "todo": 0,
-          "lines": 156,
+          "lines": 159,
           "status": "ok"
         },
         {
           "file": "FrameRateUnlockHook.kt",
           "hookCalls": 7,
-          "tryCatch": 14,
+          "tryCatch": 16,
           "logs": 24,
           "todo": 0,
-          "lines": 192,
+          "lines": 195,
           "status": "ok"
         },
         {
@@ -342,10 +411,10 @@
         {
           "file": "ProcessOptimizerHook.kt",
           "hookCalls": 2,
-          "tryCatch": 5,
+          "tryCatch": 7,
           "logs": 9,
           "todo": 0,
-          "lines": 94,
+          "lines": 97,
           "status": "ok"
         },
         {
@@ -358,6 +427,15 @@
           "status": "ok"
         },
         {
+          "file": "ShizukuSystemTuneHook.kt",
+          "hookCalls": 1,
+          "tryCatch": 4,
+          "logs": 11,
+          "todo": 0,
+          "lines": 92,
+          "status": "weak"
+        },
+        {
           "file": "TouchSamplingBoostHook.kt",
           "hookCalls": 2,
           "tryCatch": 7,
@@ -368,13 +446,15 @@
         }
       ],
       "uiBugs": 0,
-      "configIssues": [],
+      "configIssues": [
+        "LSPatch: xposedminversion=82(应93)"
+      ],
       "stats": {
-        "hookFiles": 9,
+        "hookFiles": 10,
         "ok": 9,
-        "weak": 0,
+        "weak": 1,
         "hollow": 0,
-        "totalHookCalls": 40
+        "totalHookCalls": 41
       }
     },
     {
@@ -384,28 +464,28 @@
         {
           "file": "AdBlockHook.kt",
           "hookCalls": 23,
-          "tryCatch": 3,
+          "tryCatch": 5,
           "logs": 0,
           "todo": 0,
-          "lines": 505,
+          "lines": 508,
           "status": "ok"
         },
         {
           "file": "AntiRecallHook.kt",
           "hookCalls": 8,
-          "tryCatch": 4,
+          "tryCatch": 6,
           "logs": 0,
           "todo": 0,
-          "lines": 316,
+          "lines": 319,
           "status": "ok"
         },
         {
           "file": "AutoRedPacketHook.kt",
           "hookCalls": 2,
-          "tryCatch": 12,
+          "tryCatch": 14,
           "logs": 14,
           "todo": 0,
-          "lines": 137,
+          "lines": 140,
           "status": "ok"
         },
         {
@@ -481,6 +561,15 @@
           "status": "ok"
         },
         {
+          "file": "ShizukuDbHook.kt",
+          "hookCalls": 1,
+          "tryCatch": 3,
+          "logs": 9,
+          "todo": 0,
+          "lines": 78,
+          "status": "weak"
+        },
+        {
           "file": "UIModHook.kt",
           "hookCalls": 16,
           "tryCatch": 4,
@@ -500,13 +589,17 @@
         }
       ],
       "uiBugs": 0,
-      "configIssues": [],
+      "configIssues": [
+        "LSPatch: xposedminversion=82(应93)",
+        "LSPatch: 缺android包名过滤",
+        "LSPatch: 缺isFirstApplication进程过滤"
+      ],
       "stats": {
-        "hookFiles": 13,
+        "hookFiles": 14,
         "ok": 13,
-        "weak": 0,
+        "weak": 1,
         "hollow": 0,
-        "totalHookCalls": 122
+        "totalHookCalls": 123
       }
     },
     {
@@ -532,6 +625,15 @@
           "status": "ok"
         },
         {
+          "file": "NotificationGroupingHook.kt",
+          "hookCalls": 3,
+          "tryCatch": 8,
+          "logs": 14,
+          "todo": 0,
+          "lines": 166,
+          "status": "ok"
+        },
+        {
           "file": "NotifyBeautifyHook.kt",
           "hookCalls": 1,
           "tryCatch": 7,
@@ -543,10 +645,10 @@
         {
           "file": "NotifyFilterHook.kt",
           "hookCalls": 3,
-          "tryCatch": 6,
+          "tryCatch": 8,
           "logs": 10,
           "todo": 0,
-          "lines": 130,
+          "lines": 133,
           "status": "ok"
         },
         {
@@ -568,6 +670,24 @@
           "status": "ok"
         },
         {
+          "file": "ScheduleDndHook.kt",
+          "hookCalls": 6,
+          "tryCatch": 14,
+          "logs": 25,
+          "todo": 0,
+          "lines": 206,
+          "status": "ok"
+        },
+        {
+          "file": "ShizukuNotifyCmdHook.kt",
+          "hookCalls": 0,
+          "tryCatch": 10,
+          "logs": 18,
+          "todo": 0,
+          "lines": 164,
+          "status": "hollow"
+        },
+        {
           "file": "SilentNotifyHook.kt",
           "hookCalls": 4,
           "tryCatch": 11,
@@ -575,16 +695,27 @@
           "todo": 0,
           "lines": 135,
           "status": "ok"
+        },
+        {
+          "file": "VipWhitelistHook.kt",
+          "hookCalls": 2,
+          "tryCatch": 11,
+          "logs": 11,
+          "todo": 0,
+          "lines": 133,
+          "status": "ok"
         }
       ],
       "uiBugs": 0,
-      "configIssues": [],
+      "configIssues": [
+        "LSPatch: xposedminversion=82(应93)"
+      ],
       "stats": {
-        "hookFiles": 7,
-        "ok": 6,
+        "hookFiles": 11,
+        "ok": 9,
         "weak": 1,
-        "hollow": 0,
-        "totalHookCalls": 19
+        "hollow": 1,
+        "totalHookCalls": 30
       }
     },
     {
@@ -603,19 +734,19 @@
         {
           "file": "ClipboardGuardHook.kt",
           "hookCalls": 4,
-          "tryCatch": 5,
+          "tryCatch": 7,
           "logs": 13,
           "todo": 0,
-          "lines": 85,
+          "lines": 88,
           "status": "ok"
         },
         {
           "file": "DeviceIdSpoofHook.kt",
           "hookCalls": 14,
-          "tryCatch": 19,
+          "tryCatch": 21,
           "logs": 35,
           "todo": 0,
-          "lines": 235,
+          "lines": 238,
           "status": "ok"
         },
         {
@@ -648,10 +779,19 @@
         {
           "file": "PermissionSpoofHook.kt",
           "hookCalls": 4,
-          "tryCatch": 7,
+          "tryCatch": 9,
           "logs": 14,
           "todo": 0,
-          "lines": 135,
+          "lines": 138,
+          "status": "ok"
+        },
+        {
+          "file": "PmRevokeHook.kt",
+          "hookCalls": 1,
+          "tryCatch": 2,
+          "logs": 7,
+          "todo": 0,
+          "lines": 78,
           "status": "ok"
         },
         {
@@ -692,13 +832,15 @@
         }
       ],
       "uiBugs": 0,
-      "configIssues": [],
+      "configIssues": [
+        "LSPatch: xposedminversion=82(应93)"
+      ],
       "stats": {
-        "hookFiles": 11,
-        "ok": 11,
+        "hookFiles": 12,
+        "ok": 12,
         "weak": 0,
         "hollow": 0,
-        "totalHookCalls": 57
+        "totalHookCalls": 58
       }
     },
     {
@@ -735,19 +877,28 @@
         {
           "file": "ServiceWatchdogHook.kt",
           "hookCalls": 3,
-          "tryCatch": 7,
+          "tryCatch": 9,
           "logs": 15,
           "todo": 0,
-          "lines": 160,
+          "lines": 163,
           "status": "ok"
+        },
+        {
+          "file": "ShizukuGrantHook.kt",
+          "hookCalls": 1,
+          "tryCatch": 5,
+          "logs": 9,
+          "todo": 0,
+          "lines": 92,
+          "status": "weak"
         },
         {
           "file": "ShizukuListInjectorHook.kt",
           "hookCalls": 8,
-          "tryCatch": 16,
+          "tryCatch": 18,
           "logs": 35,
           "todo": 0,
-          "lines": 365,
+          "lines": 368,
           "status": "ok"
         },
         {
@@ -763,17 +914,62 @@
       "uiBugs": 0,
       "configIssues": [],
       "stats": {
-        "hookFiles": 6,
+        "hookFiles": 7,
         "ok": 5,
-        "weak": 0,
+        "weak": 1,
         "hollow": 0,
-        "totalHookCalls": 20
+        "totalHookCalls": 21
       }
     },
     {
       "name": "StepModifier_NoRoot",
       "version": "1.0.11",
       "hooks": [
+        {
+          "file": "AntiDetectionStepHook.kt",
+          "hookCalls": 1,
+          "tryCatch": 3,
+          "logs": 6,
+          "todo": 0,
+          "lines": 101,
+          "status": "weak"
+        },
+        {
+          "file": "CalorieCalculatorHook.kt",
+          "hookCalls": 5,
+          "tryCatch": 11,
+          "logs": 17,
+          "todo": 0,
+          "lines": 139,
+          "status": "ok"
+        },
+        {
+          "file": "CompetitionModeHook.kt",
+          "hookCalls": 3,
+          "tryCatch": 7,
+          "logs": 13,
+          "todo": 0,
+          "lines": 109,
+          "status": "ok"
+        },
+        {
+          "file": "ContentProviderInjectHook.kt",
+          "hookCalls": 1,
+          "tryCatch": 2,
+          "logs": 7,
+          "todo": 0,
+          "lines": 75,
+          "status": "ok"
+        },
+        {
+          "file": "GpxRouteInjectHook.kt",
+          "hookCalls": 3,
+          "tryCatch": 11,
+          "logs": 17,
+          "todo": 2,
+          "lines": 201,
+          "status": "ok"
+        },
         {
           "file": "MultiAppSyncHook.kt",
           "hookCalls": 3,
@@ -782,6 +978,15 @@
           "todo": 0,
           "lines": 112,
           "status": "ok"
+        },
+        {
+          "file": "ScheduleStepHook.kt",
+          "hookCalls": 1,
+          "tryCatch": 4,
+          "logs": 6,
+          "todo": 0,
+          "lines": 86,
+          "status": "weak"
         },
         {
           "file": "SensorBlockHook.kt",
@@ -822,21 +1027,23 @@
         {
           "file": "StepSensorHook.kt",
           "hookCalls": 4,
-          "tryCatch": 9,
+          "tryCatch": 11,
           "logs": 18,
           "todo": 0,
-          "lines": 175,
+          "lines": 178,
           "status": "ok"
         }
       ],
       "uiBugs": 0,
-      "configIssues": [],
+      "configIssues": [
+        "LSPatch: xposedminversion=82(应93)"
+      ],
       "stats": {
-        "hookFiles": 6,
-        "ok": 6,
-        "weak": 0,
+        "hookFiles": 12,
+        "ok": 10,
+        "weak": 2,
         "hollow": 0,
-        "totalHookCalls": 20
+        "totalHookCalls": 34
       }
     },
     {
@@ -873,10 +1080,10 @@
         {
           "file": "DouyinNoWatermarkHook.kt",
           "hookCalls": 3,
-          "tryCatch": 8,
+          "tryCatch": 10,
           "logs": 9,
           "todo": 0,
-          "lines": 204,
+          "lines": 207,
           "status": "ok"
         },
         {
@@ -907,6 +1114,15 @@
           "status": "ok"
         },
         {
+          "file": "ShizukuCaptureHook.kt",
+          "hookCalls": 1,
+          "tryCatch": 3,
+          "logs": 9,
+          "todo": 0,
+          "lines": 75,
+          "status": "weak"
+        },
+        {
           "file": "XhsNoWatermarkHook.kt",
           "hookCalls": 3,
           "tryCatch": 7,
@@ -917,13 +1133,15 @@
         }
       ],
       "uiBugs": 0,
-      "configIssues": [],
+      "configIssues": [
+        "LSPatch: xposedminversion=82(应93)"
+      ],
       "stats": {
-        "hookFiles": 8,
+        "hookFiles": 9,
         "ok": 8,
-        "weak": 0,
+        "weak": 1,
         "hollow": 0,
-        "totalHookCalls": 31
+        "totalHookCalls": 32
       }
     },
     {
@@ -985,34 +1203,45 @@
           "status": "ok"
         },
         {
+          "file": "ShizukuVipDbHook.kt",
+          "hookCalls": 0,
+          "tryCatch": 10,
+          "logs": 16,
+          "todo": 0,
+          "lines": 173,
+          "status": "hollow"
+        },
+        {
           "file": "UniversalVipHook.kt",
           "hookCalls": 3,
-          "tryCatch": 6,
+          "tryCatch": 8,
           "logs": 20,
           "todo": 0,
-          "lines": 286,
+          "lines": 289,
           "status": "ok"
         }
       ],
       "uiBugs": 0,
-      "configIssues": [],
+      "configIssues": [
+        "LSPatch: xposedminversion=82(应93)"
+      ],
       "stats": {
-        "hookFiles": 7,
+        "hookFiles": 8,
         "ok": 7,
         "weak": 0,
-        "hollow": 0,
+        "hollow": 1,
         "totalHookCalls": 22
       }
     }
   ],
   "summary": {
     "totalModules": 11,
-    "totalHookFiles": 93,
-    "ok": 89,
-    "weak": 2,
-    "hollow": 0,
+    "totalHookFiles": 116,
+    "ok": 99,
+    "weak": 13,
+    "hollow": 2,
     "utility": 2,
     "uiBugs": 0,
-    "healthScore": 97.8
+    "healthScore": 86.8
   }
 }
