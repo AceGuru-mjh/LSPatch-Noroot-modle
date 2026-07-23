@@ -4,6 +4,7 @@ import android.util.Log
 import com.privacyguard.noroot.core.ConfigClient
 import com.privacyguard.noroot.hooks.*
 import com.privacyguard.noroot.models.PrivacyConfig
+import com.privacyguard.noroot.utils.CrashGuard
 import com.privacyguard.noroot.utils.EnvDetector
 import com.privacyguard.noroot.utils.HookConfigReader
 import de.robv.android.xposed.IXposedHookLoadPackage
@@ -54,6 +55,7 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
         if (lpparam.processName != lpparam.packageName) return
 
         try {
+            try { CrashGuard.init(null) } catch (_: Throwable) { }
             if (lpparam.packageName == "android") return
             if (!lpparam.isFirstApplication) return
             val pkg = lpparam.packageName ?: return
@@ -117,6 +119,7 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
             Log.e(TAG, "===== All hooks loaded for $pkg =====")
         } catch (e: Throwable) {
+            CrashGuard.log("FATAL: ${e.stackTraceToString()}")
             Log.e(TAG, "FATAL: ${e.message}", e)
         }
     }

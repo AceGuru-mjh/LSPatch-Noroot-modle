@@ -4,6 +4,7 @@ import android.util.Log
 import com.stepmod.noroot.core.ConfigClient
 import com.stepmod.noroot.hooks.*
 import com.stepmod.noroot.models.StepConfig
+import com.stepmod.noroot.utils.CrashGuard
 import com.stepmod.noroot.utils.EnvDetector
 import com.stepmod.noroot.utils.HookConfigReader
 import de.robv.android.xposed.IXposedHookLoadPackage
@@ -54,6 +55,7 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
         if (lpparam.processName != lpparam.packageName) return
 
         try {
+            try { CrashGuard.init(null) } catch (_: Throwable) { }
             if (lpparam.packageName == "android") return
             if (!lpparam.isFirstApplication) return
             val pkg = lpparam.packageName ?: return
@@ -100,8 +102,24 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
             Log.e(TAG, "Loading StepHistoryFakeHook...")
             try { if (cfg.stepHistoryFakeEnabled) StepHistoryFakeHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "StepHistoryFakeHook FAIL: ${e.message}") }
 
+            Log.e(TAG, "Loading ScheduleStepHook...")
+            try { if (cfg.scheduleStepEnabled) ScheduleStepHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "ScheduleStepHook FAIL: ${e.message}") }
+
+            Log.e(TAG, "Loading CalorieCalculatorHook...")
+            try { if (cfg.calorieCalcEnabled) CalorieCalculatorHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "CalorieCalculatorHook FAIL: ${e.message}") }
+
+            Log.e(TAG, "Loading CompetitionModeHook...")
+            try { if (cfg.competitionModeEnabled) CompetitionModeHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "CompetitionModeHook FAIL: ${e.message}") }
+
+            Log.e(TAG, "Loading AntiDetectionStepHook...")
+            try { if (cfg.antiDetectionEnabled) AntiDetectionStepHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "AntiDetectionStepHook FAIL: ${e.message}") }
+
+            Log.e(TAG, "Loading GpxRouteInjectHook...")
+            try { if (cfg.gpxRouteEnabled) GpxRouteInjectHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "GpxRouteInjectHook FAIL: ${e.message}") }
+
             Log.e(TAG, "===== All hooks loaded for $pkg =====")
         } catch (e: Throwable) {
+            CrashGuard.log("FATAL: ${e.stackTraceToString()}")
             Log.e(TAG, "FATAL: ${e.message}", e)
         }
     }

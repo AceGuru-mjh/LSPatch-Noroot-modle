@@ -100,6 +100,18 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
             Log.e(TAG, "Loading AudioQualityEnhanceHook...")
             try { if (cfg.audioQualityEnhanceEnabled) AudioQualityEnhanceHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "AudioQualityEnhanceHook FAIL: ${e.message}") }
 
+            Log.e(TAG, "Loading PerAppVolumeHook...")
+            try { if (cfg.perAppVolumeEnabled) PerAppVolumeHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "PerAppVolumeHook FAIL: ${e.message}") }
+
+            Log.e(TAG, "Loading HeadphoneProfileHook...")
+            try { if (cfg.headphoneAutoSwitchEnabled) HeadphoneProfileHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "HeadphoneProfileHook FAIL: ${e.message}") }
+
+            Log.e(TAG, "Loading ScheduledMuteHook...")
+            try { if (cfg.scheduledMuteEnabled) ScheduledMuteHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "ScheduledMuteHook FAIL: ${e.message}") }
+
+            Log.e(TAG, "Loading BluetoothDeviceEqHook...")
+            try { if (cfg.btDeviceEqEnabled) BluetoothDeviceEqHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "BluetoothDeviceEqHook FAIL: ${e.message}") }
+
             Log.e(TAG, "===== All hooks loaded for $pkg =====")
         } catch (e: Throwable) {
             Log.e(TAG, "FATAL: ${e.message}", e)

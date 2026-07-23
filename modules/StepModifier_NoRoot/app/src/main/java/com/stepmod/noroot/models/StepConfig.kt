@@ -47,5 +47,21 @@ data class StepConfig(
     var multiAppSyncEnabled: Boolean = false,        // 多APP步数同步
     var stepHistoryFakeEnabled: Boolean = false,     // 步数历史伪造
 
+    // ===== 新增实验性功能 =====
+    var scheduleStepEnabled: Boolean = false,        // 定时步数策略
+    var schedules: List<String> = emptyList(),       // JSON: [{"start":8,"end":12,"steps":5000},...]
+    var calorieCalcEnabled: Boolean = false,         // 步数→卡路里转换
+    var userWeight: Float = 65f,                     // 用户体重(kg)
+    var calorieMultiplier: Float = 0.04f,            // 卡路里系数
+    var competitionModeEnabled: Boolean = false,     // 多设备竞赛模式
+    var antiDetectionEnabled: Boolean = false,       // 反检测自然模式
+    var fluctuationRange: Int = 500,                 // 随机波动范围
+    var gpxRouteEnabled: Boolean = false,            // GPX路线模拟
+    var gpxPlaybackSpeed: Float = 1.0f,              // GPX回放倍速
+    var syncInterval: Long = 60000L,                 // 竞赛同步间隔(ms)
+    var leaderAccounts: List<String> = emptyList(),  // 竞赛主账号列表
+    var restProbability: Float = 0.1f,               // 休息概率(反检测)
+    var gpxFilePath: String = "",                    // GPX文件路径
+
     var lastModified: Long = 0L
 )

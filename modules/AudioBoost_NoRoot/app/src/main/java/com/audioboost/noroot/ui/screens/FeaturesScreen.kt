@@ -94,6 +94,37 @@ fun FeaturesScreen(cfg: AudioConfig, onConfigChange: (AudioConfig) -> Unit) {
             experimental = true
         )
 
+        FeatureCard(
+            "Per-App 音量配置", "Hook AudioManager.setStreamVolume 按应用独立配置音量级别",
+            cfg.perAppVolumeEnabled,
+            { val nc = cfg.copy(perAppVolumeEnabled = it); ConfigManager.saveGlobalConfig(nc); onConfigChange(nc) },
+            experimental = true
+        )
+        Spacer(Modifier.height(8.dp))
+
+        FeatureCard(
+            "耳机自动切换 Profile", "检测有线/蓝牙耳机连接，自动切换耳机专用EQ和低音增强",
+            cfg.headphoneAutoSwitchEnabled,
+            { val nc = cfg.copy(headphoneAutoSwitchEnabled = it); ConfigManager.saveGlobalConfig(nc); onConfigChange(nc) },
+            experimental = true
+        )
+        Spacer(Modifier.height(8.dp))
+
+        FeatureCard(
+            "定时夜间音量", "在夜间时段自动降低音量，日间恢复原音量",
+            cfg.scheduledMuteEnabled,
+            { val nc = cfg.copy(scheduledMuteEnabled = it); ConfigManager.saveGlobalConfig(nc); onConfigChange(nc) },
+            experimental = true
+        )
+        Spacer(Modifier.height(8.dp))
+
+        FeatureCard(
+            "蓝牙设备独立EQ", "按蓝牙设备MAC/名称应用独立EQ Profile",
+            cfg.btDeviceEqEnabled,
+            { val nc = cfg.copy(btDeviceEqEnabled = it); ConfigManager.saveGlobalConfig(nc); onConfigChange(nc) },
+            experimental = true
+        )
+
         Spacer(Modifier.height(20.dp))
         if (cfg.volumeBoostEnabled) {
             Text("音量增益级别", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)

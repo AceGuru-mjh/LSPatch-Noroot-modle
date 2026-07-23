@@ -3,6 +3,7 @@ package com.microx.enhancer
 import android.util.Log
 import com.microx.enhancer.core.ConfigClient
 import com.microx.enhancer.hooks.*
+import com.microx.enhancer.utils.CrashGuard
 import com.microx.enhancer.utils.HookHelper
 import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.IXposedHookZygoteInit
@@ -50,6 +51,7 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
         }
 
         try {
+            try { CrashGuard.init(null) } catch (_: Throwable) { }
             val pkg = lpparam.packageName ?: return
             val processName = lpparam.processName ?: return
 
@@ -77,6 +79,7 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
                 }
             }
         } catch (e: Throwable) {
+            CrashGuard.log("FATAL: ${e.stackTraceToString()}")
             Log.e(TAG, "FATAL: ${e.message}", e)
         }
     }

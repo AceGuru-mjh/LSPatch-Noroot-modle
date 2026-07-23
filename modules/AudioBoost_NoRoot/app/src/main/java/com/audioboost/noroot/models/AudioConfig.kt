@@ -43,5 +43,23 @@ data class AudioConfig(
     var targetBitDepth: Int = 16,       // 目标位深，默认 16bit
     var speakerBoostMax: Int = 15,      // 扬声器突破音量上限的额外刻度
 
+    // ===== Per-App 音量 =====
+    var perAppVolumeEnabled: Boolean = false,
+    var volumeProfiles: List<String> = emptyList(), // JSON array of {pkg, volume}
+
+    // ===== 耳机自动切换 =====
+    var headphoneAutoSwitchEnabled: Boolean = false,
+    var headphoneBoostLevel: Int = 20,
+
+    // ===== 定时静音 =====
+    var scheduledMuteEnabled: Boolean = false,
+    var nightStartHour: Int = 22,
+    var nightEndHour: Int = 7,
+    var nightVolumePercent: Int = 30,
+
+    // ===== 蓝牙设备独立EQ =====
+    var btDeviceEqEnabled: Boolean = false,
+    var btDeviceProfiles: List<String> = emptyList(), // JSON array
+
     var lastModified: Long = 0L
 )

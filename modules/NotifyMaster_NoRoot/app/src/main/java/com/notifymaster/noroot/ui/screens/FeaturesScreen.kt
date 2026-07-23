@@ -88,6 +88,30 @@ fun FeaturesScreen(cfg: NotifyConfig, onConfigChange: (NotifyConfig) -> Unit) {
             { val nc = cfg.copy(silentNotifyEnabled = it); ConfigManager.saveGlobalConfig(nc); onConfigChange(nc) },
             experimental = true
         )
+        Spacer(Modifier.height(8.dp))
+
+        FeatureCard(
+            "通知智能分组", "检测同应用时间窗口内通知，自动注入分组Key合并为组",
+            cfg.notificationGroupingEnabled,
+            { val nc = cfg.copy(notificationGroupingEnabled = it); ConfigManager.saveGlobalConfig(nc); onConfigChange(nc) },
+            experimental = true
+        )
+        Spacer(Modifier.height(8.dp))
+
+        FeatureCard(
+            "VIP白名单", "白名单联系人/APP通知始终显示，绕过所有过滤",
+            cfg.vipWhitelistEnabled,
+            { val nc = cfg.copy(vipWhitelistEnabled = it); ConfigManager.saveGlobalConfig(nc); onConfigChange(nc) },
+            experimental = true
+        )
+        Spacer(Modifier.height(8.dp))
+
+        FeatureCard(
+            "定时免打扰", "按工作日/周末时间表控制通知静默（工作日22-07 周末23-09）",
+            cfg.scheduleDndEnabled,
+            { val nc = cfg.copy(scheduleDndEnabled = it); ConfigManager.saveGlobalConfig(nc); onConfigChange(nc) },
+            experimental = true
+        )
 
         Spacer(Modifier.height(20.dp))
         Text("Shizuku 增强（adb-level）", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)

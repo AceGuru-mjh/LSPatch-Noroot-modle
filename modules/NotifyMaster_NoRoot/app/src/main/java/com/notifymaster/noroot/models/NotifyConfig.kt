@@ -55,5 +55,22 @@ data class NotifyConfig(
     var batchGroupKey: String = "notifymaster_group",  // 分组 key
     var batchMaxCount: Int = 5,                          // 单组最大条数
 
+    // ===== 通知智能分组（实验性）=====
+    var notificationGroupingEnabled: Boolean = false,
+    var groupingWindowMs: Long = 5000L,
+    var maxUngroupedCount: Int = 3,
+
+    // ===== VIP 白名单（实验性）=====
+    var vipWhitelistEnabled: Boolean = false,
+    var vipContactNames: List<String> = emptyList(),
+    var vipContactApps: List<String> = emptyList(),
+
+    // ===== 定时免打扰（实验性）=====
+    var scheduleDndEnabled: Boolean = false,
+    var weekdayStartHour: Int = 22,
+    var weekdayEndHour: Int = 7,
+    var weekendStartHour: Int = 23,
+    var weekendEndHour: Int = 9,
+
     var lastModified: Long = 0L
 )

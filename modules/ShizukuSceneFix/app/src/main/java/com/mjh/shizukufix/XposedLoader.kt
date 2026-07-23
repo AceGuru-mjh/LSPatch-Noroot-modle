@@ -10,6 +10,7 @@ import com.mjh.shizukufix.hooks.ShizukuGrantHook
 import com.mjh.shizukufix.hooks.ShizukuListInjectorHook
 import com.mjh.shizukufix.hooks.ShizukuVariantDetectorHook
 import com.mjh.shizukufix.models.ShizukuFixConfig
+import com.mjh.shizukufix.utils.CrashGuard
 import com.mjh.shizukufix.utils.EnvDetector
 import com.mjh.shizukufix.utils.HookConfigReader
 import de.robv.android.xposed.IXposedHookLoadPackage
@@ -64,6 +65,7 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
         if (lpparam.processName != lpparam.packageName) return
 
         try {
+            try { CrashGuard.init(null) } catch (_: Throwable) { }
             currentPkg = pkg
             Log.e(TAG, "Loading hooks for $pkg (integrated=${isIntegratedMode})")
 
@@ -101,6 +103,7 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
                 return
             }
         } catch (e: Throwable) {
+            CrashGuard.log("FATAL: ${e.stackTraceToString()}")
             Log.e(TAG, "FATAL: ${e.message}", e)
         }
     }

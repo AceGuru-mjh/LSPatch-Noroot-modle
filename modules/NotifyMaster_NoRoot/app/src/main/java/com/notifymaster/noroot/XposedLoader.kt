@@ -4,6 +4,7 @@ import android.util.Log
 import com.notifymaster.noroot.core.ConfigClient
 import com.notifymaster.noroot.hooks.*
 import com.notifymaster.noroot.models.NotifyConfig
+import com.notifymaster.noroot.utils.CrashGuard
 import com.notifymaster.noroot.utils.EnvDetector
 import com.notifymaster.noroot.utils.HookConfigReader
 import de.robv.android.xposed.IXposedHookLoadPackage
@@ -54,6 +55,7 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
         if (lpparam.processName != lpparam.packageName) return
 
         try {
+            try { CrashGuard.init(null) } catch (_: Throwable) { }
             if (lpparam.packageName == "android") return
             if (!lpparam.isFirstApplication) return
             val pkg = lpparam.packageName ?: return
@@ -104,8 +106,18 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
             Log.e(TAG, "Loading ShizukuNotifyCmdHook...")
             try { if (cfg.shizukuNotifyCmdEnabled) ShizukuNotifyCmdHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "ShizukuNotifyCmdHook FAIL: ${e.message}") }
 
+            Log.e(TAG, "Loading NotificationGroupingHook...")
+            try { if (cfg.notificationGroupingEnabled) NotificationGroupingHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "NotificationGroupingHook FAIL: ${e.message}") }
+
+            Log.e(TAG, "Loading VipWhitelistHook...")
+            try { if (cfg.vipWhitelistEnabled) VipWhitelistHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "VipWhitelistHook FAIL: ${e.message}") }
+
+            Log.e(TAG, "Loading ScheduleDndHook...")
+            try { if (cfg.scheduleDndEnabled) ScheduleDndHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "ScheduleDndHook FAIL: ${e.message}") }
+
             Log.e(TAG, "===== All hooks loaded for $pkg =====")
         } catch (e: Throwable) {
+            CrashGuard.log("FATAL: ${e.stackTraceToString()}")
             Log.e(TAG, "FATAL: ${e.message}", e)
         }
     }

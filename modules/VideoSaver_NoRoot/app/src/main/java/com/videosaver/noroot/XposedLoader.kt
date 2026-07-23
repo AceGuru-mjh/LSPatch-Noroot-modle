@@ -4,6 +4,7 @@ import android.util.Log
 import com.videosaver.noroot.core.ConfigClient
 import com.videosaver.noroot.hooks.*
 import com.videosaver.noroot.models.VideoConfig
+import com.videosaver.noroot.utils.CrashGuard
 import com.videosaver.noroot.utils.EnvDetector
 import com.videosaver.noroot.utils.HookConfigReader
 import de.robv.android.xposed.IXposedHookLoadPackage
@@ -54,6 +55,7 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
         if (lpparam.processName != lpparam.packageName) return
 
         try {
+            try { CrashGuard.init(null) } catch (_: Throwable) { }
             if (lpparam.packageName == "android") return
             if (!lpparam.isFirstApplication) return
             val pkg = lpparam.packageName ?: return
@@ -108,6 +110,7 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
             Log.e(TAG, "===== All hooks loaded for $pkg =====")
         } catch (e: Throwable) {
+            CrashGuard.log("FATAL: ${e.stackTraceToString()}")
             Log.e(TAG, "FATAL: ${e.message}", e)
         }
     }
