@@ -1,5 +1,6 @@
 package com.stepmod.noroot.hooks
 
+import android.hardware.Sensor
 import com.stepmod.noroot.models.StepConfig
 import com.stepmod.noroot.utils.LogStore
 import com.stepmod.noroot.utils.LogX
@@ -10,12 +11,12 @@ import kotlin.random.Random
 
 object AntiDetectionStepHook {
 
+    @Volatile private var baseSteps = 0
+    @Volatile private var currentFluctuation = 0
+    @Volatile private var isResting = false
+    @Volatile private var restUntilMs = 0L
+    @Volatile private var lastUpdateMs = 0L
     private val random = Random(System.currentTimeMillis())
-    private var baseSteps = 0
-    private var currentFluctuation = 0
-    private var isResting = false
-    private var restUntilMs = 0L
-    private var lastUpdateMs = 0L
 
     fun apply(lpparam: XC_LoadPackage.LoadPackageParam, cfg: StepConfig) {
         if (!cfg.antiDetectionEnabled) return
@@ -26,7 +27,7 @@ object AntiDetectionStepHook {
         restUntilMs = 0L
 
         LogX.i("反检测 Hook 启动 | 波动范围±${cfg.fluctuationRange} 休息概率=${cfg.restProbability}")
-        try { LogStore.add("antidetect", "反检测：波动${cfg.fluctuationRange}，休息概率${cfg.restProbability}") } catch (_: Exception) { }
+        try { LogStore.add("antidetect", "反检测：波动${cfg.fluctuationRange}，休息概率${cfg.restProbability}") } catch (e: Exception) { LogX.w("LogStore 写入失败: ${e.message}") }
 
         hookSensorEventForAntiDetection(lpparam, cfg)
     }
@@ -46,18 +47,15 @@ object AntiDetectionStepHook {
                     override fun beforeHookedMethod(p: MethodHookParam) {
                         try {
                             val event = p.args[0] ?: return
-                            val sensorField = eventCls.getDeclaredField("sensor")
-                            sensorField.isAccessible = true
-                            val sensor = sensorField.get(event) ?: return
-                            val type = sensor.javaClass.getMethod("getType").invoke(sensor) as? Int ?: return
+                            val sensor = XposedHelpers.getObjectField(event, "sensor") ?: return
+                            val type = XposedHelpers.callMethod(sensor, "getType") as? Int ?: return
 
-                            if (type != 19) return
+                            if (type != Sensor.TYPE_STEP_COUNTER) return
 
                             updateAntiDetectionState(cfg)
 
-                            val valuesField = eventCls.getDeclaredField("values")
-                            valuesField.isAccessible = true
-                            val values = valuesField.get(event) as? FloatArray ?: return
+                            val values = XposedHelpers.getObjectField(event, "values") as? FloatArray ?: return
+                            if (values.isEmpty()) return
 
                             if (isResting) {
                                 values[0] = 0f
@@ -65,7 +63,7 @@ object AntiDetectionStepHook {
                                 val adjusted = (baseSteps + currentFluctuation).coerceAtLeast(0)
                                 values[0] = adjusted.toFloat()
                             }
-                        } catch (e: Exception) { LogX.w("异常: ${e.message}") }
+                        } catch (e: Exception) { LogX.w("反检测修改失败", e) }
                     }
                 })
             LogX.hookSuccess("AntiDetection", "onSensorChanged")

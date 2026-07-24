@@ -78,7 +78,7 @@ object PerAppVolumeHook {
                 if (pkg.isNotEmpty() && vol in 0..100) {
                     map[pkg] = vol
                 }
-            } catch (_: Exception) { }
+            } catch (e: Exception) { LogX.w("volumeProfiles 解析失败: ${e.message}") }
         }
         return map
     }

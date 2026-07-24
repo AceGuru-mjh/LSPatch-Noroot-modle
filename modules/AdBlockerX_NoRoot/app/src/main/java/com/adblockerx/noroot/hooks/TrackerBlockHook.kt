@@ -101,17 +101,17 @@ object TrackerBlockHook {
                         override fun beforeHookedMethod(p: MethodHookParam) {
                             try { ConfigManager.incrementBlockedCount(1) } catch (e: Throwable) { LogX.w("异常: ${e.message}") }
                             LogX.d("[Tracker] 拦截上报: ${clazz.name}.$methodName")
-                            // 根据返回类型设置默认返回值，阻断原方法执行
                             val ret = m.returnType
-                            p.result = when (ret) {
+                            val result = when (ret) {
                                 Void.TYPE -> null
-                                Boolean::class.javaPrimitiveType -> false
-                                Int::class.javaPrimitiveType -> 0
-                                Long::class.javaPrimitiveType -> 0L
-                                Float::class.javaPrimitiveType -> 0f
-                                Double::class.javaPrimitiveType -> 0.0
+                                Boolean::class.javaPrimitiveType -> java.lang.Boolean.FALSE
+                                Int::class.javaPrimitiveType -> 0 as Any
+                                Long::class.javaPrimitiveType -> 0L as Any
+                                Float::class.javaPrimitiveType -> 0f as Any
+                                Double::class.javaPrimitiveType -> 0.0 as Any
                                 else -> null
                             }
+                            p.setResult(result)
                         }
                     })
                     success = true

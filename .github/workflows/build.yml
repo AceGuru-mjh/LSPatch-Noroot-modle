@@ -49,9 +49,26 @@ jobs:
         with:
           name: ${{ matrix.module }}-apk
           path: ${{ matrix.module }}.apk
+  health-check:
+    name: Health Check
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Run healthcheck
+        run: python scripts/healthcheck.py > web/public/health-report.json
+      - name: Upload health report
+        uses: actions/upload-artifact@v4
+        with:
+          name: health-report
+          path: web/public/health-report.json
+
   release:
     name: Publish APKs
-    needs: build
+    needs: [build, health-check]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4

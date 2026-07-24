@@ -61,8 +61,8 @@ object HeadphoneProfileHook {
                 LogX.hookSuccess("HeadphoneProfile", "BroadcastReceiver")
             }
 
-            try { LogStore.add("profile", "耳机自动切换: boost=${cfg.headphoneBoostLevel}%") } catch (_: Exception) { }
-            try { LogStore.incrementCounter(1) } catch (_: Exception) { }
+            try { LogStore.add("profile", "耳机自动切换: boost=${cfg.headphoneBoostLevel}%") } catch (e: Exception) { LogX.w("LogStore 写入失败: ${e.message}") }
+            try { LogStore.incrementCounter(1) } catch (e: Exception) { LogX.w("计数器更新失败: ${e.message}") }
         } catch (e: Exception) {
             LogX.hookFailed("HeadphoneProfile", "BroadcastReceiver", e)
         }

@@ -84,7 +84,7 @@ object NotifyBeautifyHook {
     private fun applyColorToNotification(notif: Any, cfg: NotifyConfig) {
         try {
             XposedHelpers.setIntField(notif, "color", cfg.beautifyColor)
-        } catch (_: Throwable) { }
+        } catch (e: Throwable) { LogX.w("通知颜色修改失败: ${e.message}") }
     }
 
     /** 修改 Notification extras 中的 title */
@@ -95,6 +95,6 @@ object NotifyBeautifyHook {
             val origTitle = XposedHelpers.callMethod(extras, "getCharSequence", "android.title") as? CharSequence ?: return
             val newTitle = cfg.beautifyTitlePrefix + origTitle.toString()
             XposedHelpers.callMethod(extras, "putCharSequence", "android.title", newTitle as CharSequence)
-        } catch (_: Throwable) { }
+        } catch (e: Throwable) { LogX.w("标题前缀注入失败: ${e.message}") }
     }
 }

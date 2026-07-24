@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LSPatch-Noroot-modle · 健康仪表盘</title>
+<style>
+  :root {
+    --bg: #0d1117; --card: #161b22; --border: #30363d;
+    --text: #c9d1d9; --muted: #8b949e; --accent: #58a6ff;
+    --ok: #3fb950; --warn: #d29922; --hollow: #f85149; --utility: #8b949e;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; padding: 24px; }
+  h1 { font-size: 24px; margin-bottom: 4px; }
+  .sub { color: var(--muted); font-size: 14px; margin-bottom: 24px; }
+  .summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 24px; }
+  .stat { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 16px; text-align: center; }
+  .stat .val { font-size: 28px; font-weight: 700; }
+  .stat .lbl { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .ok .val { color: var(--ok); } .warn .val { color: var(--warn); } .hollow .val { color: var(--hollow); }
+  .score { background: linear-gradient(135deg, #1a3a1a, #0d2818); border-color: #2ea043; }
+  .score .val { font-size: 36px; color: var(--ok); }
+  section { margin-bottom: 32px; }
+  section h2 { font-size: 18px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+  .modules { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+  .card h3 { font-size: 15px; margin-bottom: 8px; }
+  .card .pkg { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+  .hook-list { font-size: 12px; }
+  .hook-row { display: flex; align-items: center; gap: 6px; padding: 3px 0; }
+  .hook-name { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .badge { display: inline-block; padding: 1px 6px; border-radius: 4px; font-size: 10px; font-weight: 600; }
+  .badge-ok { background: #1a3a1a; color: var(--ok); }
+  .badge-weak { background: #3a2e0a; color: var(--warn); }
+  .badge-hollow { background: #3a1010; color: var(--hollow); }
+  .badge-utility { background: #1a1a2e; color: var(--utility); }
+  .stats-line { font-size: 11px; color: var(--muted); margin-top: 4px; }
+  .issues { font-size: 11px; color: var(--warn); margin-top: 4px; }
+  .config-issues { font-size: 11px; color: var(--hollow); margin-top: 4px; }
+  footer { text-align: center; color: var(--muted); font-size: 12px; margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--border); }
+  .refresh { cursor: pointer; color: var(--accent); text-decoration: underline; }
+  .loading { text-align: center; padding: 40px; color: var(--muted); }
+  .timeline { font-size: 13px; }
+  .timeline .ver { display: flex; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+  .timeline .vnum { color: var(--accent); font-weight: 600; min-width: 60px; }
+  .timeline .vdate { color: var(--muted); min-width: 80px; font-size: 12px; }
+  .timeline .vchanges { flex: 1; font-size: 12px; }
+</style>
+</head>
+<body>
+<div id="app"><div class="loading">加载健康报告中...</div></div>
+
+<script>
+async function load() {
+  try {
+    const [health, changelog] = await Promise.all([
+      fetch('health-report.json').then(r => r.json()),
+      fetch('changelog.json').then(r => r.json())
+    ]);
+    render(health, changelog);
+  } catch (e) {
+    document.getElementById('app').innerHTML = '<div class="loading" style="color:#f85149">加载失败: ' + e.message + '<br>请先运行 python scripts/healthcheck.py > web/public/health-report.json</div>';
+  }
+}
+
+function render(h, cl) {
+  const s = h.summary;
+  const statusBadge = (st) => `<span class="badge badge-${st}">${st}</span>`;
+
+  let html = `
+    <h1>LSPatch-Noroot-modle · 健康仪表盘</h1>
+    <div class="sub">版本 ${h.version} · ${new Date(h.timestamp).toLocaleString('zh-CN')} · <span class="refresh" onclick="location.reload()">刷新</span></div>
+
+    <div class="summary">
+      <div class="stat score"><div class="val">${s.healthScore}%</div><div class="lbl">健康分数</div></div>
+      <div class="stat ok"><div class="val">${s.ok}</div><div class="lbl">OK Hook文件</div></div>
+      <div class="stat warn"><div class="val">${s.weak}</div><div class="lbl">弱Hook</div></div>
+      <div class="stat hollow"><div class="val">${s.hollow}</div><div class="lbl">空壳Hook</div></div>
+      <div class="stat"><div class="val">${s.totalModules}</div><div class="lbl">模块数</div></div>
+      <div class="stat"><div class="val">${s.totalHookFiles}</div><div class="lbl">Hook文件</div></div>
+      <div class="stat"><div class="val" style="color:var(--warn)">${s.uiBugs}</div><div class="lbl">UI缺陷</div></div>
+    </div>
+
+    <section>
+      <h2>模块详情 (${s.totalModules})</h2>
+      <div class="modules">
+  `;
+
+  for (const m of h.modules) {
+    const total = m.stats.hookFiles;
+    const ok = m.stats.ok; const w = m.stats.weak; const ho = m.stats.hollow;
+    html += `<div class="card">
+      <h3>${m.name}</h3>
+      <div class="pkg">v${m.version} · ${total} Hook · ok=${ok} weak=${w} hollow=${ho} · UI缺陷=${m.uiBugs}</div>`;
+
+    if (m.configIssues.length > 0) {
+      html += `<div class="config-issues">⚠️ ${m.configIssues.join(' · ')}</div>`;
+    }
+    if (m.uiBugs > 0) {
+      html += `<div class="issues">⚠️ ${m.uiBugs} 处 UI 直接改字段 (cfg.X=it)</div>`;
+    }
+
+    html += '<div class="hook-list">';
+    for (const hook of m.hooks) {
+      html += `<div class="hook-row"><span class="hook-name">${hook.file}</span> ${statusBadge(hook.status)} <span style="color:var(--muted)">hooks=${hook.hookCalls} try=${hook.tryCatch} lines=${hook.lines}</span></div>`;
+    }
+    html += '</div></div>';
+  }
+  html += '</div></section>';
+
+  if (cl && cl.versions) {
+    html += '<section><h2>版本历史</h2><div class="timeline">';
+    for (const v of cl.versions) {
+      html += `<div class="ver"><span class="vnum">${v.version}</span><span class="vdate">${v.date}</span><span class="vchanges">${v.changes.join(' · ')}</span></div>`;
+    }
+    html += '</div></section>';
+  }
+
+  html += `<footer>LSPatch-Noroot-modle · 健康仪表盘 · 开发者 MJH · <a href="https://github.com/AceGuru-mjh/LSPatch-Noroot-modle" style="color:var(--accent)">GitHub</a></footer>`;
+  document.getElementById('app').innerHTML = html;
+}
+
+load();
+</script>
+</body>
+</html>
