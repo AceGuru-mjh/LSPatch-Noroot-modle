@@ -1,4 +1,4 @@
-package com.stepmod.noroot.activities
+﻿package com.stepmod.noroot.activities
 
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
@@ -151,5 +151,9 @@ fun GlassmorphismPanel(onClose: () -> Unit) {
                 }
             }
         }
+    }
+    override fun onDestroy() {
+        com.stepmod.noroot.services.FloatingBallService.panelOpen = false
+        super.onDestroy()
     }
 }

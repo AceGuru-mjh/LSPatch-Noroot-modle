@@ -1,4 +1,4 @@
-package com.batteryopt.noroot.activities
+﻿package com.batteryopt.noroot.activities
 
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
@@ -151,5 +151,9 @@ fun GlassmorphismPanel(onClose: () -> Unit) {
                 }
             }
         }
+    }
+    override fun onDestroy() {
+        com.batteryopt.noroot.services.FloatingBallService.panelOpen = false
+        super.onDestroy()
     }
 }

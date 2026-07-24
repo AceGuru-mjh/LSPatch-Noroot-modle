@@ -19,10 +19,13 @@ import com.vipunlock.noroot.utils.ConfigManager
 import com.vipunlock.noroot.utils.LogStore
 
 class FloatingBallService : Service() {
+    companion object {
+        @Volatile var panelOpen = false
+    }
     private lateinit var windowManager: WindowManager
     private lateinit var ballView: View
     private lateinit var params: WindowManager.LayoutParams
-    private var isPanelOpen = false
+    private var isPanelOpen get() = panelOpen set(v) { panelOpen = v }
     private var isDestroyed = false
     private var handler: Handler? = null
     private var updateRunnable: Runnable? = null

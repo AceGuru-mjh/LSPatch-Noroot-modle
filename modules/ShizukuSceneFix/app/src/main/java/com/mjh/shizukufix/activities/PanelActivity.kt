@@ -1,4 +1,4 @@
-package com.mjh.shizukufix.activities
+﻿package com.mjh.shizukufix.activities
 
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
@@ -151,5 +151,9 @@ fun GlassmorphismPanel(onClose: () -> Unit) {
                 }
             }
         }
+    }
+    override fun onDestroy() {
+        com.mjh.shizukufix.services.FloatingBallService.panelOpen = false
+        super.onDestroy()
     }
 }

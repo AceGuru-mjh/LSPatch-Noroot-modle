@@ -1,4 +1,4 @@
-package com.audioboost.noroot.activities
+﻿package com.audioboost.noroot.activities
 
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
@@ -59,6 +59,11 @@ class PanelActivity : ComponentActivity() {
         window.attributes = params
 
         setContent { GlassmorphismPanel(onClose = { finish() }) }
+    }
+
+    override fun onDestroy() {
+        com.audioboost.noroot.services.FloatingBallService.panelOpen = false
+        super.onDestroy()
     }
 }
 

@@ -1,4 +1,4 @@
-package com.notifymaster.noroot.activities
+﻿package com.notifymaster.noroot.activities
 
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
@@ -151,5 +151,9 @@ fun GlassmorphismPanel(onClose: () -> Unit) {
                 }
             }
         }
+    }
+    override fun onDestroy() {
+        com.notifymaster.noroot.services.FloatingBallService.panelOpen = false
+        super.onDestroy()
     }
 }

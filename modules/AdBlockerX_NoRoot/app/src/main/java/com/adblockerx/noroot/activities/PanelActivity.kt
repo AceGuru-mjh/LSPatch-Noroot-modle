@@ -1,5 +1,6 @@
 package com.adblockerx.noroot.activities
 
+import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
@@ -59,6 +60,11 @@ class PanelActivity : ComponentActivity() {
         window.attributes = params
 
         setContent { GlassmorphismPanel(onClose = { finish() }) }
+    }
+
+    override fun onDestroy() {
+        com.adblockerx.noroot.services.FloatingBallService.panelOpen = false
+        super.onDestroy()
     }
 }
 

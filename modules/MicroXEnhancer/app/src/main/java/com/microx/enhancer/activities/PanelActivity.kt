@@ -1,4 +1,4 @@
-package com.microx.enhancer.activities
+﻿package com.microx.enhancer.activities
 
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
@@ -151,5 +151,9 @@ fun GlassmorphismPanel(onClose: () -> Unit) {
                 }
             }
         }
+    }
+    override fun onDestroy() {
+        com.microx.enhancer.services.FloatingBallService.panelOpen = false
+        super.onDestroy()
     }
 }
