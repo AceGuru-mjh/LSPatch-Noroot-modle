@@ -23,6 +23,7 @@ class FloatingBallService : Service() {
     private lateinit var ballView: View
     private lateinit var params: WindowManager.LayoutParams
     private var isPanelOpen = false
+    private var isDestroyed = false
     private var handler: Handler? = null
     private var updateRunnable: Runnable? = null
 
@@ -54,6 +55,7 @@ class FloatingBallService : Service() {
             private var initialX = 0; private var initialY = 0
             private var initialTouchX = 0f; private var initialTouchY = 0f
             override fun onTouch(v: View, event: MotionEvent): Boolean {
+                if (isDestroyed) return false
                 when (event.action) {
                     MotionEvent.ACTION_DOWN -> {
                         initialX = params.x; initialY = params.y
@@ -62,7 +64,7 @@ class FloatingBallService : Service() {
                     MotionEvent.ACTION_MOVE -> {
                         params.x = initialX - (event.rawX - initialTouchX).toInt()
                         params.y = initialY + (event.rawY - initialTouchY).toInt()
-                        windowManager.updateViewLayout(ballView, params)
+                        try { windowManager.updateViewLayout(ballView, params) } catch (_: Exception) {}
                     }
                 }
                 return false
@@ -74,6 +76,7 @@ class FloatingBallService : Service() {
     }
 
     private fun updateBallState() {
+        if (isDestroyed) return
         try {
             val enabled = true
             val pulse = ballView.findViewById<View>(R.id.ball_pulse)
@@ -93,7 +96,7 @@ class FloatingBallService : Service() {
         startActivity(intent)
     }
 
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+    fun onPanelClosed() {`n        isPanelOpen = false`n    }`n`n    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         try { LogStore.add("info", "悬浮球服务已启动") } catch (_: Throwable) {}
         startPeriodicUpdate()
         return START_STICKY
@@ -106,6 +109,7 @@ class FloatingBallService : Service() {
         if (updateRunnable == null) {
             updateRunnable = object : Runnable {
                 override fun run() {
+                    if (isDestroyed) return
                     try { updateBallState() } catch (_: Throwable) {}
                     handler?.postDelayed(this, 1000L)
                 }
@@ -118,6 +122,7 @@ class FloatingBallService : Service() {
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onDestroy() {
+        isDestroyed = true
         try { updateRunnable?.let { handler?.removeCallbacks(it) } } catch (_: Throwable) {}
         handler = null
         updateRunnable = null
