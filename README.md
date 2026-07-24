@@ -9,6 +9,8 @@
   <img src="https://img.shields.io/badge/UI-Material%203-emerald" />
   <img src="https://img.shields.io/badge/MinSDK-26-emerald" />
   <img src="https://img.shields.io/badge/License-MIT-emerald" />
+  <img src="https://img.shields.io/github/actions/workflow/status/AceGuru-mjh/LSPatch-Noroot-modle/build.yml?branch=main&label=CI&logo=github" />
+  <img src="https://img.shields.io/badge/Health-86%25-brightgreen" />
 </p>
 
 ## 模块列表
