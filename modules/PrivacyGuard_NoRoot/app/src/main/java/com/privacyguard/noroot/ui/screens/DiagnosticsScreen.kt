@@ -1,4 +1,4 @@
-package com.privacyguard.noroot.ui.screens
+﻿package com.privacyguard.noroot.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -12,7 +12,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -115,7 +115,7 @@ fun DiagnosticsScreen() {
                 DiagRow("Location Spoof", diagData["Location Spoof"] ?: "-")
                 DiagRow("Sensor Faker", diagData["Sensor Faker"] ?: "-")
                 DiagRow("Ad ID Block", diagData["Ad ID Block"] ?: "-")
-                HorizontalDivider(Modifier.padding(vertical = 4.dp))
+                Divider(Modifier.padding(vertical = 4.dp))
                 DiagRow("Denied Perms", diagData["Denied Perms"] ?: "-")
                 DiagRow("PM Revoke", diagData["PM Revoke"] ?: "-")
             }

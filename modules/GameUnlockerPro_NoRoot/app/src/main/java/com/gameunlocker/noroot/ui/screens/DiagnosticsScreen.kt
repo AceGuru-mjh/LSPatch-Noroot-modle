@@ -1,4 +1,4 @@
-package com.gameunlocker.noroot.ui.screens
+﻿package com.gameunlocker.noroot.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -12,7 +12,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -109,7 +109,7 @@ fun DiagnosticsScreen() {
                 DiagRow("Process Optimized", diagData["Process Optimized"] ?: "-")
                 DiagRow("Detection Hide", diagData["Detection Hide"] ?: "-")
                 DiagRow("Resolution Spoof", diagData["Resolution Spoof"] ?: "-")
-                HorizontalDivider(Modifier.padding(vertical = 4.dp))
+                Divider(Modifier.padding(vertical = 4.dp))
                 DiagRow("Shizuku Sys Tune", diagData["Shizuku Tune"] ?: "-")
             }
         }

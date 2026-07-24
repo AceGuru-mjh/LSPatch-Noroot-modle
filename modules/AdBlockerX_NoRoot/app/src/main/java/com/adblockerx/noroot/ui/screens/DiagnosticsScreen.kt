@@ -1,4 +1,4 @@
-package com.adblockerx.noroot.ui.screens
+﻿package com.adblockerx.noroot.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -12,7 +12,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -97,10 +97,10 @@ fun DiagnosticsScreen() {
                 Text("Ad Blocking Stats", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                 Spacer(Modifier.height(8.dp))
                 DiagRow("Ads Blocked", diagData["Blocked Ads"] ?: "-")
-                HorizontalDivider(Modifier.padding(vertical = 4.dp))
+                Divider(Modifier.padding(vertical = 4.dp))
                 DiagRow("Built-in Domains", diagData["Built-in Domains"] ?: "-")
                 DiagRow("Custom Domains", diagData["Custom Domains"] ?: "-")
-                HorizontalDivider(Modifier.padding(vertical = 4.dp))
+                Divider(Modifier.padding(vertical = 4.dp))
                 DiagRow("Logs Today", diagData["Logs Today"] ?: "-")
             }
         }
@@ -114,7 +114,7 @@ fun DiagnosticsScreen() {
                 DiagRow("OkHttp Hook", diagData["OkHttp Hook"] ?: "-")
                 DiagRow("Hosts Filter", diagData["Hosts Filter"] ?: "-")
                 DiagRow("AdView Hide", diagData["AdView Hide"] ?: "-")
-                HorizontalDivider(Modifier.padding(vertical = 4.dp))
+                Divider(Modifier.padding(vertical = 4.dp))
                 DiagRow("Experimental", diagData["Experimental"] ?: "-")
             }
         }

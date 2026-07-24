@@ -1,4 +1,4 @@
-package com.audioboost.noroot.ui.screens
+﻿package com.audioboost.noroot.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -12,7 +12,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -99,7 +99,7 @@ fun DiagnosticsScreen() {
                 DiagRow("Speaker Boost", diagData["Speaker Boost"] ?: "-")
                 DiagRow("Mic Boost", diagData["Mic Boost"] ?: "-")
                 DiagRow("Audio Quality", diagData["Audio Quality"] ?: "-")
-                HorizontalDivider(Modifier.padding(vertical = 4.dp))
+                Divider(Modifier.padding(vertical = 4.dp))
                 DiagRow("Per-App Volume", diagData["Per-App Volume"] ?: "-")
                 DiagRow("Headphone Switch", diagData["Headphone Switch"] ?: "-")
             }

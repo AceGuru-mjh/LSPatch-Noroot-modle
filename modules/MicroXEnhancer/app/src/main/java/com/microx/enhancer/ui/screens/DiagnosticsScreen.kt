@@ -1,4 +1,4 @@
-package com.microx.enhancer.ui.screens
+﻿package com.microx.enhancer.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -12,7 +12,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -119,7 +119,7 @@ fun DiagnosticsScreen() {
                 DiagRow("Voice Export", diagData["Voice Export"] ?: "-")
                 DiagRow("Msg Search", diagData["Msg Search"] ?: "-")
                 DiagRow("Custom Theme", diagData["Custom Theme"] ?: "-")
-                HorizontalDivider(Modifier.padding(vertical = 4.dp))
+                Divider(Modifier.padding(vertical = 4.dp))
                 DiagRow("Shizuku DB", diagData["Shizuku DB"] ?: "-")
             }
         }

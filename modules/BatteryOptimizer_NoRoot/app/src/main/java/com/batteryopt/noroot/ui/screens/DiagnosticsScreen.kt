@@ -1,4 +1,4 @@
-package com.batteryopt.noroot.ui.screens
+﻿package com.batteryopt.noroot.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -12,7 +12,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -106,7 +106,7 @@ fun DiagnosticsScreen() {
                 DiagRow("Location Opt", diagData["Location"] ?: "-")
                 DiagRow("Sensor Opt", diagData["Sensor"] ?: "-")
                 DiagRow("Animation Opt", diagData["Animation"] ?: "-")
-                HorizontalDivider(Modifier.padding(vertical = 4.dp))
+                Divider(Modifier.padding(vertical = 4.dp))
                 DiagRow("Experimental", diagData["Experimental"] ?: "-")
                 DiagRow("AppOps (Shizuku)", diagData["AppOps"] ?: "-")
             }

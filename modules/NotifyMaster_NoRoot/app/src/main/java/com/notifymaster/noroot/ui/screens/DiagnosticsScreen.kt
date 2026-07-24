@@ -1,4 +1,4 @@
-package com.notifymaster.noroot.ui.screens
+﻿package com.notifymaster.noroot.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -12,7 +12,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -98,7 +98,7 @@ fun DiagnosticsScreen() {
                 DiagRow("Anti-Recall", diagData["Anti-Recall"] ?: "-")
                 DiagRow("Notify History", diagData["Notify History"] ?: "-")
                 DiagRow("Notify Beautify", diagData["Notify Beautify"] ?: "-")
-                HorizontalDivider(Modifier.padding(vertical = 4.dp))
+                Divider(Modifier.padding(vertical = 4.dp))
                 DiagRow("Batch Notify", diagData["Batch Notify"] ?: "-")
                 DiagRow("Priority Override", diagData["Priority Override"] ?: "-")
                 DiagRow("Silent Notify", diagData["Silent Notify"] ?: "-")

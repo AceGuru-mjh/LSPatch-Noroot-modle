@@ -1,4 +1,4 @@
-package com.mjh.shizukufix.ui.screens
+﻿package com.mjh.shizukufix.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -12,7 +12,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -115,7 +115,7 @@ fun DiagnosticsScreen() {
                 DiagRow("Scene Fix (Path A)", diagData["Scene Fix"] ?: "-")
                 DiagRow("List Injector (Path B)", diagData["List Injector"] ?: "-")
                 DiagRow("Variant Detect", diagData["Variant Detect"] ?: "-")
-                HorizontalDivider(Modifier.padding(vertical = 4.dp))
+                Divider(Modifier.padding(vertical = 4.dp))
                 DiagRow("Service Watchdog", diagData["Service Watchdog"] ?: "-")
                 DiagRow("Auto Grant", diagData["Auto Grant"] ?: "-")
                 DiagRow("Hide from Scene", diagData["Hide from Scene"] ?: "-")
