@@ -25,7 +25,7 @@
 ```
 lsp-model/
 ├── modules/                          # 10 个独立 Gradle 工程
-│   ├── keystore/mjh-release.jks      # 统一签名 (alias=mjh, pass=meng411722)
+│   ├── keystore/mjh-release.jks      # 统一签名 (alias=mjh, 密码通过环境变量或local.properties提供)
 │   ├── ShizukuSceneFix/              # 通用 (Kotlin)
 │   ├── GameUnlockerPro_NoRoot/       # LSPatch 免Root
 │   ├── GameUnlockerPro_Root/         # LSPosed Root
@@ -240,9 +240,9 @@ android {
     signingConfigs {
         create("release") {
             storeFile = file("../../keystore/mjh-release.jks")
-            storePassword = "meng411722"
-            keyAlias = "mjh"
-            keyPassword = "meng411722"
+            storePassword = System.getenv("MJH_STORE_PASSWORD")?.takeIf { it.isNotEmpty() } ?: error("MJH_STORE_PASSWORD not set")
+            keyAlias = System.getenv("MJH_KEY_ALIAS")?.takeIf { it.isNotEmpty() } ?: "mjh"
+            keyPassword = System.getenv("MJH_KEY_PASSWORD")?.takeIf { it.isNotEmpty() } ?: error("MJH_KEY_PASSWORD not set")
         }
     }
     buildTypes {
@@ -559,7 +559,7 @@ Next.js 应用，功能：
 
 - 仓库：`github.com/AceGuru-mjh/LSPatch-Noroot-modle`
 - 开发者：MJH
-- 签名：`mjh-release.jks` (alias=mjh, pass=meng411722)
+- 签名：`mjh-release.jks` (alias=mjh, 密码通过 MJH_STORE_PASSWORD / MJH_KEY_PASSWORD 环境变量提供)
 
 ---
 
