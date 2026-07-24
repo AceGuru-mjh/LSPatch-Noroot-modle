@@ -25,7 +25,6 @@ class FloatingBallService : Service() {
     private lateinit var windowManager: WindowManager
     private lateinit var ballView: View
     private lateinit var params: WindowManager.LayoutParams
-    private var isPanelOpen get() = panelOpen set(v) { panelOpen = v }
     private var isDestroyed = false
     private var handler: Handler? = null
     private var updateRunnable: Runnable? = null
@@ -92,14 +91,14 @@ class FloatingBallService : Service() {
     }
 
     private fun showPanel() {
-        if (isPanelOpen) return
-        isPanelOpen = true
+        if (panelOpen) return
+        panelOpen = true
         val intent = Intent(this, PanelActivity::class.java)
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         startActivity(intent)
     }
 
-    fun onPanelClosed() {`n        isPanelOpen = false`n    }`n`n    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         try { LogStore.add("info", "悬浮球服务已启动") } catch (_: Throwable) {}
         startPeriodicUpdate()
         return START_STICKY

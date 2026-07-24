@@ -60,6 +60,11 @@ class PanelActivity : ComponentActivity() {
 
         setContent { GlassmorphismPanel(onClose = { finish() }) }
     }
+
+    override fun onDestroy() {
+        FloatingBallService.panelOpen = false
+        super.onDestroy()
+    }
 }
 
 @Composable
@@ -151,9 +156,5 @@ fun GlassmorphismPanel(onClose: () -> Unit) {
                 }
             }
         }
-    }
-    override fun onDestroy() {
-        com.mjh.shizukufix.services.FloatingBallService.panelOpen = false
-        super.onDestroy()
     }
 }

@@ -108,7 +108,7 @@ class FloatingBallService : Service() {
         isPanelOpen = false
     }
 
-    fun onPanelClosed() {`n        isPanelOpen = false`n    }`n`n    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         try { LogStore.add("info", "悬浮球服务已启动") } catch (_: Throwable) {}
         startPeriodicUpdate()
         return START_STICKY

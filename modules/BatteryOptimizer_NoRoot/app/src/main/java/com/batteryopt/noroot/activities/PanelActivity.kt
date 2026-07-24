@@ -57,8 +57,12 @@ class PanelActivity : ComponentActivity() {
         params.height = WindowManager.LayoutParams.WRAP_CONTENT
         params.gravity = Gravity.CENTER
         window.attributes = params
-
         setContent { GlassmorphismPanel(onClose = { finish() }) }
+    }
+
+    override fun onDestroy() {
+        com.batteryopt.noroot.services.FloatingBallService.panelOpen = false
+        super.onDestroy()
     }
 }
 
@@ -151,9 +155,5 @@ fun GlassmorphismPanel(onClose: () -> Unit) {
                 }
             }
         }
-    }
-    override fun onDestroy() {
-        com.batteryopt.noroot.services.FloatingBallService.panelOpen = false
-        super.onDestroy()
     }
 }
