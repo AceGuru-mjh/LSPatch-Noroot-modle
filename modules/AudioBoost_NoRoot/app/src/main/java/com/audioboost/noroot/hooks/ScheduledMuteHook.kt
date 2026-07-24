@@ -45,7 +45,7 @@ object ScheduledMuteHook {
 
                         if (nightModeActive) {
                             val maxVol = try {
-                                val am = XposedHelpers.callMethod(
+                                XposedHelpers.callMethod(
                                     p.thisObject, "getStreamMaxVolume", stream
                                 ) as? Int
                             } catch (_: Throwable) { null } ?: 15
