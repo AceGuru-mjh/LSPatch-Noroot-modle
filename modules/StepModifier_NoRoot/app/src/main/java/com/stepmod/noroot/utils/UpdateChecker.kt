@@ -1,4 +1,4 @@
-package com.stepmod.noroot.utils
+﻿package com.stepmod.noroot.utils
 
 import android.content.Context
 import android.util.Log
@@ -7,31 +7,28 @@ import java.io.BufferedReader
 import java.io.File
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
+import java.net.InetSocketAddress
+import java.net.Proxy
 import java.net.URL
 
-/**
- * 热更新检查器（增强版）
- *
- * 新增能力：
- *  - 忽略指定版本（用户不想更新的版本不再提示）
- *  - 自动检查偏好开关（持久化）
- *  - 上次检查时间记录（避免频繁请求 GitHub API）
- *  - 下载缓存清理
- *  - 上次缓存的 UpdateInfo（避免重复网络请求）
- *
- * 数据源: https://api.github.com/repos/AceGuru-mjh/LSPatch-Noroot-modle/releases/latest
- */
 object UpdateChecker {
 
     private const val TAG = "UpdateChecker"
     private const val REPO = "AceGuru-mjh/LSPatch-Noroot-modle"
-    private const val API_URL = "https://api.github.com/repos/$REPO/releases/latest"
     private const val PREFS_NAME = "update_prefs"
     private const val KEY_IGNORED_VERSION = "ignored_version"
     private const val KEY_AUTO_CHECK = "auto_check"
     private const val KEY_LAST_CHECK_TIME = "last_check_time"
     private const val KEY_LAST_UPDATE_INFO = "last_update_info"
-    private const val MIN_CHECK_INTERVAL_MS = 5 * 60 * 1000L  // 最少5分钟间隔
+    private const val MIN_CHECK_INTERVAL_MS = 5 * 60 * 1000L
+
+    private val API_MIRRORS = listOf(
+        "https://api.github.com/repos/$REPO/releases/latest",
+        "https://ghproxy.com/https://api.github.com/repos/$REPO/releases/latest",
+        "https://mirror.ghproxy.com/https://api.github.com/repos/$REPO/releases/latest",
+        "https://gh.con.sh/https://api.github.com/repos/$REPO/releases/latest",
+        "https://api.github.do/https://api.github.com/repos/$REPO/releases/latest"
+    )
 
     data class UpdateInfo(
         val latestVersion: String,
@@ -54,14 +51,12 @@ object UpdateChecker {
     private var cachedInfo: UpdateInfo? = null
     private var cachedContext: Context? = null
 
-    /** 初始化（在 Application.onCreate 调用，存 Context 用于 prefs） */
     fun init(context: Context) {
         cachedContext = context.applicationContext
     }
 
     private fun prefs() = cachedContext?.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
-    /** 检查更新（同步，需子线程调用） */
     fun checkUpdate(currentVersion: String, force: Boolean = false): UpdateInfo? {
         if (!force) {
             val last = prefs()?.getLong(KEY_LAST_CHECK_TIME, 0L) ?: 0L
@@ -70,7 +65,7 @@ object UpdateChecker {
                 return cachedInfo ?: loadCachedInfo(currentVersion)
             }
         }
-        val result = fetchFromGithub(currentVersion)
+        val result = fetchWithMirrors(currentVersion)
         if (result != null) {
             cachedInfo = result
             prefs()?.edit()?.apply {
@@ -82,24 +77,48 @@ object UpdateChecker {
         return result
     }
 
-    private fun fetchFromGithub(currentVersion: String): UpdateInfo? {
+    private fun fetchWithMirrors(currentVersion: String): UpdateInfo? {
+        for ((idx, url) in API_MIRRORS.withIndex()) {
+            val isDirect = idx == 0
+            Log.d(TAG, "尝试源 ${idx + 1}/${API_MIRRORS.size}${if (isDirect) " (直连)" else " (镜像)"}")
+            val result = tryFetch(url, currentVersion, timeout = if (isDirect) 8000 else 12000)
+            if (result != null) {
+                Log.i(TAG, "源 ${idx + 1} 成功${if (!isDirect) " (镜像)" else ""}")
+                return result
+            }
+            Log.w(TAG, "源 ${idx + 1} 失败，尝试下一个...")
+        }
+        Log.e(TAG, "所有更新源均不可达")
+        return null
+    }
+
+    private fun tryFetch(urlStr: String, currentVersion: String, timeout: Int): UpdateInfo? {
         return try {
-            val conn = (URL(API_URL).openConnection() as HttpURLConnection).apply {
+            val url = URL(urlStr)
+            val conn = (url.openConnection() as HttpURLConnection).apply {
                 requestMethod = "GET"
-                connectTimeout = 10000
-                readTimeout = 15000
+                connectTimeout = timeout
+                readTimeout = timeout + 5000
                 setRequestProperty("Accept", "application/vnd.github+json")
                 setRequestProperty("User-Agent", "LSP-Model-UpdateChecker")
+                instanceFollowRedirects = true
             }
             if (conn.responseCode != 200) {
-                Log.w(TAG, "GitHub API 返回 ${conn.responseCode}")
+                Log.w(TAG, "HTTP ${conn.responseCode}: $urlStr")
+                conn.disconnect()
                 return null
             }
-            val raw = BufferedReader(InputStreamReader(conn.inputStream)).readText()
+            val raw = BufferedReader(InputStreamReader(conn.inputStream, Charsets.UTF_8)).readText()
             conn.disconnect()
             parseRelease(raw, currentVersion)
+        } catch (e: java.net.SocketTimeoutException) {
+            null
+        } catch (e: java.net.ConnectException) {
+            null
+        } catch (e: java.io.IOException) {
+            null
         } catch (e: Exception) {
-            Log.e(TAG, "检查更新失败: ${e.message}")
+            Log.e(TAG, "异常: ${e.message}")
             null
         }
     }
@@ -139,7 +158,7 @@ object UpdateChecker {
                 isIgnored = latestVersion == ignored
             )
         } catch (e: Exception) {
-            Log.e(TAG, "解析 Release 失败: ${e.message}")
+            Log.e(TAG, "解析失败: ${e.message}")
             null
         }
     }
