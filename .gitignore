@@ -14,3 +14,24 @@ local.properties
 !modules/keystore/mjh-release.jks
 captures/
 .cxx/
+
+# Python
+__pycache__/
+*.py[cod]
+health-report.json
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# Editor
+*.swp
+*.swo
+*~
+
+# Misc
+workspace-extract/
+workspace-*.tar
+*.key
+*.pem
+secrets.properties

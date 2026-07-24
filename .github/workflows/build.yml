@@ -65,7 +65,25 @@ jobs:
         with:
           tag_name: v1.0.14
           name: LSPatch-Noroot-modle v1.0.14
-          body: "11 LSPatch NoRoot modules. Dev: MJH"
+          body: "## LSPatch-Noroot-modle v1.0.14
+
+11 NoRoot LSPatch modules — Material 3 UI | Three Iron Laws architecture
+
+| 模块 | 功能 |
+|------|------|
+| AdBlockerX | WebView/OkHttp/域名黑名单广告拦截 |
+| AudioBoost | 音量突破上限/均衡器/分应用音量 |
+| BatteryOptimizer | WakeLock/Alarm/Job 调度省电优化 |
+| GameUnlockerPro | 帧率解锁/机型伪装/触控优化 |
+| MicroXEnhancer | 微信/QQ 防撤回/去广告/美化 |
+| NotifyMaster | 通知过滤/防撤回/历史记录管理 |
+| PrivacyGuard | 设备ID/位置/传感器隐私保护 |
+| ShizukuSceneFix | Shizuku Scene 授权修复 |
+| StepModifier | 步数/轨迹/心率传感器修改 |
+| VideoSaver | 抖音/快手/小红书去水印下载 |
+| VipUnlocker | VIP解锁/广告移除/验证绕过 |
+
+开发者: MJH | github.com/AceGuru-mjh/LSPatch-Noroot-modle"
           files: release-assets/*.apk
           prerelease: false
           draft: false
