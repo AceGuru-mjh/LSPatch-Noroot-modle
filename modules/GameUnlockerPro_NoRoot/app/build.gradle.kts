@@ -20,9 +20,9 @@ android {
             // 优先从环境变量读取(GitHub Actions Secrets), 其次 local.properties, 最后默认值
             val storeFilePath = System.getenv("MJH_STORE_FILE") ?: rootProject.file("../keystore/mjh-release.jks").path
             storeFile = file(storeFilePath)
-            storePassword = System.getenv("MJH_STORE_PASSWORD")?.takeIf { it.isNotEmpty() } ?: "meng411722"
+            storePassword = System.getenv("MJH_STORE_PASSWORD")?.takeIf { it.isNotEmpty() } ?: error("MJH_STORE_PASSWORD not set")
             keyAlias = System.getenv("MJH_KEY_ALIAS")?.takeIf { it.isNotEmpty() } ?: "mjh"
-            keyPassword = System.getenv("MJH_KEY_PASSWORD")?.takeIf { it.isNotEmpty() } ?: "meng411722"
+            keyPassword = System.getenv("MJH_KEY_PASSWORD")?.takeIf { it.isNotEmpty() } ?: error("MJH_KEY_PASSWORD not set")
         }
     }
 
