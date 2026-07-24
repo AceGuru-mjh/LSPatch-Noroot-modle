@@ -1,0 +1,49 @@
+{
+  "versions": [
+    {
+      "version": "v1.0.14",
+      "date": "2026-07-24",
+      "changes": [
+        "11模块XposedLoader全部反射化 (Class.forName) — 铁律1+2合规",
+        "xposedminversion 82→93 — LSPatch v0.6.1+ 合规",
+        "填充2个空壳Hook — Application.onCreate 触发点注入",
+        "build.gradle.kts 密码脱敏 — System.getenv() 替代明文",
+        "AI_DEV_GUIDE.md 密码脱敏 — 3处环境变量替换",
+        "healthcheck.py UTF-8编码修复 — Windows GBK兼容",
+        "CI release body 增强 — 11模块功能表格",
+        ".gitignore 扩展 — Windows/Python/编辑器模式",
+        "DiagnosticsScreen HorizontalDivider → Divider — material3 1.1.2兼容",
+        "ScheduledMuteHook Kotlin try-catch 类型修复"
+      ]
+    },
+    {
+      "version": "v1.0.13",
+      "date": "2026-07-23",
+      "changes": [
+        "CI workflow 简化 — 移除debug keystore依赖",
+        "ApkDownloader 缺LogX import修复",
+        "ShizukuSceneFix import路径修复",
+        "热更新多源镜像 + 断点续传"
+      ]
+    },
+    {
+      "version": "v1.0.12",
+      "date": "2026-07-22",
+      "changes": [
+        "core/ui隔离架构 — XposedLoader反射加载 (防秒崩)",
+        "VipUnlocker全反射tryInvoke",
+        "OkHttpAdHook语法修复",
+        "AI_DEV_GUIDE v1.2.0 — 三大铁律强制规则"
+      ]
+    },
+    {
+      "version": "v1.0.11",
+      "date": "2026-07-20",
+      "changes": [
+        "11 LSPatch NoRoot模块合集首次发布",
+        "Material 3 毛玻璃悬浮球UI",
+        "Shizuku adb级命令增强"
+      ]
+    }
+  ]
+}
