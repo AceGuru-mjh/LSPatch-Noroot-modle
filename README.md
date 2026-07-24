@@ -112,7 +112,7 @@ GitHub Actions 会自动构建全部 11 个模块并发布到 Releases。
 - **框架**：LSPatch（免 Root Xposed）
 - **语言**：Kotlin 1.9.20
 - **UI**：Jetpack Compose + Material 3
-- **Xposed API**：compileOnly de.robv.android.xposed:api:82
+- **Xposed API**：compileOnly de.robv.android.xposed:api:82 (编译期) · xposedminversion=93 (LSPatch v0.6.1+ 运行时)
 - **Shizuku API**：compileOnly dev.rikka.shizuku:api:13.1.5
 - **构建**：AGP 8.2.0 + Gradle 8.2 + JDK 17
 - **minSdk**：26 (Android 8.0)
