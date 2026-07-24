@@ -55,9 +55,5 @@
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
-        </provider>
-
-            <provider android:name="rikka.shizuku.ShizukuProvider" android:authorities="${applicationId}.shizuku" android:exported="true" android:permission="moe.shizuku.manager.permission.API" />
-
-    </application>
+        </provider></application>
 </manifest>
