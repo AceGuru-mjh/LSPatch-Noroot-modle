@@ -1,4 +1,4 @@
-package com.stepmod.noroot.hooks
+﻿package com.stepmod.noroot.hooks
 
 import android.hardware.Sensor
 import com.stepmod.noroot.models.StepConfig
@@ -63,7 +63,7 @@ object AntiDetectionStepHook {
                                 val adjusted = (baseSteps + currentFluctuation).coerceAtLeast(0)
                                 values[0] = adjusted.toFloat()
                             }
-                        } catch (e: Exception) { LogX.w("反检测修改失败", e) }
+                        } catch (e: Exception) { LogX.w("反检测修改失败: ${e.message}") }
                     }
                 })
             LogX.hookSuccess("AntiDetection", "onSensorChanged")

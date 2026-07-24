@@ -1,4 +1,4 @@
-package com.adblockerx.noroot.activities
+﻿package com.adblockerx.noroot.activities
 
 import android.content.Intent
 import android.graphics.Color

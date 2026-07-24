@@ -65,7 +65,6 @@ class PanelActivity : ComponentActivity() {
         super.onDestroy()
     }
 }
-}
 
 @Composable
 fun GlassmorphismPanel(onClose: () -> Unit) {
