@@ -1,10 +1,6 @@
-package com.microx.enhancer
+﻿package com.microx.enhancer
 
 import android.util.Log
-import com.microx.enhancer.core.ConfigClient
-import com.microx.enhancer.hooks.*
-import com.microx.enhancer.utils.CrashGuard
-import com.microx.enhancer.utils.HookHelper
 import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.IXposedHookZygoteInit
 import de.robv.android.xposed.callbacks.XC_LoadPackage
@@ -12,7 +8,7 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage
 class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
     companion object {
-        const val VERSION = "1.0.11"
+        const val VERSION = "1.0.14"
         const val TAG = "LSP-MicroX"
         const val MODULE_PKG = "com.microx.enhancer"
         var currentPkg: String? = null
@@ -50,12 +46,15 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
             return
         }
 
+        if (lpparam.processName != lpparam.packageName) return
+
         try {
-            try { CrashGuard.init(null) } catch (_: Throwable) { }
+            tryInvokeVoid("com.microx.enhancer.utils.CrashGuard", "init", null)
             val pkg = lpparam.packageName ?: return
             val processName = lpparam.processName ?: return
 
             if (pkg == "android") return
+            if (!lpparam.isFirstApplication) return
 
             val ctx = try {
                 val at = Class.forName("android.app.ActivityThread")
@@ -64,7 +63,7 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
                     .getMethod("getApplication").invoke(at) as? android.content.Context
             } catch (_: Throwable) { null }
 
-            val masterSwitch = if (ctx != null) ConfigClient.readMasterSwitch(ctx) else true
+            val masterSwitch = if (ctx != null) tryInvokeCtx<Boolean>("com.microx.enhancer.core.ConfigClient", "readMasterSwitch", ctx) ?: true else true
             if (!masterSwitch) {
                 Log.e(TAG, "Master switch OFF via ContentProvider, skipping hooks")
                 return
@@ -72,14 +71,16 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
             when (pkg) {
                 "com.tencent.mm" -> {
-                    if (HookHelper.isWeChatMainProcess(processName)) onWeChatLoaded(lpparam)
+                    val isMain = tryInvokeBool("com.microx.enhancer.utils.HookHelper", "isWeChatMainProcess", processName)
+                    if (isMain == true) onWeChatLoaded(lpparam)
                 }
                 "com.tencent.mobileqq" -> {
-                    if (HookHelper.isQQMainProcess(processName)) onQQLoaded(lpparam)
+                    val isMain = tryInvokeBool("com.microx.enhancer.utils.HookHelper", "isQQMainProcess", processName)
+                    if (isMain == true) onQQLoaded(lpparam)
                 }
             }
         } catch (e: Throwable) {
-            CrashGuard.log("FATAL: ${e.stackTraceToString()}")
+            tryInvokeVoid("com.microx.enhancer.utils.CrashGuard", "log", "FATAL: ${e.stackTraceToString()}")
             Log.e(TAG, "FATAL: ${e.message}", e)
         }
     }
@@ -88,29 +89,22 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
         Log.e(TAG, "Loading WeChat hooks (integrated=${isIntegratedMode})")
         currentPkg = "com.tencent.mm"
 
-        val modules = listOf(
-            "SecurityBypass" to { SecurityBypassHook.hook(lpparam) },
-            "AdBlock" to { AdBlockHook.hook(lpparam) },
-            "AntiRecall" to { AntiRecallHook.hook(lpparam) },
-            "Moment" to { MomentHook.hook(lpparam) },
-            "UIMod" to { UIModHook.hook(lpparam) },
-            "Privacy" to { PrivacyHook.hook(lpparam) },
-            "BatchManager" to { BatchManagerHook.hook(lpparam) },
-            "AutoReply" to { AutoReplyHook.hook(lpparam) },
-            "VoiceMessageExport" to { VoiceMessageExportHook.hook(lpparam) },
-            "MessageSearchEnhance" to { MessageSearchEnhanceHook.hook(lpparam) },
-            "CustomTheme" to { CustomThemeHook.hook(lpparam) }
+        val hooks = listOf(
+            "com.microx.enhancer.hooks.SecurityBypassHook" to "hook",
+            "com.microx.enhancer.hooks.AdBlockHook" to "hook",
+            "com.microx.enhancer.hooks.AntiRecallHook" to "hook",
+            "com.microx.enhancer.hooks.MomentHook" to "hook",
+            "com.microx.enhancer.hooks.UIModHook" to "hook",
+            "com.microx.enhancer.hooks.PrivacyHook" to "hook",
+            "com.microx.enhancer.hooks.BatchManagerHook" to "hook",
+            "com.microx.enhancer.hooks.AutoReplyHook" to "hook",
+            "com.microx.enhancer.hooks.VoiceMessageExportHook" to "hook",
+            "com.microx.enhancer.hooks.MessageSearchEnhanceHook" to "hook",
+            "com.microx.enhancer.hooks.CustomThemeHook" to "hook"
         )
-
-        for ((name, hookAction) in modules) {
-            try {
-                hookAction.invoke()
-                Log.e(TAG, "[$name] OK")
-            } catch (e: Throwable) {
-                Log.e(TAG, "[$name] FAIL: ${e.message}")
-            }
+        for ((className, methodName) in hooks) {
+            tryInvokeHook0(className, methodName, lpparam)
         }
-
         Log.e(TAG, "===== WeChat hooks loaded =====")
     }
 
@@ -118,25 +112,52 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
         Log.e(TAG, "Loading QQ hooks (integrated=${isIntegratedMode})")
         currentPkg = "com.tencent.mobileqq"
 
-        val modules = listOf(
-            "SecurityBypass" to { SecurityBypassHook.hook(lpparam) },
-            "AdBlock-QQ" to { AdBlockHook.hookQQ(lpparam) },
-            "AntiRecall-QQ" to { AntiRecallHook.hookQQ(lpparam) },
-            "UIMod-QQ" to { UIModHook.hookQQ(lpparam) },
-            "Privacy-QQ" to { PrivacyHook.hookQQ(lpparam) },
-            "AutoReply-QQ" to { AutoReplyHook.hookQQ(lpparam) },
-            "CustomTheme-QQ" to { CustomThemeHook.hookQQ(lpparam) }
+        val hooks = listOf(
+            "com.microx.enhancer.hooks.SecurityBypassHook" to "hook",
+            "com.microx.enhancer.hooks.AdBlockHook" to "hookQQ",
+            "com.microx.enhancer.hooks.AntiRecallHook" to "hookQQ",
+            "com.microx.enhancer.hooks.UIModHook" to "hookQQ",
+            "com.microx.enhancer.hooks.PrivacyHook" to "hookQQ",
+            "com.microx.enhancer.hooks.AutoReplyHook" to "hookQQ",
+            "com.microx.enhancer.hooks.CustomThemeHook" to "hookQQ"
         )
-
-        for ((name, hookAction) in modules) {
-            try {
-                hookAction.invoke()
-                Log.e(TAG, "[$name] OK")
-            } catch (e: Throwable) {
-                Log.e(TAG, "[$name] FAIL: ${e.message}")
-            }
+        for ((className, methodName) in hooks) {
+            tryInvokeHook0(className, methodName, lpparam)
         }
-
         Log.e(TAG, "===== QQ hooks loaded =====")
+    }
+
+    private fun tryInvokeHook0(className: String, methodName: String, lpparam: XC_LoadPackage.LoadPackageParam) {
+        try {
+            val clazz = Class.forName(className)
+            val method = clazz.declaredMethods.firstOrNull { it.name == methodName && it.parameterCount == 1 }
+            method?.invoke(null, lpparam)
+        } catch (e: Throwable) {
+            Log.e(TAG, "${className.substringAfterLast('.')}#$methodName FAIL: ${e.message}")
+        }
+    }
+
+    private fun tryInvokeVoid(className: String, methodName: String, arg: Any?) {
+        try {
+            val clazz = Class.forName(className)
+            val method = clazz.declaredMethods.firstOrNull { it.name == methodName && it.parameterCount == 1 }
+            method?.invoke(null, arg)
+        } catch (_: Throwable) { }
+    }
+
+    private fun <T> tryInvokeCtx(className: String, methodName: String, ctx: android.content.Context): T? {
+        return try {
+            val clazz = Class.forName(className)
+            val method = clazz.declaredMethods.firstOrNull { it.name == methodName && it.parameterCount == 1 }
+            method?.invoke(null, ctx) as? T
+        } catch (_: Throwable) { null }
+    }
+
+    private fun tryInvokeBool(className: String, methodName: String, arg: String): Boolean? {
+        return try {
+            val clazz = Class.forName(className)
+            val method = clazz.declaredMethods.firstOrNull { it.name == methodName && it.parameterCount == 1 }
+            method?.invoke(null, arg) as? Boolean
+        } catch (_: Throwable) { null }
     }
 }

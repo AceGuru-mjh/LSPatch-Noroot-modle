@@ -1,12 +1,7 @@
-package com.stepmod.noroot
+﻿package com.stepmod.noroot
 
 import android.util.Log
-import com.stepmod.noroot.core.ConfigClient
-import com.stepmod.noroot.hooks.*
 import com.stepmod.noroot.models.StepConfig
-import com.stepmod.noroot.utils.CrashGuard
-import com.stepmod.noroot.utils.EnvDetector
-import com.stepmod.noroot.utils.HookConfigReader
 import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.IXposedHookZygoteInit
 import de.robv.android.xposed.callbacks.XC_LoadPackage
@@ -14,7 +9,7 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage
 class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
     companion object {
-        const val VERSION = "1.0.11"
+        const val VERSION = "1.0.14"
         const val TAG = "LSP-StepModifier"
         const val MODULE_PKG = "com.stepmod.noroot"
         var currentPkg: String? = null
@@ -55,7 +50,8 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
         if (lpparam.processName != lpparam.packageName) return
 
         try {
-            try { CrashGuard.init(null) } catch (_: Throwable) { }
+            tryInvokeVoid("com.stepmod.noroot.utils.CrashGuard", "init", null)
+
             if (lpparam.packageName == "android") return
             if (!lpparam.isFirstApplication) return
             val pkg = lpparam.packageName ?: return
@@ -64,7 +60,7 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
             currentPkg = pkg
             Log.e(TAG, "Loading hooks for $pkg (integrated=${isIntegratedMode})")
 
-            EnvDetector.detect(lpparam)
+            tryInvoke("com.stepmod.noroot.utils.EnvDetector", "detect", lpparam)
 
             val ctx = try {
                 val at = Class.forName("android.app.ActivityThread")
@@ -73,7 +69,7 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
                     .getMethod("getApplication").invoke(at) as? android.content.Context
             } catch (_: Throwable) { null }
 
-            val masterSwitch = if (ctx != null) ConfigClient.readMasterSwitch(ctx) else true
+            val masterSwitch = if (ctx != null) tryInvokeCtx<Boolean>("com.stepmod.noroot.core.ConfigClient", "readMasterSwitch", ctx) ?: true else true
             if (!masterSwitch) {
                 Log.e(TAG, "Master switch OFF via ContentProvider, skipping hooks")
                 return
@@ -81,45 +77,22 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
             val cfg = loadConfig()
 
-            Log.e(TAG, "Loading StepSensorHook...")
-            try { if (cfg.stepModifyEnabled) StepSensorHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "StepSensorHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading StepReportHook...")
-            try { if (cfg.stepModifyEnabled) StepReportHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "StepReportHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading StepCounterHook...")
-            try { if (cfg.stepModifyEnabled) StepCounterHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "StepCounterHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading ContentProviderInjectHook...")
-            try { if (cfg.contentProviderInjectEnabled) ContentProviderInjectHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "ContentProviderInjectHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading SensorBlockHook...")
-            try { if (cfg.sensorBlockEnabled) SensorBlockHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "SensorBlockHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading MultiAppSyncHook...")
-            try { if (cfg.multiAppSyncEnabled) MultiAppSyncHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "MultiAppSyncHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading StepHistoryFakeHook...")
-            try { if (cfg.stepHistoryFakeEnabled) StepHistoryFakeHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "StepHistoryFakeHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading ScheduleStepHook...")
-            try { if (cfg.scheduleStepEnabled) ScheduleStepHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "ScheduleStepHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading CalorieCalculatorHook...")
-            try { if (cfg.calorieCalcEnabled) CalorieCalculatorHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "CalorieCalculatorHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading CompetitionModeHook...")
-            try { if (cfg.competitionModeEnabled) CompetitionModeHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "CompetitionModeHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading AntiDetectionStepHook...")
-            try { if (cfg.antiDetectionEnabled) AntiDetectionStepHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "AntiDetectionStepHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading GpxRouteInjectHook...")
-            try { if (cfg.gpxRouteEnabled) GpxRouteInjectHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "GpxRouteInjectHook FAIL: ${e.message}") }
+            if (cfg.stepModifyEnabled) tryInvokeHook("com.stepmod.noroot.hooks.StepSensorHook", lpparam, cfg)
+            if (cfg.stepModifyEnabled) tryInvokeHook("com.stepmod.noroot.hooks.StepReportHook", lpparam, cfg)
+            if (cfg.stepModifyEnabled) tryInvokeHook("com.stepmod.noroot.hooks.StepCounterHook", lpparam, cfg)
+            if (cfg.contentProviderInjectEnabled) tryInvokeHook("com.stepmod.noroot.hooks.ContentProviderInjectHook", lpparam, cfg)
+            if (cfg.sensorBlockEnabled) tryInvokeHook("com.stepmod.noroot.hooks.SensorBlockHook", lpparam, cfg)
+            if (cfg.multiAppSyncEnabled) tryInvokeHook("com.stepmod.noroot.hooks.MultiAppSyncHook", lpparam, cfg)
+            if (cfg.stepHistoryFakeEnabled) tryInvokeHook("com.stepmod.noroot.hooks.StepHistoryFakeHook", lpparam, cfg)
+            if (cfg.scheduleStepEnabled) tryInvokeHook("com.stepmod.noroot.hooks.ScheduleStepHook", lpparam, cfg)
+            if (cfg.calorieCalcEnabled) tryInvokeHook("com.stepmod.noroot.hooks.CalorieCalculatorHook", lpparam, cfg)
+            if (cfg.competitionModeEnabled) tryInvokeHook("com.stepmod.noroot.hooks.CompetitionModeHook", lpparam, cfg)
+            if (cfg.antiDetectionEnabled) tryInvokeHook("com.stepmod.noroot.hooks.AntiDetectionStepHook", lpparam, cfg)
+            if (cfg.gpxRouteEnabled) tryInvokeHook("com.stepmod.noroot.hooks.GpxRouteInjectHook", lpparam, cfg)
 
             Log.e(TAG, "===== All hooks loaded for $pkg =====")
         } catch (e: Throwable) {
-            CrashGuard.log("FATAL: ${e.stackTraceToString()}")
+            tryInvokeVoid("com.stepmod.noroot.utils.CrashGuard", "log", "FATAL: ${e.stackTraceToString()}")
             Log.e(TAG, "FATAL: ${e.message}", e)
         }
     }
@@ -134,7 +107,50 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
     )
 
     private fun loadConfig(): StepConfig {
-        HookConfigReader.readGlobal()?.let { return it }
-        return try { com.stepmod.noroot.utils.ConfigManager.getGlobalConfig() } catch (_: Throwable) { StepConfig(packageName = "global") }
+        try {
+            val reader = Class.forName("com.stepmod.noroot.utils.HookConfigReader")
+            val result = reader.getDeclaredMethod("readGlobal").invoke(null) as? StepConfig
+            if (result != null) return result
+        } catch (_: Throwable) { }
+        return try {
+            val mgr = Class.forName("com.stepmod.noroot.utils.ConfigManager")
+            mgr.getDeclaredMethod("getGlobalConfig").invoke(null) as StepConfig
+        } catch (_: Throwable) { StepConfig(packageName = "global") }
+    }
+
+    private fun tryInvoke(className: String, methodName: String, vararg args: Any?) {
+        try {
+            val clazz = Class.forName(className)
+            val method = clazz.declaredMethods.firstOrNull { it.name == methodName && it.parameterCount == args.size }
+            method?.invoke(null, *args)
+        } catch (e: Throwable) {
+            Log.e(TAG, "${className.substringAfterLast('.')}#$methodName FAIL: ${e.message}")
+        }
+    }
+
+    private fun tryInvokeVoid(className: String, methodName: String, arg: Any?) {
+        try {
+            val clazz = Class.forName(className)
+            val method = clazz.declaredMethods.firstOrNull { it.name == methodName && it.parameterCount == 1 }
+            method?.invoke(null, arg)
+        } catch (_: Throwable) { }
+    }
+
+    private fun <T> tryInvokeCtx(className: String, methodName: String, ctx: android.content.Context): T? {
+        return try {
+            val clazz = Class.forName(className)
+            val method = clazz.declaredMethods.firstOrNull { it.name == methodName && it.parameterCount == 1 }
+            method?.invoke(null, ctx) as? T
+        } catch (_: Throwable) { null }
+    }
+
+    private fun tryInvokeHook(className: String, lpparam: XC_LoadPackage.LoadPackageParam, cfg: Any?) {
+        try {
+            val clazz = Class.forName(className)
+            val method = clazz.declaredMethods.firstOrNull { it.parameterCount == 2 }
+            method?.invoke(null, lpparam, cfg)
+        } catch (e: Throwable) {
+            Log.e(TAG, "${className.substringAfterLast('.')} FAIL: ${e.message}")
+        }
     }
 }

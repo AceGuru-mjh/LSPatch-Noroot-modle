@@ -1,12 +1,7 @@
-package com.notifymaster.noroot
+﻿package com.notifymaster.noroot
 
 import android.util.Log
-import com.notifymaster.noroot.core.ConfigClient
-import com.notifymaster.noroot.hooks.*
 import com.notifymaster.noroot.models.NotifyConfig
-import com.notifymaster.noroot.utils.CrashGuard
-import com.notifymaster.noroot.utils.EnvDetector
-import com.notifymaster.noroot.utils.HookConfigReader
 import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.IXposedHookZygoteInit
 import de.robv.android.xposed.callbacks.XC_LoadPackage
@@ -14,7 +9,7 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage
 class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
     companion object {
-        const val VERSION = "1.0.11"
+        const val VERSION = "1.0.14"
         const val TAG = "LSP-NotifyMaster"
         const val MODULE_PKG = "com.notifymaster.noroot"
         var currentPkg: String? = null
@@ -55,7 +50,8 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
         if (lpparam.processName != lpparam.packageName) return
 
         try {
-            try { CrashGuard.init(null) } catch (_: Throwable) { }
+            tryInvokeVoid("com.notifymaster.noroot.utils.CrashGuard", "init", null)
+
             if (lpparam.packageName == "android") return
             if (!lpparam.isFirstApplication) return
             val pkg = lpparam.packageName ?: return
@@ -64,7 +60,7 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
             currentPkg = pkg
             Log.e(TAG, "Loading hooks for $pkg (integrated=${isIntegratedMode})")
 
-            EnvDetector.detect(lpparam)
+            tryInvoke("com.notifymaster.noroot.utils.EnvDetector", "detect", lpparam)
 
             val ctx = try {
                 val at = Class.forName("android.app.ActivityThread")
@@ -73,7 +69,7 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
                     .getMethod("getApplication").invoke(at) as? android.content.Context
             } catch (_: Throwable) { null }
 
-            val masterSwitch = if (ctx != null) ConfigClient.readMasterSwitch(ctx) else true
+            val masterSwitch = if (ctx != null) tryInvokeCtx<Boolean>("com.notifymaster.noroot.core.ConfigClient", "readMasterSwitch", ctx) ?: true else true
             if (!masterSwitch) {
                 Log.e(TAG, "Master switch OFF via ContentProvider, skipping hooks")
                 return
@@ -82,42 +78,21 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
             val cfg = loadConfig()
             cfg.packageName = pkg
 
-            Log.e(TAG, "Loading NotifyFilterHook...")
-            try { if (cfg.notifyFilterEnabled) NotifyFilterHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "NotifyFilterHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading AntiRecallNotifyHook...")
-            try { if (cfg.antiRecallNotifyEnabled) AntiRecallNotifyHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "AntiRecallNotifyHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading NotifyHistoryHook...")
-            try { if (cfg.notifyHistoryEnabled) NotifyHistoryHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "NotifyHistoryHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading NotifyBeautifyHook...")
-            try { if (cfg.notifyBeautifyEnabled) NotifyBeautifyHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "NotifyBeautifyHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading BatchNotifyHook...")
-            try { if (cfg.batchNotifyEnabled) BatchNotifyHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "BatchNotifyHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading PriorityOverrideHook...")
-            try { if (cfg.priorityOverrideEnabled) PriorityOverrideHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "PriorityOverrideHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading SilentNotifyHook...")
-            try { if (cfg.silentNotifyEnabled) SilentNotifyHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "SilentNotifyHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading ShizukuNotifyCmdHook...")
-            try { if (cfg.shizukuNotifyCmdEnabled) ShizukuNotifyCmdHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "ShizukuNotifyCmdHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading NotificationGroupingHook...")
-            try { if (cfg.notificationGroupingEnabled) NotificationGroupingHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "NotificationGroupingHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading VipWhitelistHook...")
-            try { if (cfg.vipWhitelistEnabled) VipWhitelistHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "VipWhitelistHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading ScheduleDndHook...")
-            try { if (cfg.scheduleDndEnabled) ScheduleDndHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "ScheduleDndHook FAIL: ${e.message}") }
+            if (cfg.notifyFilterEnabled) tryInvokeHook("com.notifymaster.noroot.hooks.NotifyFilterHook", lpparam, cfg)
+            if (cfg.antiRecallNotifyEnabled) tryInvokeHook("com.notifymaster.noroot.hooks.AntiRecallNotifyHook", lpparam, cfg)
+            if (cfg.notifyHistoryEnabled) tryInvokeHook("com.notifymaster.noroot.hooks.NotifyHistoryHook", lpparam, cfg)
+            if (cfg.notifyBeautifyEnabled) tryInvokeHook("com.notifymaster.noroot.hooks.NotifyBeautifyHook", lpparam, cfg)
+            if (cfg.batchNotifyEnabled) tryInvokeHook("com.notifymaster.noroot.hooks.BatchNotifyHook", lpparam, cfg)
+            if (cfg.priorityOverrideEnabled) tryInvokeHook("com.notifymaster.noroot.hooks.PriorityOverrideHook", lpparam, cfg)
+            if (cfg.silentNotifyEnabled) tryInvokeHook("com.notifymaster.noroot.hooks.SilentNotifyHook", lpparam, cfg)
+            if (cfg.shizukuNotifyCmdEnabled) tryInvokeHook("com.notifymaster.noroot.hooks.ShizukuNotifyCmdHook", lpparam, cfg)
+            if (cfg.notificationGroupingEnabled) tryInvokeHook("com.notifymaster.noroot.hooks.NotificationGroupingHook", lpparam, cfg)
+            if (cfg.vipWhitelistEnabled) tryInvokeHook("com.notifymaster.noroot.hooks.VipWhitelistHook", lpparam, cfg)
+            if (cfg.scheduleDndEnabled) tryInvokeHook("com.notifymaster.noroot.hooks.ScheduleDndHook", lpparam, cfg)
 
             Log.e(TAG, "===== All hooks loaded for $pkg =====")
         } catch (e: Throwable) {
-            CrashGuard.log("FATAL: ${e.stackTraceToString()}")
+            tryInvokeVoid("com.notifymaster.noroot.utils.CrashGuard", "log", "FATAL: ${e.stackTraceToString()}")
             Log.e(TAG, "FATAL: ${e.message}", e)
         }
     }
@@ -133,7 +108,50 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
     )
 
     private fun loadConfig(): NotifyConfig {
-        HookConfigReader.readGlobal()?.let { return it }
-        return try { com.notifymaster.noroot.utils.ConfigManager.getGlobalConfig() } catch (_: Throwable) { NotifyConfig(packageName = "global") }
+        try {
+            val reader = Class.forName("com.notifymaster.noroot.utils.HookConfigReader")
+            val result = reader.getDeclaredMethod("readGlobal").invoke(null) as? NotifyConfig
+            if (result != null) return result
+        } catch (_: Throwable) { }
+        return try {
+            val mgr = Class.forName("com.notifymaster.noroot.utils.ConfigManager")
+            mgr.getDeclaredMethod("getGlobalConfig").invoke(null) as NotifyConfig
+        } catch (_: Throwable) { NotifyConfig(packageName = "global") }
+    }
+
+    private fun tryInvoke(className: String, methodName: String, vararg args: Any?) {
+        try {
+            val clazz = Class.forName(className)
+            val method = clazz.declaredMethods.firstOrNull { it.name == methodName && it.parameterCount == args.size }
+            method?.invoke(null, *args)
+        } catch (e: Throwable) {
+            Log.e(TAG, "${className.substringAfterLast('.')}#$methodName FAIL: ${e.message}")
+        }
+    }
+
+    private fun tryInvokeVoid(className: String, methodName: String, arg: Any?) {
+        try {
+            val clazz = Class.forName(className)
+            val method = clazz.declaredMethods.firstOrNull { it.name == methodName && it.parameterCount == 1 }
+            method?.invoke(null, arg)
+        } catch (_: Throwable) { }
+    }
+
+    private fun <T> tryInvokeCtx(className: String, methodName: String, ctx: android.content.Context): T? {
+        return try {
+            val clazz = Class.forName(className)
+            val method = clazz.declaredMethods.firstOrNull { it.name == methodName && it.parameterCount == 1 }
+            method?.invoke(null, ctx) as? T
+        } catch (_: Throwable) { null }
+    }
+
+    private fun tryInvokeHook(className: String, lpparam: XC_LoadPackage.LoadPackageParam, cfg: Any?) {
+        try {
+            val clazz = Class.forName(className)
+            val method = clazz.declaredMethods.firstOrNull { it.parameterCount == 2 }
+            method?.invoke(null, lpparam, cfg)
+        } catch (e: Throwable) {
+            Log.e(TAG, "${className.substringAfterLast('.')} FAIL: ${e.message}")
+        }
     }
 }

@@ -1,12 +1,7 @@
-package com.videosaver.noroot
+﻿package com.videosaver.noroot
 
 import android.util.Log
-import com.videosaver.noroot.core.ConfigClient
-import com.videosaver.noroot.hooks.*
 import com.videosaver.noroot.models.VideoConfig
-import com.videosaver.noroot.utils.CrashGuard
-import com.videosaver.noroot.utils.EnvDetector
-import com.videosaver.noroot.utils.HookConfigReader
 import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.IXposedHookZygoteInit
 import de.robv.android.xposed.callbacks.XC_LoadPackage
@@ -14,7 +9,7 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage
 class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
     companion object {
-        const val VERSION = "1.0.11"
+        const val VERSION = "1.0.14"
         const val TAG = "LSP-VideoSaver"
         const val MODULE_PKG = "com.videosaver.noroot"
         var currentPkg: String? = null
@@ -55,7 +50,8 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
         if (lpparam.processName != lpparam.packageName) return
 
         try {
-            try { CrashGuard.init(null) } catch (_: Throwable) { }
+            tryInvokeVoid("com.videosaver.noroot.utils.CrashGuard", "init", null)
+
             if (lpparam.packageName == "android") return
             if (!lpparam.isFirstApplication) return
             val pkg = lpparam.packageName ?: return
@@ -64,7 +60,7 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
             currentPkg = pkg
             Log.e(TAG, "Loading hooks for $pkg (integrated=${isIntegratedMode})")
 
-            EnvDetector.detect(lpparam)
+            tryInvoke("com.videosaver.noroot.utils.EnvDetector", "detect", lpparam)
 
             val ctx = try {
                 val at = Class.forName("android.app.ActivityThread")
@@ -73,7 +69,7 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
                     .getMethod("getApplication").invoke(at) as? android.content.Context
             } catch (_: Throwable) { null }
 
-            val masterSwitch = if (ctx != null) ConfigClient.readMasterSwitch(ctx) else true
+            val masterSwitch = if (ctx != null) tryInvokeCtx<Boolean>("com.videosaver.noroot.core.ConfigClient", "readMasterSwitch", ctx) ?: true else true
             if (!masterSwitch) {
                 Log.e(TAG, "Master switch OFF via ContentProvider, skipping hooks")
                 return
@@ -81,36 +77,19 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
             val cfg = loadConfig()
 
-            Log.e(TAG, "Loading DouyinNoWatermarkHook...")
-            try { if (cfg.douyinNoWatermark) DouyinNoWatermarkHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "DouyinNoWatermarkHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading KuaishouNoWatermarkHook...")
-            try { if (cfg.kuaishouNoWatermark) KuaishouNoWatermarkHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "KuaishouNoWatermarkHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading XhsNoWatermarkHook...")
-            try { if (cfg.xhsNoWatermark) XhsNoWatermarkHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "XhsNoWatermarkHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading BiliDownloadHook...")
-            try { if (cfg.biliDownload) BiliDownloadHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "BiliDownloadHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading ShizukuCaptureHook...")
-            try { if (cfg.shizukuCaptureEnabled) ShizukuCaptureHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "ShizukuCaptureHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading AutoDownloadHook...")
-            try { if (cfg.autoDownloadEnabled) AutoDownloadHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "AutoDownloadHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading RemoveVideoAdsHook...")
-            try { if (cfg.removeAdsEnabled) RemoveVideoAdsHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "RemoveVideoAdsHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading SaveOriginalQualityHook...")
-            try { if (cfg.saveOriginalQualityEnabled) SaveOriginalQualityHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "SaveOriginalQualityHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading BatchDownloadHook...")
-            try { if (cfg.batchDownloadEnabled) BatchDownloadHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "BatchDownloadHook FAIL: ${e.message}") }
+            if (cfg.douyinNoWatermark) tryInvokeHook("com.videosaver.noroot.hooks.DouyinNoWatermarkHook", lpparam, cfg)
+            if (cfg.kuaishouNoWatermark) tryInvokeHook("com.videosaver.noroot.hooks.KuaishouNoWatermarkHook", lpparam, cfg)
+            if (cfg.xhsNoWatermark) tryInvokeHook("com.videosaver.noroot.hooks.XhsNoWatermarkHook", lpparam, cfg)
+            if (cfg.biliDownload) tryInvokeHook("com.videosaver.noroot.hooks.BiliDownloadHook", lpparam, cfg)
+            if (cfg.shizukuCaptureEnabled) tryInvokeHook("com.videosaver.noroot.hooks.ShizukuCaptureHook", lpparam, cfg)
+            if (cfg.autoDownloadEnabled) tryInvokeHook("com.videosaver.noroot.hooks.AutoDownloadHook", lpparam, cfg)
+            if (cfg.removeAdsEnabled) tryInvokeHook("com.videosaver.noroot.hooks.RemoveVideoAdsHook", lpparam, cfg)
+            if (cfg.saveOriginalQualityEnabled) tryInvokeHook("com.videosaver.noroot.hooks.SaveOriginalQualityHook", lpparam, cfg)
+            if (cfg.batchDownloadEnabled) tryInvokeHook("com.videosaver.noroot.hooks.BatchDownloadHook", lpparam, cfg)
 
             Log.e(TAG, "===== All hooks loaded for $pkg =====")
         } catch (e: Throwable) {
-            CrashGuard.log("FATAL: ${e.stackTraceToString()}")
+            tryInvokeVoid("com.videosaver.noroot.utils.CrashGuard", "log", "FATAL: ${e.stackTraceToString()}")
             Log.e(TAG, "FATAL: ${e.message}", e)
         }
     }
@@ -124,7 +103,50 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
     )
 
     private fun loadConfig(): VideoConfig {
-        HookConfigReader.readGlobal()?.let { return it }
-        return try { com.videosaver.noroot.utils.ConfigManager.getGlobalConfig() } catch (_: Throwable) { VideoConfig(packageName = "global") }
+        try {
+            val reader = Class.forName("com.videosaver.noroot.utils.HookConfigReader")
+            val result = reader.getDeclaredMethod("readGlobal").invoke(null) as? VideoConfig
+            if (result != null) return result
+        } catch (_: Throwable) { }
+        return try {
+            val mgr = Class.forName("com.videosaver.noroot.utils.ConfigManager")
+            mgr.getDeclaredMethod("getGlobalConfig").invoke(null) as VideoConfig
+        } catch (_: Throwable) { VideoConfig(packageName = "global") }
+    }
+
+    private fun tryInvoke(className: String, methodName: String, vararg args: Any?) {
+        try {
+            val clazz = Class.forName(className)
+            val method = clazz.declaredMethods.firstOrNull { it.name == methodName && it.parameterCount == args.size }
+            method?.invoke(null, *args)
+        } catch (e: Throwable) {
+            Log.e(TAG, "${className.substringAfterLast('.')}#$methodName FAIL: ${e.message}")
+        }
+    }
+
+    private fun tryInvokeVoid(className: String, methodName: String, arg: Any?) {
+        try {
+            val clazz = Class.forName(className)
+            val method = clazz.declaredMethods.firstOrNull { it.name == methodName && it.parameterCount == 1 }
+            method?.invoke(null, arg)
+        } catch (_: Throwable) { }
+    }
+
+    private fun <T> tryInvokeCtx(className: String, methodName: String, ctx: android.content.Context): T? {
+        return try {
+            val clazz = Class.forName(className)
+            val method = clazz.declaredMethods.firstOrNull { it.name == methodName && it.parameterCount == 1 }
+            method?.invoke(null, ctx) as? T
+        } catch (_: Throwable) { null }
+    }
+
+    private fun tryInvokeHook(className: String, lpparam: XC_LoadPackage.LoadPackageParam, cfg: Any?) {
+        try {
+            val clazz = Class.forName(className)
+            val method = clazz.declaredMethods.firstOrNull { it.parameterCount == 2 }
+            method?.invoke(null, lpparam, cfg)
+        } catch (e: Throwable) {
+            Log.e(TAG, "${className.substringAfterLast('.')} FAIL: ${e.message}")
+        }
     }
 }

@@ -1,12 +1,7 @@
-package com.vipunlock.noroot
+﻿package com.vipunlock.noroot
 
 import android.util.Log
-import com.vipunlock.noroot.core.ConfigClient
-import com.vipunlock.noroot.hooks.*
 import com.vipunlock.noroot.models.VipConfig
-import com.vipunlock.noroot.utils.CrashGuard
-import com.vipunlock.noroot.utils.EnvDetector
-import com.vipunlock.noroot.utils.HookConfigReader
 import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.IXposedHookZygoteInit
 import de.robv.android.xposed.callbacks.XC_LoadPackage
@@ -14,7 +9,7 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage
 class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
     companion object {
-        const val VERSION = "1.0.11"
+        const val VERSION = "1.0.14"
         const val TAG = "LSP-VipUnlocker"
         const val MODULE_PKG = "com.vipunlock.noroot"
         var currentPkg: String? = null
@@ -55,7 +50,8 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
         if (lpparam.processName != lpparam.packageName) return
 
         try {
-            try { CrashGuard.init(null) } catch (_: Throwable) { }
+            tryInvokeVoid("com.vipunlock.noroot.utils.CrashGuard", "init", null)
+
             if (lpparam.packageName == "android") return
             if (!lpparam.isFirstApplication) return
             val pkg = lpparam.packageName ?: return
@@ -64,7 +60,7 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
             currentPkg = pkg
             Log.e(TAG, "Loading hooks for $pkg (integrated=${isIntegratedMode})")
 
-            EnvDetector.detect(lpparam)
+            tryInvoke("com.vipunlock.noroot.utils.EnvDetector", "detect", lpparam)
 
             val ctx = try {
                 val at = Class.forName("android.app.ActivityThread")
@@ -73,7 +69,7 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
                     .getMethod("getApplication").invoke(at) as? android.content.Context
             } catch (_: Throwable) { null }
 
-            val masterSwitch = if (ctx != null) ConfigClient.readMasterSwitch(ctx) else true
+            val masterSwitch = if (ctx != null) tryInvokeCtx<Boolean>("com.vipunlock.noroot.core.ConfigClient", "readMasterSwitch", ctx) ?: true else true
             if (!masterSwitch) {
                 Log.e(TAG, "Master switch OFF via ContentProvider, skipping hooks")
                 return
@@ -82,63 +78,28 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
             val cfg = loadConfig()
             cfg.packageName = pkg
 
-            Log.e(TAG, "Loading NetEaseMusicVipHook...")
-            try { if (cfg.netEaseVipEnabled && pkg == "com.netease.cloudmusic") NetEaseMusicVipHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "NetEaseMusicVipHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading QQMusicVipHook...")
-            try { if (cfg.qqMusicVipEnabled && pkg == "com.tencent.wmusic") QQMusicVipHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "QQMusicVipHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading KugouVipHook...")
-            try { if (cfg.kugouVipEnabled && pkg == "com.kugou.android") UniversalVipHook.applyForKugou(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "KugouVipHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading KuwoVipHook...")
-            try { if (cfg.kuwoVipEnabled && pkg == "com.kuwo.player") UniversalVipHook.applyForKuwo(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "KuwoVipHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading IqiyiVipHook...")
-            try { if (cfg.iqiyiVipEnabled && pkg == "com.qiyi.video") IqiyiVipHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "IqiyiVipHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading YoukuVipHook...")
-            try { if (cfg.youkuVipEnabled && pkg == "com.youku.phone") UniversalVipHook.applyForYouku(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "YoukuVipHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading TencentVideoVipHook...")
-            try { if (cfg.tencentVideoVipEnabled && pkg == "com.tencent.qqlive") UniversalVipHook.applyForTencentVideo(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "TencentVideoVipHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading BilibiliVipHook...")
-            try { if (cfg.biliVipEnabled && pkg == "tv.danmaku.bili") BilibiliVipHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "BilibiliVipHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading XimalayaVipHook...")
-            try { if (cfg.ximalayaVipEnabled && pkg == "com.ximalaya.ting.android") UniversalVipHook.applyForXimalaya(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "XimalayaVipHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading ToutiaoVipHook...")
-            try { if (cfg.toutiaoVipEnabled && pkg == "com.ss.android.article.news") UniversalVipHook.applyForToutiao(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "ToutiaoVipHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading ZhihuVipHook...")
-            try { if (cfg.zhihuVipEnabled && pkg == "com.zhihu.android") UniversalVipHook.applyForZhihu(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "ZhihuVipHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading BaiduNetdiskHook...")
-            try { if (cfg.baiduNetdiskVipEnabled && pkg == "com.baidu.netdisk") UniversalVipHook.applyForBaiduNetdisk(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "BaiduNetdiskHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading WpsVipHook...")
-            try { if (cfg.wpsVipEnabled && pkg == "com.wps.moffice_eng") UniversalVipHook.applyForWps(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "WpsVipHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading WereadVipHook...")
-            try { if (cfg.wereadVipEnabled && pkg == "com.tencent.weread") UniversalVipHook.applyForWeread(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "WereadVipHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading UniversalVipHook...")
-            try { if (cfg.universalVipTryEnabled) UniversalVipHook.applyForCommon(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "UniversalVipHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading RemoveAdsHook...")
-            try { if (cfg.removeAdsEnabled) RemoveAdsHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "RemoveAdsHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading BypassVerifyHook...")
-            try { if (cfg.bypassVerifyEnabled) BypassVerifyHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "BypassVerifyHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading ShizukuVipDbHook...")
-            try { if (cfg.shizukuVipDbEnabled) ShizukuVipDbHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "ShizukuVipDbHook FAIL: ${e.message}") }
+            if (cfg.netEaseVipEnabled && pkg == "com.netease.cloudmusic") tryInvokeHook("com.vipunlock.noroot.hooks.NetEaseMusicVipHook", lpparam, cfg)
+            if (cfg.qqMusicVipEnabled && pkg == "com.tencent.wmusic") tryInvokeHook("com.vipunlock.noroot.hooks.QQMusicVipHook", lpparam, cfg)
+            if (cfg.kugouVipEnabled && pkg == "com.kugou.android") tryInvokeHook("com.vipunlock.noroot.hooks.UniversalVipHook", lpparam, cfg)
+            if (cfg.kuwoVipEnabled && pkg == "com.kuwo.player") tryInvokeHook("com.vipunlock.noroot.hooks.UniversalVipHook", lpparam, cfg)
+            if (cfg.iqiyiVipEnabled && pkg == "com.qiyi.video") tryInvokeHook("com.vipunlock.noroot.hooks.IqiyiVipHook", lpparam, cfg)
+            if (cfg.youkuVipEnabled && pkg == "com.youku.phone") tryInvokeHook("com.vipunlock.noroot.hooks.UniversalVipHook", lpparam, cfg)
+            if (cfg.tencentVideoVipEnabled && pkg == "com.tencent.qqlive") tryInvokeHook("com.vipunlock.noroot.hooks.UniversalVipHook", lpparam, cfg)
+            if (cfg.biliVipEnabled && pkg == "tv.danmaku.bili") tryInvokeHook("com.vipunlock.noroot.hooks.BilibiliVipHook", lpparam, cfg)
+            if (cfg.ximalayaVipEnabled && pkg == "com.ximalaya.ting.android") tryInvokeHook("com.vipunlock.noroot.hooks.UniversalVipHook", lpparam, cfg)
+            if (cfg.toutiaoVipEnabled && pkg == "com.ss.android.article.news") tryInvokeHook("com.vipunlock.noroot.hooks.UniversalVipHook", lpparam, cfg)
+            if (cfg.zhihuVipEnabled && pkg == "com.zhihu.android") tryInvokeHook("com.vipunlock.noroot.hooks.UniversalVipHook", lpparam, cfg)
+            if (cfg.baiduNetdiskVipEnabled && pkg == "com.baidu.netdisk") tryInvokeHook("com.vipunlock.noroot.hooks.UniversalVipHook", lpparam, cfg)
+            if (cfg.wpsVipEnabled && pkg == "com.wps.moffice_eng") tryInvokeHook("com.vipunlock.noroot.hooks.UniversalVipHook", lpparam, cfg)
+            if (cfg.wereadVipEnabled && pkg == "com.tencent.weread") tryInvokeHook("com.vipunlock.noroot.hooks.UniversalVipHook", lpparam, cfg)
+            if (cfg.universalVipTryEnabled) tryInvokeHook("com.vipunlock.noroot.hooks.UniversalVipHook", lpparam, cfg)
+            if (cfg.removeAdsEnabled) tryInvokeHook("com.vipunlock.noroot.hooks.RemoveAdsHook", lpparam, cfg)
+            if (cfg.bypassVerifyEnabled) tryInvokeHook("com.vipunlock.noroot.hooks.BypassVerifyHook", lpparam, cfg)
+            if (cfg.shizukuVipDbEnabled) tryInvokeHook("com.vipunlock.noroot.hooks.ShizukuVipDbHook", lpparam, cfg)
 
             Log.e(TAG, "===== All hooks loaded for $pkg =====")
         } catch (e: Throwable) {
-            CrashGuard.log("FATAL: ${e.stackTraceToString()}")
+            tryInvokeVoid("com.vipunlock.noroot.utils.CrashGuard", "log", "FATAL: ${e.stackTraceToString()}")
             Log.e(TAG, "FATAL: ${e.message}", e)
         }
     }
@@ -152,7 +113,50 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
     )
 
     private fun loadConfig(): VipConfig {
-        HookConfigReader.readGlobal()?.let { return it }
-        return try { com.vipunlock.noroot.utils.ConfigManager.getGlobalConfig() } catch (_: Throwable) { VipConfig(packageName = "global") }
+        try {
+            val reader = Class.forName("com.vipunlock.noroot.utils.HookConfigReader")
+            val result = reader.getDeclaredMethod("readGlobal").invoke(null) as? VipConfig
+            if (result != null) return result
+        } catch (_: Throwable) { }
+        return try {
+            val mgr = Class.forName("com.vipunlock.noroot.utils.ConfigManager")
+            mgr.getDeclaredMethod("getGlobalConfig").invoke(null) as VipConfig
+        } catch (_: Throwable) { VipConfig(packageName = "global") }
+    }
+
+    private fun tryInvoke(className: String, methodName: String, vararg args: Any?) {
+        try {
+            val clazz = Class.forName(className)
+            val method = clazz.declaredMethods.firstOrNull { it.name == methodName && it.parameterCount == args.size }
+            method?.invoke(null, *args)
+        } catch (e: Throwable) {
+            Log.e(TAG, "${className.substringAfterLast('.')}#$methodName FAIL: ${e.message}")
+        }
+    }
+
+    private fun tryInvokeVoid(className: String, methodName: String, arg: Any?) {
+        try {
+            val clazz = Class.forName(className)
+            val method = clazz.declaredMethods.firstOrNull { it.name == methodName && it.parameterCount == 1 }
+            method?.invoke(null, arg)
+        } catch (_: Throwable) { }
+    }
+
+    private fun <T> tryInvokeCtx(className: String, methodName: String, ctx: android.content.Context): T? {
+        return try {
+            val clazz = Class.forName(className)
+            val method = clazz.declaredMethods.firstOrNull { it.name == methodName && it.parameterCount == 1 }
+            method?.invoke(null, ctx) as? T
+        } catch (_: Throwable) { null }
+    }
+
+    private fun tryInvokeHook(className: String, lpparam: XC_LoadPackage.LoadPackageParam, cfg: Any?) {
+        try {
+            val clazz = Class.forName(className)
+            val method = clazz.declaredMethods.firstOrNull { it.parameterCount == 2 }
+            method?.invoke(null, lpparam, cfg)
+        } catch (e: Throwable) {
+            Log.e(TAG, "${className.substringAfterLast('.')} FAIL: ${e.message}")
+        }
     }
 }

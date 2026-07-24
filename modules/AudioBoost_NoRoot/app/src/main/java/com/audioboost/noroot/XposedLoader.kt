@@ -1,11 +1,7 @@
-package com.audioboost.noroot
+﻿package com.audioboost.noroot
 
 import android.util.Log
-import com.audioboost.noroot.core.ConfigClient
-import com.audioboost.noroot.hooks.*
 import com.audioboost.noroot.models.AudioConfig
-import com.audioboost.noroot.utils.EnvDetector
-import com.audioboost.noroot.utils.HookConfigReader
 import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.IXposedHookZygoteInit
 import de.robv.android.xposed.callbacks.XC_LoadPackage
@@ -13,7 +9,7 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage
 class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
     companion object {
-        const val VERSION = "1.0.11"
+        const val VERSION = "1.0.14"
         const val TAG = "LSP-AudioBoost"
         const val MODULE_PKG = "com.audioboost.noroot"
         var currentPkg: String? = null
@@ -62,7 +58,7 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
             currentPkg = pkg
             Log.e(TAG, "Loading hooks for $pkg (integrated=${isIntegratedMode})")
 
-            EnvDetector.detect(lpparam)
+            tryInvoke("com.audioboost.noroot.utils.EnvDetector", "detect", lpparam)
 
             val ctx = try {
                 val at = Class.forName("android.app.ActivityThread")
@@ -71,7 +67,7 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
                     .getMethod("getApplication").invoke(at) as? android.content.Context
             } catch (_: Throwable) { null }
 
-            val masterSwitch = if (ctx != null) ConfigClient.readMasterSwitch(ctx) else true
+            val masterSwitch = if (ctx != null) tryInvokeCtx<Boolean>("com.audioboost.noroot.core.ConfigClient", "readMasterSwitch", ctx) ?: true else true
             if (!masterSwitch) {
                 Log.e(TAG, "Master switch OFF via ContentProvider, skipping hooks")
                 return
@@ -79,38 +75,17 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
             val cfg = loadConfig()
 
-            Log.e(TAG, "Loading TinymixBridgeHook...")
-            try { if (cfg.tinymixEnabled) TinymixBridgeHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "TinymixBridgeHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading VolumeBoostHook...")
-            try { if (cfg.volumeBoostEnabled) VolumeBoostHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "VolumeBoostHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading BassBoostHook...")
-            try { if (cfg.bassBoostEnabled) BassBoostHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "BassBoostHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading EqualizerHook...")
-            try { if (cfg.equalizerEnabled) EqualizerHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "EqualizerHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading SpeakerBoostHook...")
-            try { if (cfg.speakerBoostEnabled) SpeakerBoostHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "SpeakerBoostHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading MicBoostHook...")
-            try { if (cfg.micBoostEnabled) MicBoostHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "MicBoostHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading AudioQualityEnhanceHook...")
-            try { if (cfg.audioQualityEnhanceEnabled) AudioQualityEnhanceHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "AudioQualityEnhanceHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading PerAppVolumeHook...")
-            try { if (cfg.perAppVolumeEnabled) PerAppVolumeHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "PerAppVolumeHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading HeadphoneProfileHook...")
-            try { if (cfg.headphoneAutoSwitchEnabled) HeadphoneProfileHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "HeadphoneProfileHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading ScheduledMuteHook...")
-            try { if (cfg.scheduledMuteEnabled) ScheduledMuteHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "ScheduledMuteHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading BluetoothDeviceEqHook...")
-            try { if (cfg.btDeviceEqEnabled) BluetoothDeviceEqHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "BluetoothDeviceEqHook FAIL: ${e.message}") }
+            if (cfg.tinymixEnabled) tryInvokeHook("com.audioboost.noroot.hooks.TinymixBridgeHook", lpparam, cfg)
+            if (cfg.volumeBoostEnabled) tryInvokeHook("com.audioboost.noroot.hooks.VolumeBoostHook", lpparam, cfg)
+            if (cfg.bassBoostEnabled) tryInvokeHook("com.audioboost.noroot.hooks.BassBoostHook", lpparam, cfg)
+            if (cfg.equalizerEnabled) tryInvokeHook("com.audioboost.noroot.hooks.EqualizerHook", lpparam, cfg)
+            if (cfg.speakerBoostEnabled) tryInvokeHook("com.audioboost.noroot.hooks.SpeakerBoostHook", lpparam, cfg)
+            if (cfg.micBoostEnabled) tryInvokeHook("com.audioboost.noroot.hooks.MicBoostHook", lpparam, cfg)
+            if (cfg.audioQualityEnhanceEnabled) tryInvokeHook("com.audioboost.noroot.hooks.AudioQualityEnhanceHook", lpparam, cfg)
+            if (cfg.perAppVolumeEnabled) tryInvokeHook("com.audioboost.noroot.hooks.PerAppVolumeHook", lpparam, cfg)
+            if (cfg.headphoneAutoSwitchEnabled) tryInvokeHook("com.audioboost.noroot.hooks.HeadphoneProfileHook", lpparam, cfg)
+            if (cfg.scheduledMuteEnabled) tryInvokeHook("com.audioboost.noroot.hooks.ScheduledMuteHook", lpparam, cfg)
+            if (cfg.btDeviceEqEnabled) tryInvokeHook("com.audioboost.noroot.hooks.BluetoothDeviceEqHook", lpparam, cfg)
 
             Log.e(TAG, "===== All hooks loaded for $pkg =====")
         } catch (e: Throwable) {
@@ -127,7 +102,42 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
     )
 
     private fun loadConfig(): AudioConfig {
-        HookConfigReader.readGlobal()?.let { return it }
-        return try { com.audioboost.noroot.utils.ConfigManager.getGlobalConfig() } catch (_: Throwable) { AudioConfig(packageName = "global") }
+        try {
+            val reader = Class.forName("com.audioboost.noroot.utils.HookConfigReader")
+            val result = reader.getDeclaredMethod("readGlobal").invoke(null) as? AudioConfig
+            if (result != null) return result
+        } catch (_: Throwable) { }
+        return try {
+            val mgr = Class.forName("com.audioboost.noroot.utils.ConfigManager")
+            mgr.getDeclaredMethod("getGlobalConfig").invoke(null) as AudioConfig
+        } catch (_: Throwable) { AudioConfig(packageName = "global") }
+    }
+
+    private fun tryInvoke(className: String, methodName: String, vararg args: Any?) {
+        try {
+            val clazz = Class.forName(className)
+            val method = clazz.declaredMethods.firstOrNull { it.name == methodName && it.parameterCount == args.size }
+            method?.invoke(null, *args)
+        } catch (e: Throwable) {
+            Log.e(TAG, "${className.substringAfterLast('.')}#$methodName FAIL: ${e.message}")
+        }
+    }
+
+    private fun <T> tryInvokeCtx(className: String, methodName: String, ctx: android.content.Context): T? {
+        return try {
+            val clazz = Class.forName(className)
+            val method = clazz.declaredMethods.firstOrNull { it.name == methodName && it.parameterCount == 1 }
+            method?.invoke(null, ctx) as? T
+        } catch (_: Throwable) { null }
+    }
+
+    private fun tryInvokeHook(className: String, lpparam: XC_LoadPackage.LoadPackageParam, cfg: Any?) {
+        try {
+            val clazz = Class.forName(className)
+            val method = clazz.declaredMethods.firstOrNull { it.parameterCount == 2 }
+            method?.invoke(null, lpparam, cfg)
+        } catch (e: Throwable) {
+            Log.e(TAG, "${className.substringAfterLast('.')} FAIL: ${e.message}")
+        }
     }
 }

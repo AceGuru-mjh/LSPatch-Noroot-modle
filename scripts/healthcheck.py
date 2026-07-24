@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """
 LSP-Model 模块体检脚本
 输出 JSON 报告到 stdout，供 Web 工具渲染。
@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MODULES_DIR = os.path.join(ROOT, "modules")
-VERSION = "1.0.11"
+VERSION = "1.0.14"
 
 def scan_module(mod_dir, mod_name):
     """扫描单个模块"""
@@ -27,7 +27,7 @@ def scan_module(mod_dir, mod_name):
     result["stats"]["hookFiles"] = len(hook_files)
 
     for f in sorted(hook_files):
-        with open(f, errors='replace') as fh:
+        with open(f, encoding='utf-8', errors='replace') as fh:
             c = fh.read()
         name = os.path.basename(f)
         hook_calls = len(re.findall(r'findAndHookMethod|findAndHookConstructor|hookAllMethods|XposedBridge\.hook(?:Method|AllMethods)?\(', c))
@@ -78,7 +78,7 @@ def scan_module(mod_dir, mod_name):
     # 3. 配置一致性
     gradle = f"{mod_dir}/app/build.gradle.kts"
     if os.path.isfile(gradle):
-        with open(gradle) as fh:
+        with open(gradle, encoding='utf-8', errors='replace') as fh:
             gc = fh.read()
         checks = {
             "versionName匹配VERSION": f'versionName = "{VERSION}"' in gc,
@@ -96,7 +96,7 @@ def scan_module(mod_dir, mod_name):
     # 4. Manifest 检查
     manifest = f"{mod_dir}/app/src/main/AndroidManifest.xml"
     if os.path.isfile(manifest):
-        with open(manifest) as fh:
+        with open(manifest, encoding='utf-8', errors='replace') as fh:
             mc = fh.read()
         for meta in ['xposedmodule', 'xposedminversion', 'xposeddescription', 'xposedscope']:
             if f'android:name="{meta}"' not in mc:
@@ -105,7 +105,7 @@ def scan_module(mod_dir, mod_name):
     # 5. xposed_init 检查
     xposed_init = f"{mod_dir}/app/src/main/assets/xposed_init"
     if os.path.isfile(xposed_init):
-        with open(xposed_init) as fh:
+        with open(xposed_init, encoding='utf-8', errors='replace') as fh:
             init = fh.read().strip()
         if not init.endswith("XposedLoader"):
             result["configIssues"].append(f"xposed_init非XposedLoader: {init}")
@@ -124,7 +124,7 @@ def scan_module(mod_dir, mod_name):
         # XposedLoader 包名过滤 + 进程过滤
         xl_files = __import__('glob').glob(f"{mod_dir}/app/src/main/java/**/XposedLoader.kt", recursive=True)
         for xlf in xl_files:
-            with open(xlf) as fh: xc = fh.read()
+            with open(xlf, encoding='utf-8', errors='replace') as fh: xc = fh.read()
             if 'packageName == "android"' not in xc and '"android" == lpparam.packageName' not in xc:
                 result["configIssues"].append("LSPatch: 缺android包名过滤")
             if 'isFirstApplication' not in xc:

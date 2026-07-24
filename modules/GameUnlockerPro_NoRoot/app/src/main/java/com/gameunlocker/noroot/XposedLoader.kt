@@ -1,11 +1,7 @@
-package com.gameunlocker.noroot
+﻿package com.gameunlocker.noroot
 
 import android.util.Log
-import com.gameunlocker.noroot.core.ConfigClient
-import com.gameunlocker.noroot.hooks.*
 import com.gameunlocker.noroot.models.GameConfig
-import com.gameunlocker.noroot.utils.EnvDetector
-import com.gameunlocker.noroot.utils.HookConfigReader
 import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.IXposedHookZygoteInit
 import de.robv.android.xposed.callbacks.XC_LoadPackage
@@ -13,7 +9,7 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage
 class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
     companion object {
-        const val VERSION = "1.0.11"
+        const val VERSION = "1.0.14"
         const val TAG = "LSP-GameUnlocker"
         const val MODULE_PKG = "com.gameunlocker.noroot"
         var currentPkg: String? = null
@@ -62,7 +58,7 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
             currentPkg = pkg
             Log.e(TAG, "Loading hooks for $pkg (integrated=${isIntegratedMode})")
 
-            EnvDetector.detect(lpparam)
+            tryInvoke("com.gameunlocker.noroot.utils.EnvDetector", "detect", lpparam)
 
             val ctx = try {
                 val at = Class.forName("android.app.ActivityThread")
@@ -71,7 +67,7 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
                     .getMethod("getApplication").invoke(at) as? android.content.Context
             } catch (_: Throwable) { null }
 
-            val masterSwitch = if (ctx != null) ConfigClient.readMasterSwitch(ctx) else true
+            val masterSwitch = if (ctx != null) tryInvokeCtx<Boolean>("com.gameunlocker.noroot.core.ConfigClient", "readMasterSwitch", ctx) ?: true else true
             if (!masterSwitch) {
                 Log.e(TAG, "Master switch OFF via ContentProvider, skipping hooks")
                 return
@@ -79,35 +75,16 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
             val cfg = loadConfig()
 
-            Log.e(TAG, "Loading GameDetectionHideHook...")
-            try { if (cfg.detectionHideEnabled) GameDetectionHideHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "GameDetectionHideHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading DeviceSpoofHook...")
-            try { if (cfg.deviceSpoofEnabled) DeviceSpoofHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "DeviceSpoofHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading FrameRateUnlockHook...")
-            try { if (cfg.frameRateUnlockEnabled) FrameRateUnlockHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "FrameRateUnlockHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading ProcessOptimizerHook...")
-            try { if (cfg.processOptimizeEnabled) ProcessOptimizerHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "ProcessOptimizerHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading ResolutionSpoofHook...")
-            try { if (cfg.resolutionSpoofEnabled) ResolutionSpoofHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "ResolutionSpoofHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading ShizukuSystemTuneHook...")
-            try { if (cfg.shizukuSystemTuneEnabled) ShizukuSystemTuneHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "ShizukuSystemTuneHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading TouchSamplingBoostHook...")
-            try { if (cfg.touchSamplingBoostEnabled) TouchSamplingBoostHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "TouchSamplingBoostHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading NetworkLatencyOptHook...")
-            try { if (cfg.networkLatencyOptEnabled) NetworkLatencyOptHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "NetworkLatencyOptHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading AudioPriorityBoostHook...")
-            try { if (cfg.audioPriorityBoostEnabled) AudioPriorityBoostHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "AudioPriorityBoostHook FAIL: ${e.message}") }
-
-            Log.e(TAG, "Loading MemoryDefragHook...")
-            try { if (cfg.memoryDefragEnabled) MemoryDefragHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "MemoryDefragHook FAIL: ${e.message}") }
+            if (cfg.detectionHideEnabled) tryInvokeHook("com.gameunlocker.noroot.hooks.GameDetectionHideHook", lpparam, cfg)
+            if (cfg.deviceSpoofEnabled) tryInvokeHook("com.gameunlocker.noroot.hooks.DeviceSpoofHook", lpparam, cfg)
+            if (cfg.frameRateUnlockEnabled) tryInvokeHook("com.gameunlocker.noroot.hooks.FrameRateUnlockHook", lpparam, cfg)
+            if (cfg.processOptimizeEnabled) tryInvokeHook("com.gameunlocker.noroot.hooks.ProcessOptimizerHook", lpparam, cfg)
+            if (cfg.resolutionSpoofEnabled) tryInvokeHook("com.gameunlocker.noroot.hooks.ResolutionSpoofHook", lpparam, cfg)
+            if (cfg.shizukuSystemTuneEnabled) tryInvokeHook("com.gameunlocker.noroot.hooks.ShizukuSystemTuneHook", lpparam, cfg)
+            if (cfg.touchSamplingBoostEnabled) tryInvokeHook("com.gameunlocker.noroot.hooks.TouchSamplingBoostHook", lpparam, cfg)
+            if (cfg.networkLatencyOptEnabled) tryInvokeHook("com.gameunlocker.noroot.hooks.NetworkLatencyOptHook", lpparam, cfg)
+            if (cfg.audioPriorityBoostEnabled) tryInvokeHook("com.gameunlocker.noroot.hooks.AudioPriorityBoostHook", lpparam, cfg)
+            if (cfg.memoryDefragEnabled) tryInvokeHook("com.gameunlocker.noroot.hooks.MemoryDefragHook", lpparam, cfg)
 
             Log.e(TAG, "===== All hooks loaded for $pkg =====")
         } catch (e: Throwable) {
@@ -124,7 +101,42 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
     )
 
     private fun loadConfig(): GameConfig {
-        HookConfigReader.readGlobal()?.let { return it }
-        return try { com.gameunlocker.noroot.utils.ConfigManager.getGlobalConfig() } catch (_: Throwable) { GameConfig(packageName = "global") }
+        try {
+            val reader = Class.forName("com.gameunlocker.noroot.utils.HookConfigReader")
+            val result = reader.getDeclaredMethod("readGlobal").invoke(null) as? GameConfig
+            if (result != null) return result
+        } catch (_: Throwable) { }
+        return try {
+            val mgr = Class.forName("com.gameunlocker.noroot.utils.ConfigManager")
+            mgr.getDeclaredMethod("getGlobalConfig").invoke(null) as GameConfig
+        } catch (_: Throwable) { GameConfig(packageName = "global") }
+    }
+
+    private fun tryInvoke(className: String, methodName: String, vararg args: Any?) {
+        try {
+            val clazz = Class.forName(className)
+            val method = clazz.declaredMethods.firstOrNull { it.name == methodName && it.parameterCount == args.size }
+            method?.invoke(null, *args)
+        } catch (e: Throwable) {
+            Log.e(TAG, "${className.substringAfterLast('.')}#$methodName FAIL: ${e.message}")
+        }
+    }
+
+    private fun <T> tryInvokeCtx(className: String, methodName: String, ctx: android.content.Context): T? {
+        return try {
+            val clazz = Class.forName(className)
+            val method = clazz.declaredMethods.firstOrNull { it.name == methodName && it.parameterCount == 1 }
+            method?.invoke(null, ctx) as? T
+        } catch (_: Throwable) { null }
+    }
+
+    private fun tryInvokeHook(className: String, lpparam: XC_LoadPackage.LoadPackageParam, cfg: Any?) {
+        try {
+            val clazz = Class.forName(className)
+            val method = clazz.declaredMethods.firstOrNull { it.parameterCount == 2 }
+            method?.invoke(null, lpparam, cfg)
+        } catch (e: Throwable) {
+            Log.e(TAG, "${className.substringAfterLast('.')} FAIL: ${e.message}")
+        }
     }
 }

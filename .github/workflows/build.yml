@@ -1,4 +1,4 @@
-name: Build NoRoot Module APKs
+﻿name: Build NoRoot Module APKs
 on:
   push:
     branches: [ main, master ]
@@ -63,8 +63,8 @@ jobs:
           find all-apks -name "*.apk" | while read f; do cp "$f" "release-assets/$(basename "$f")"; done
       - uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.0.13
-          name: LSPatch-Noroot-modle v1.0.13
+          tag_name: v1.0.14
+          name: LSPatch-Noroot-modle v1.0.14
           body: "11 LSPatch NoRoot modules. Dev: MJH"
           files: release-assets/*.apk
           prerelease: false

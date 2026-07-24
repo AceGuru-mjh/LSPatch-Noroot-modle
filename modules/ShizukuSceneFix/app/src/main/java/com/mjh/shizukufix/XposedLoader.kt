@@ -1,18 +1,7 @@
-package com.mjh.shizukufix
+﻿package com.mjh.shizukufix
 
 import android.util.Log
-import com.mjh.shizukufix.core.ConfigClient
-import com.mjh.shizukufix.hooks.AutoGrantHelperHook
-import com.mjh.shizukufix.hooks.HideFromSceneHook
-import com.mjh.shizukufix.hooks.ScenePermissionRequesterHook
-import com.mjh.shizukufix.hooks.ServiceWatchdogHook
-import com.mjh.shizukufix.hooks.ShizukuGrantHook
-import com.mjh.shizukufix.hooks.ShizukuListInjectorHook
-import com.mjh.shizukufix.hooks.ShizukuVariantDetectorHook
 import com.mjh.shizukufix.models.ShizukuFixConfig
-import com.mjh.shizukufix.utils.CrashGuard
-import com.mjh.shizukufix.utils.EnvDetector
-import com.mjh.shizukufix.utils.HookConfigReader
 import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.IXposedHookZygoteInit
 import de.robv.android.xposed.callbacks.XC_LoadPackage
@@ -20,7 +9,7 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage
 class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
     companion object {
-        const val VERSION = "1.0.11"
+        const val VERSION = "1.0.14"
         const val TAG = "LSP-ShizukuFix"
         const val MODULE_PKG = "com.mjh.shizukufix"
         const val SCENE_PACKAGE = "com.omarea.vtools"
@@ -65,11 +54,11 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
         if (lpparam.processName != lpparam.packageName) return
 
         try {
-            try { CrashGuard.init(null) } catch (_: Throwable) { }
+            tryInvokeVoid("com.mjh.shizukufix.utils.CrashGuard", "init", null)
             currentPkg = pkg
             Log.e(TAG, "Loading hooks for $pkg (integrated=${isIntegratedMode})")
 
-            EnvDetector.detect(lpparam)
+            tryInvoke("com.mjh.shizukufix.utils.EnvDetector", "detect", lpparam)
 
             val ctx = try {
                 val at = Class.forName("android.app.ActivityThread")
@@ -78,7 +67,7 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
                     .getMethod("getApplication").invoke(at) as? android.content.Context
             } catch (_: Throwable) { null }
 
-            val masterSwitch = if (ctx != null) ConfigClient.readMasterSwitch(ctx) else true
+            val masterSwitch = if (ctx != null) tryInvokeCtx<Boolean>("com.mjh.shizukufix.core.ConfigClient", "readMasterSwitch", ctx) ?: true else true
             if (!masterSwitch) {
                 Log.e(TAG, "Master switch OFF via ContentProvider, skipping hooks")
                 return
@@ -88,33 +77,80 @@ class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
             if (pkg == SCENE_PACKAGE) {
                 Log.e(TAG, "=== Path A: Hooking Scene process ===")
-                try { if (cfg.sceneFixEnabled) ScenePermissionRequesterHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "ScenePermissionRequesterHook FAIL: ${e.message}") }
-                try { if (cfg.pmGrantEnabled) ShizukuGrantHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "ShizukuGrantHook FAIL: ${e.message}") }
-                try { if (cfg.hideFromSceneEnabled) HideFromSceneHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "HideFromSceneHook FAIL: ${e.message}") }
+                if (cfg.sceneFixEnabled) tryInvokeHook("com.mjh.shizukufix.hooks.ScenePermissionRequesterHook", lpparam, cfg)
+                if (cfg.pmGrantEnabled) tryInvokeHook("com.mjh.shizukufix.hooks.ShizukuGrantHook", lpparam, cfg)
+                if (cfg.hideFromSceneEnabled) tryInvokeHook("com.mjh.shizukufix.hooks.HideFromSceneHook", lpparam, cfg)
                 return
             }
 
             if (isShizukuTarget(pkg)) {
                 Log.e(TAG, "=== Path B: Hooking Shizuku process ===")
-                try { if (cfg.variantDetectEnabled) ShizukuVariantDetectorHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "ShizukuVariantDetectorHook FAIL: ${e.message}") }
-                try { if (cfg.listInjectorEnabled) ShizukuListInjectorHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "ShizukuListInjectorHook FAIL: ${e.message}") }
-                try { if (cfg.serviceWatchdogEnabled) ServiceWatchdogHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "ServiceWatchdogHook FAIL: ${e.message}") }
-                try { if (cfg.autoGrantHelperEnabled) AutoGrantHelperHook.apply(lpparam, cfg) } catch (e: Throwable) { Log.e(TAG, "AutoGrantHelperHook FAIL: ${e.message}") }
+                if (cfg.variantDetectEnabled) tryInvokeHook("com.mjh.shizukufix.hooks.ShizukuVariantDetectorHook", lpparam, cfg)
+                if (cfg.listInjectorEnabled) tryInvokeHook("com.mjh.shizukufix.hooks.ShizukuListInjectorHook", lpparam, cfg)
+                if (cfg.serviceWatchdogEnabled) tryInvokeHook("com.mjh.shizukufix.hooks.ServiceWatchdogHook", lpparam, cfg)
+                if (cfg.autoGrantHelperEnabled) tryInvokeHook("com.mjh.shizukufix.hooks.AutoGrantHelperHook", lpparam, cfg)
                 return
             }
         } catch (e: Throwable) {
-            CrashGuard.log("FATAL: ${e.stackTraceToString()}")
+            tryInvokeVoid("com.mjh.shizukufix.utils.CrashGuard", "log", "FATAL: ${e.stackTraceToString()}")
             Log.e(TAG, "FATAL: ${e.message}", e)
         }
     }
 
     private fun isShizukuTarget(pkg: String): Boolean {
         if (pkg in DEFAULT_SHIZUKU_PACKAGES) return true
-        return ShizukuVariantDetectorHook.isShizukuProcess(pkg)
+        return try {
+            val clazz = Class.forName("com.mjh.shizukufix.hooks.ShizukuVariantDetectorHook")
+            val method = clazz.declaredMethods.firstOrNull { it.name == "isShizukuProcess" && it.parameterCount == 1 }
+            method?.invoke(null, pkg) as? Boolean ?: false
+        } catch (_: Throwable) { false }
     }
 
     private fun loadConfig(): ShizukuFixConfig {
-        HookConfigReader.readGlobal()?.let { return it }
-        return try { com.mjh.shizukufix.utils.ConfigManager.getGlobalConfig() } catch (_: Throwable) { ShizukuFixConfig(packageName = "global") }
+        try {
+            val reader = Class.forName("com.mjh.shizukufix.utils.HookConfigReader")
+            val result = reader.getDeclaredMethod("readGlobal").invoke(null) as? ShizukuFixConfig
+            if (result != null) return result
+        } catch (_: Throwable) { }
+        return try {
+            val mgr = Class.forName("com.mjh.shizukufix.utils.ConfigManager")
+            mgr.getDeclaredMethod("getGlobalConfig").invoke(null) as ShizukuFixConfig
+        } catch (_: Throwable) { ShizukuFixConfig(packageName = "global") }
+    }
+
+    private fun tryInvoke(className: String, methodName: String, vararg args: Any?) {
+        try {
+            val clazz = Class.forName(className)
+            val method = clazz.declaredMethods.firstOrNull { it.name == methodName && it.parameterCount == args.size }
+            method?.invoke(null, *args)
+        } catch (e: Throwable) {
+            Log.e(TAG, "${className.substringAfterLast('.')}#$methodName FAIL: ${e.message}")
+        }
+    }
+
+    private fun tryInvokeVoid(className: String, methodName: String, arg: Any?) {
+        try {
+            val clazz = Class.forName(className)
+            val method = clazz.declaredMethods.firstOrNull { it.name == methodName && it.parameterCount == 1 }
+            method?.invoke(null, arg)
+        } catch (_: Throwable) { }
+    }
+
+    private fun <T> tryInvokeCtx(className: String, methodName: String, ctx: android.content.Context): T? {
+        return try {
+            val clazz = Class.forName(className)
+            val method = clazz.declaredMethods.firstOrNull { it.name == methodName && it.parameterCount == 1 }
+            method?.invoke(null, ctx) as? T
+        } catch (_: Throwable) { null }
+    }
+
+    private fun tryInvokeHook(className: String, lpparam: XC_LoadPackage.LoadPackageParam, cfg: Any?) {
+        try {
+            val clazz = Class.forName(className)
+            val method = clazz.declaredMethods.firstOrNull { it.parameterCount == 2 }
+            method?.invoke(null, lpparam, cfg)
+        } catch (e: Throwable) {
+            Log.e(TAG, "${className.substringAfterLast('.')} FAIL: ${e.message}")
+        }
     }
 }
