@@ -38,6 +38,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color as ComposeColor
 import androidx.compose.ui.unit.dp
 import com.mjh.shizukufix.models.ShizukuFixConfig
+import com.mjh.shizukufix.services.FloatingBallService
 import com.mjh.shizukufix.utils.ConfigManager
 import com.mjh.shizukufix.utils.LogEntry
 import com.mjh.shizukufix.utils.LogStore
