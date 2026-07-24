@@ -83,7 +83,7 @@ def scan_module(mod_dir, mod_name):
         checks = {
             "versionName匹配VERSION": f'versionName = "{VERSION}"' in gc,
             "versionCode=1": 'versionCode = 1' in gc,
-            "signingConfig": 'meng411722' in gc,
+            "signingConfig": 'MJH_STORE_PASSWORD' in gc or 'MJH_KEY_PASSWORD' in gc,
             "compose=true": 'compose = true' in gc,
             "jvmTarget=17": 'jvmTarget = "17"' in gc,
             "noBOM": 'compose-bom' not in gc,
@@ -125,7 +125,7 @@ def scan_module(mod_dir, mod_name):
         xl_files = __import__('glob').glob(f"{mod_dir}/app/src/main/java/**/XposedLoader.kt", recursive=True)
         for xlf in xl_files:
             with open(xlf, encoding='utf-8', errors='replace') as fh: xc = fh.read()
-            if 'packageName == "android"' not in xc and '"android" == lpparam.packageName' not in xc:
+            if 'packageName == "android"' not in xc and '"android" == lpparam.packageName' not in xc and 'pkg == "android"' not in xc:
                 result["configIssues"].append("LSPatch: 缺android包名过滤")
             if 'isFirstApplication' not in xc:
                 result["configIssues"].append("LSPatch: 缺isFirstApplication进程过滤")
