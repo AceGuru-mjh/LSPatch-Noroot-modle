@@ -1,4 +1,4 @@
-package com.notifymaster.noroot.services
+﻿package com.notifymaster.noroot.services
 
 import android.app.Service
 import android.content.Intent
@@ -6,6 +6,7 @@ import android.graphics.PixelFormat
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
+import android.util.TypedValue
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -25,6 +26,9 @@ class FloatingBallService : Service() {
     private var handler: Handler? = null
     private var updateRunnable: Runnable? = null
 
+    private fun dp(v: Int): Int =
+        TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, v.toFloat(), resources.displayMetrics).toInt()
+
     override fun onCreate() {
         super.onCreate()
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
@@ -33,16 +37,16 @@ class FloatingBallService : Service() {
         try { ConfigManager.init(applicationContext) } catch (_: Throwable) {}
 
         ballView = LayoutInflater.from(this).inflate(R.layout.floating_ball, null)
-        updateBallCount()
 
+        val size = dp(64)
         params = WindowManager.LayoutParams(
-            120, 120,
+            size, size,
             WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
             PixelFormat.TRANSLUCENT
         ).apply {
             gravity = Gravity.TOP or Gravity.END
-            x = 0; y = 800
+            x = 0; y = dp(200)
         }
 
         ballView.setOnClickListener { showPanel() }
@@ -66,13 +70,18 @@ class FloatingBallService : Service() {
         })
 
         windowManager.addView(ballView, params)
+        updateBallState()
     }
 
-    private fun updateBallCount() {
+    private fun updateBallState() {
         try {
-            val tv = ballView.findViewById<TextView>(R.id.ball_count) ?: return
-            val count = try { 0L } catch (_: Throwable) { 0L }
-            tv.text = count.toString()
+            val enabled = true
+            val pulse = ballView.findViewById<View>(R.id.ball_pulse)
+            val status = ballView.findViewById<View>(R.id.ball_status)
+            val value = ballView.findViewById<TextView>(R.id.ball_value)
+            pulse?.visibility = if (enabled) View.VISIBLE else View.GONE
+            status?.alpha = if (enabled) 1f else 0.4f
+            value?.text = if (enabled) "●" else "‖"
         } catch (_: Throwable) {}
     }
 
@@ -97,7 +106,7 @@ class FloatingBallService : Service() {
         if (updateRunnable == null) {
             updateRunnable = object : Runnable {
                 override fun run() {
-                    try { updateBallCount() } catch (_: Throwable) {}
+                    try { updateBallState() } catch (_: Throwable) {}
                     handler?.postDelayed(this, 1000L)
                 }
             }
