@@ -44,6 +44,22 @@ object ShizukuVipDbHook {
         } catch (e: Throwable) {
             LogX.e("Shizuku 检测异常", e)
         }
+
+        try {
+            val appClass = XposedHelpers.findClassIfExists(
+                "android.app.Application", lpparam.classLoader
+            ) ?: return
+            XposedHelpers.findAndHookMethod(appClass, "onCreate", object : XC_MethodHook() {
+                override fun afterHookedMethod(param: MethodHookParam) {
+                    val pkg = targetPkg ?: return
+                    LogX.i("Application onCreate 触发 — Shizuku VIP DB 就绪")
+                    setVipBySqlite(pkg)
+                    grantBillingPermission(pkg)
+                }
+            })
+        } catch (e: Throwable) {
+            LogX.e("Hook Application.onCreate 失败", e)
+        }
     }
 
     // ===== sqlite3 VIP 写入 =====

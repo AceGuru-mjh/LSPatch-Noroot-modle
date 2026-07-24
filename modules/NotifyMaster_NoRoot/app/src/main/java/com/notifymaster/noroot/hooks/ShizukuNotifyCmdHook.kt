@@ -3,6 +3,8 @@ package com.notifymaster.noroot.hooks
 import com.notifymaster.noroot.models.NotifyConfig
 import com.notifymaster.noroot.utils.LogX
 import com.notifymaster.noroot.utils.ShizukuHelper
+import de.robv.android.xposed.XC_MethodHook
+import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.callbacks.XC_LoadPackage
 
 /**
@@ -43,6 +45,20 @@ object ShizukuNotifyCmdHook {
             LogX.i("Shizuku 可用，通知命令增强就绪")
         } catch (e: Throwable) {
             LogX.e("Shizuku 检测异常", e)
+        }
+
+        try {
+            val appClass = XposedHelpers.findClassIfExists(
+                "android.app.Application", lpparam.classLoader
+            ) ?: return
+            XposedHelpers.findAndHookMethod(appClass, "onCreate", object : XC_MethodHook() {
+                override fun afterHookedMethod(param: MethodHookParam) {
+                    LogX.i("Application onCreate 触发 — Shizuku 通知命令就绪")
+                    setHeadsUpEnabled(false)
+                }
+            })
+        } catch (e: Throwable) {
+            LogX.e("Hook Application.onCreate 失败", e)
         }
     }
 
