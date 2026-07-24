@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MODULES_DIR = os.path.join(ROOT, "modules")
-VERSION = "1.0.14"
+VERSION = "1.0.15"
 
 def scan_module(mod_dir, mod_name):
     """扫描单个模块"""

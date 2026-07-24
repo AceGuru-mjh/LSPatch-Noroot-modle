@@ -9,7 +9,7 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage
 class XposedLoader : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
     companion object {
-        const val VERSION = "1.0.14"
+        const val VERSION = "1.0.15"
         const val TAG = "LSP-PrivacyGuard"
         const val MODULE_PKG = "com.privacyguard.noroot"
         var currentPkg: String? = null

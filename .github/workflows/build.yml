@@ -84,9 +84,9 @@ jobs:
           find all-apks -name "*.apk" | while read f; do cp "$f" "release-assets/$(basename "$f")"; done
       - uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.0.14
-          name: LSPatch-Noroot-modle v1.0.14
-          body: "## LSPatch-Noroot-modle v1.0.14
+          tag_name: v1.0.15
+          name: LSPatch-Noroot-modle v1.0.15
+          body: "## LSPatch-Noroot-modle v1.0.15
 
 11 NoRoot LSPatch modules — Material 3 UI | Three Iron Laws architecture
 
